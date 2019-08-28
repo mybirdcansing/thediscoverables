@@ -30,8 +30,8 @@ CREATE TABLE IF NOT EXISTS admin_user (
     PRIMARY KEY (admin_user_id)
 )  ENGINE=INNODB;
 
-INSERT INTO admin_user (username, password, email, admin_user_status_id, modified_date, created_date) 
-VALUES ('adam', 'abacadae', 'thediscoverables@gmail.com', 1, now(), now());
+INSERT INTO admin_user (username, first_name, last_name, password, email, admin_user_status_id, modified_date, created_date) 
+VALUES ('adam', 'Adam', 'Cohen', 'abacadae', 'thediscoverables@gmail.com', 1, now(), now());
 
 
 DROP TABLE IF EXISTS playlist_song;

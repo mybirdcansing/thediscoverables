@@ -2,8 +2,7 @@
 require_once __dir__ . '/../consts.php';
 
 class DataAccess
-{ 
-	
+{
 	public static function getConnection() {
 		mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);	
 		try {

@@ -1,0 +1,14 @@
+outline
+
+Auth
+	Authenticate
+		validate username and password
+			if invalid, return status and message
+		 	if valid, set cookie and return status and message
+		
+	Authorize
+		validate cookie
+			if invalid, return status and message
+		 	if valid, set cookie and return status and message
+	Logout
+		set cookie and return status and message

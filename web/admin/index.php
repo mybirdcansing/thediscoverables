@@ -1,12 +1,8 @@
 <?php
 
 // authorization handler
-require __DIR__ . '/lib/consts.php';
-require __DIR__ . '/lib/authorize_cookie.php';
-
-
-$cookie = $_COOKIE[LOGIN_COOKIE_NAME];
-$cookieAuth = new AuthorizeCookie($cookie);
+require __DIR__ . '/../lib/consts.php';
+require __DIR__ . '/../lib/auth_cookie.php';
 
 ?>
 <!DOCTYPE html>
@@ -49,9 +45,11 @@ $cookieAuth = new AuthorizeCookie($cookie);
 	admin page
 	</p>
 <?php
-	if($cookieAuth->isValid()) {
+	if(AuthCookie::isValid()) {
 ?>
+	<form method="get" action="login.php">
 	    <input type="submit" name="submit" id="logout" value="submit" class="button" />
+	</form>
 <?php
 	} else {
 ?>

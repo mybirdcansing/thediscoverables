@@ -26,7 +26,6 @@ class UserData
 
         try {
 			$statement = $this->dbConnection->query($statement);
-            // $result = $statement->fetch(\PDO::FETCH_ASSOC);
             $users = [];
 			while ($row = $statement->fetch_assoc()) {
 			    $users[] = $this->getUserFromRow($row);
@@ -67,19 +66,19 @@ class UserData
     public function insert(Array $input)
     {
         $statement = "
-            INSERT INTO person 
-                (firstname, lastname, firstparent_id, secondparent_id)
-            VALUES
-                (:firstname, :lastname, :firstparent_id, :secondparent_id);
+			INSERT INTO 
+				admin_user (username, first_name, last_name, password, email, admin_user_status_id, modified_date, created_date)
+			VALUES (:username, :firstname, :lastname, :password, :email, 1, now(), now());
         ";
 
         try {
             $statement = $this->dbConnection->prepare($statement);
             $statement->execute(array(
-                'firstname' => $input['firstname'],
-                'lastname'  => $input['lastname'],
-                'firstparent_id' => $input['firstparent_id'] ?? null,
-                'secondparent_id' => $input['secondparent_id'] ?? null,
+            	'username' => $input['username'],
+                'firstname' => $input['firstname'] ?? null,
+                'lastname'  => $input['lastname'] ?? null,
+                'password' => $input['password'],
+                'email' => $input['email']
             ));
             return $statement->rowCount();
         } catch (\PDOException $e) {

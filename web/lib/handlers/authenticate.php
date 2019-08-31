@@ -1,6 +1,7 @@
 <?php
-require_once __dir__ . '/../consts.php';
+// require_once __dir__ . '/../consts.php';
 require_once __dir__ . '/../objects/user.php';
+require_once __dir__ . '/../connecters/data_access.php';
 require_once __dir__ . '/../connecters/user_data.php';
 require_once __dir__ . '/../auth_cookie.php';
 
@@ -12,7 +13,8 @@ $username = $_REQUEST['username'];
 $password = $_REQUEST['password'];
 
 if (isset($username) && isset($password)) {
-	$userData = new UserData();
+	$dbConnection = (new DataAccess())->getConnection();
+	$userData = new UserData($dbConnection);
 	$user = $userData->getAuthenticatedUser($username, $password);
 	if ($user) {
 		AuthCookie::setCookie($username);

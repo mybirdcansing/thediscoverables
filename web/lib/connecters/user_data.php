@@ -1,6 +1,5 @@
 <?php
 require_once __dir__ . '/../objects/user.php';
-require_once __dir__ . '/../objects/users.php';
 
 class UserData
 { 

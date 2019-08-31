@@ -31,8 +31,8 @@ CREATE TABLE IF NOT EXISTS admin_user (
 )  ENGINE=INNODB;
 
 INSERT INTO admin_user (username, first_name, last_name, password, email, admin_user_status_id, modified_date, created_date) 
-VALUES ('adam', 'Adam', 'Cohen', 'abacadae', 'thediscoverables@gmail.com', 1, now(), now());
-
+VALUES ('adam', 'Adam', 'Cohen', '$2y$10$8uS6GOhS1qSUHndzAIvnVOyJ1mbTF/OPc4C.RdDOon50mxmtM19y.', 'thediscoverables@gmail.com', 1, now(), now());
+-- password = abacadae
 
 DROP TABLE IF EXISTS playlist_song;
 DROP TABLE IF EXISTS playlist;

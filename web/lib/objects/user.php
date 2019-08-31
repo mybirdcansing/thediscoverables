@@ -1,6 +1,5 @@
 <?php 
-class User 
-{ 
+class User {
 
     private $id;
     private $username;
@@ -8,8 +7,7 @@ class User
     private $lastName;
     private $email;
 
-    function __construct() 
-    { 
+    function __construct() { 
     }
 
     public function getId() {

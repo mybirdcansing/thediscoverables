@@ -8,7 +8,6 @@ class UserController {
     private $db;
     private $requestMethod;
     private $userId;
-
     private $userData;
 
     public function __construct($db, $requestMethod, $userId)
@@ -69,8 +68,8 @@ class UserController {
 
     private function createUserFromRequest()
     {
-        $input = (array) json_decode(file_get_contents('php://input'), TRUE);
-        if (! $this->validatePerson($input)) {
+        $input = (array)json_decode(file_get_contents('php://input'), TRUE);
+        if (!$this->validatePerson($input)) {
             return $this->unprocessableEntityResponse();
         }
         $this->userData->insert($input);

@@ -70,14 +70,13 @@ class UserData
 				admin_user (username, first_name, last_name, password, email, admin_user_status_id, modified_date, created_date)
 			VALUES (:username, :firstname, :lastname, :password, :email, 1, now(), now());
         ";
-
         try {
             $statement = $this->dbConnection->prepare($statement);
             $statement->execute(array(
             	'username' => $input['username'],
                 'firstname' => $input['firstname'] ?? null,
                 'lastname'  => $input['lastname'] ?? null,
-                'password' => $input['password'],
+                'password' => $hashed_password = password_hash($input['password'], PASSWORD_DEFAULT),
                 'email' => $input['email']
             ));
             return $statement->rowCount();
@@ -89,23 +88,31 @@ class UserData
     public function update($id, Array $input)
     {
         $statement = "
-            UPDATE person
+            UPDATE admin_user
             SET 
+                username = :username,
+                email = :email,
                 firstname = :firstname,
                 lastname  = :lastname,
-                firstparent_id = :firstparent_id,
-                secondparent_id = :secondparent_id
+                password = :password,
+                admin_user_status_id = :admin_user_status_id,
+                modified_date = now()
             WHERE id = :id;
         ";
-
+        $username = $input['username'];
+        if (intval($input['admin_user_status_id']) === DISABLED_USER_STATUS_ID) {
+        	$username = $username . "_DISABLED_" . (microtime(true) * 10000000);
+        }
         try {
             $statement = $this->dbConnection->prepare($statement);
             $statement->execute(array(
                 'id' => (int) $id,
+                'username' => $input['username'],
                 'firstname' => $input['firstname'],
                 'lastname'  => $input['lastname'],
-                'firstparent_id' => $input['firstparent_id'] ?? null,
-                'secondparent_id' => $input['secondparent_id'] ?? null,
+                'password' => $hashed_password = password_hash($input['password'], PASSWORD_DEFAULT),
+                'email' => $input['email'],
+                'admin_user_status_id' => $input['admin_user_status_id'] || 1
             ));
             return $statement->rowCount();
         } catch (\PDOException $e) {
@@ -130,35 +137,29 @@ class UserData
     }
 
 	public function getAuthenticatedUser($username, $password) {
-		
 		$sql = "
 		  	SELECT 
 				au.admin_user_id,
 				au.username,
 				au.first_name,
 				au.last_name,
-				au.email
+				au.email,
+				au.password
 		  	FROM admin_user au 
 		  	WHERE au.admin_user_status_id = 1 
-		  	AND au.username = ? 
-		  	AND au.password = ?;
+		  	AND au.username = ?;
 		";
 
-		// $conn = (new DataAccess())->getConnection();
-		try { 
-			$stmt = $this->dbConnection->prepare($sql);
-			$stmt->bind_param("ss", $username, $password);
-			$stmt->execute();
-			$result = $stmt->get_result();
-			if ($result->num_rows == 1) {
-			    $row = $result->fetch_assoc();
-			    $user = $this->getUserFromRow($row);
-			    return $user;
-			} else {
-				return 0;
-			}
-		} finally {
-		  	// $this->dbConnection->close();
+		$stmt = $this->dbConnection->prepare($sql);
+		$stmt->bind_param("s", $username);
+		$stmt->execute();
+		$result = $stmt->get_result();
+		if ($result->num_rows == 1) {
+		    $row = $result->fetch_assoc();
+		    $user = $this->getUserFromRow($row);
+		    return password_verify($password, $row["password"]) ? $user : 0;
+		} else {
+			return 0;
 		}
 	}
 

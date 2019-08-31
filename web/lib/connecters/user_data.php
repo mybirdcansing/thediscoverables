@@ -123,7 +123,7 @@ class UserData
     public function delete($id)
     {
         $statement = "
-            DELETE FROM person
+            DELETE FROM user
             WHERE id = :id;
         ";
 

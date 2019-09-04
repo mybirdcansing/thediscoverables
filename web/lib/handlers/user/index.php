@@ -1,7 +1,7 @@
 <?php
-require_once __dir__ . '/../../connecters/data_access.php';
-require_once __dir__ . '/../../connecters/user_data.php';
-require_once __dir__ . '/user.php';
+require_once __dir__ . '/../../connecters/DataAccess.php';
+require_once __dir__ . '/../../connecters/UserData.php';
+require_once __dir__ . '/UserController.php';
 
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
@@ -28,7 +28,8 @@ $userId = null;
 // } else {
 // }
 $userId = (isset($_REQUEST["id"])) ? $_REQUEST["id"] : 0;
-
+// echo "userId: $userId";
+// exit();
 
 $requestMethod = $_SERVER["REQUEST_METHOD"];
 

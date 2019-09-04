@@ -2,7 +2,7 @@
 
 // authorization handler
 require __DIR__ . '/../lib/consts.php';
-require __DIR__ . '/../lib/auth_cookie.php';
+require __DIR__ . '/../lib/AuthCookie.php';
 
 ?>
 <!DOCTYPE html>

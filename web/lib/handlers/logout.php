@@ -1,6 +1,6 @@
 <?php
 require_once __dir__ . '/../consts.php';
-require_once __dir__ . '/../auth_cookie.php';
+require_once __dir__ . '/../AuthCookie.php';
 
 // authorization handler
 header("Access-Control-Allow-Origin: *");

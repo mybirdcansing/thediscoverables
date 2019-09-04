@@ -1,55 +1,39 @@
-<?php 
-class User {
+<?php
+abstract class JsonConvertible {
+   static function fromJson($json) {
+       $result = new static();
+       $objJson = json_decode($json);
+       $class = new \ReflectionClass($result);
+       $publicProps = $class->getProperties(\ReflectionProperty::IS_PUBLIC);
+       foreach ($publicProps as $prop) {
+            $propName = $prop->name;
+            if (isset($objJson->$propName)) {
+                $prop->setValue($result, $objJson->$propName);
+            }
+            else {
+                $prop->setValue($result, null);
+            }
+       }
+       return $result;
+   }
+   function toJson() {
+      return json_encode($this);
+   }
+}
 
-    private $id;
-    private $username;
-    private $firstName;
-    private $lastName;
-    private $email;
 
-    function __construct() { 
-    }
+class User extends JsonConvertible {
 
-    public function getId() {
-        return $this->id;
-    }
+    public $id;
+    public $username;
+    public $firstName;
+    public $lastName;
+    public $email;
+    public $password = '';
 
-    public function setId($id) {
-        $this->id = $id;
-    }
-
-    public function getUsername() {
-        return $this->username;
-    }
-
-    public function setUsername($username) {
-        $this->username = $username;
-    }
-
-    public function getEmail() {
-        return $this->email;  
+    function __construct() {
     }
     
-    public function setEmail($email) {
-        $this->email = $email;
-    }
-
-    public function getFirstName() {
-        return $this->firstName;
-    }
-
-    public function setFirstName($firstName) {
-        $this->firstName = $firstName;
-    }
-
-    public function getLastName() {
-        return $this->lastName;
-    }
-
-    public function setLastName($lastName) {
-        $this->lastName = $lastName;
-    }
-
     public function expose() {
         return get_object_vars($this);
     }

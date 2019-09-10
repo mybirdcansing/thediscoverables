@@ -7,9 +7,16 @@ require_once __dir__ . '/TestBase.php';
 use GuzzleHttp\Psr7\Request;
 
 
+
 final class UserTest extends TestBase
 {
     private $userHandlerPath = 'user/index.php';
+
+    protected function setUp(): void
+    {
+        $this->authenticateUser('adam', 'abacadae');
+    }
+
     public function testGET() 
     {
         $user = $this->_getUser('00000000-0000-0000-0000-000000000000');
@@ -32,7 +39,8 @@ final class UserTest extends TestBase
                 'email' => $email,
                 'password' => 'abacadae',
                 'status_id' => 1
-            ]
+            ],
+            'cookies' => $this->cookieJar
         ]);
 
         $json = json_decode($response->getBody()->getContents());
@@ -47,14 +55,6 @@ final class UserTest extends TestBase
         $this->assertEquals($user->email, $email);
     }
 
-    private function _getUser($userId, $client = null) {
-        if (!$client) $client = $this->getHandlerClient();
-        // get the user and make sure it's all good
-        $response = $client->get('user', ['query' => 'id=' . $userId]);
-        $this->assertEquals($response->getStatusCode(), 200);
-        $user = User::fromJson($response->getBody());
-        return $user;
-    }
 
     public function testUpdate()
     {
@@ -71,7 +71,8 @@ final class UserTest extends TestBase
                 'email' => $email,
                 'password' => 'abacadae',
                 'status_id' => 1
-            ]
+            ],
+            'cookies' => $this->cookieJar
         ]);
         $code = $response->getStatusCode();
         $json = json_decode($response->getBody()->getContents());
@@ -86,4 +87,19 @@ final class UserTest extends TestBase
         $this->assertEquals($user->email, $email);
     }
 
+
+
+
+
+    private function _getUser($userId, $client = null) {
+        if (!$client) $client = $this->getHandlerClient();
+
+        $response = $client->get('user', [
+            'query' => 'id=' . $userId,
+            'cookies' => $this->cookieJar
+        ]);
+        $this->assertEquals($response->getStatusCode(), 200);
+        $user = User::fromJson($response->getBody());
+        return $user;
+    }
 }

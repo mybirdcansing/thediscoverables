@@ -6,6 +6,7 @@ class AuthCookie
     public static function setCookie($username) {
         $loginCookie = $username . ',' . md5($username . SECRET_WORD);
     	setcookie(LOGIN_COOKIE_NAME, $loginCookie, time() + (3600 * 24 * 30), '/');
+        return $loginCookie;
     }
 
     public static function logout() {

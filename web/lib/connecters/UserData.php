@@ -163,13 +163,14 @@ class UserData
 		$stmt->bind_param("s", $username);
 		$stmt->execute();
 		$result = $stmt->get_result();
-		if ($result->num_rows == 1 && password_verify($password, $row["password"])) {
+		if ($result->num_rows == 1) {
 		    $row = $result->fetch_assoc();
-		    $user = $this->_rowToUser($row);
-		    return $user;
-		} else {
-			return 0;
+            if (password_verify($password, $row["password"])) {
+                $user = $this->_rowToUser($row);
+                return $user;
+            }
 		}
+		return 0;
 	}
 
 	private function _rowToUser($row) {

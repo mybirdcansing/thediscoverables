@@ -2,6 +2,7 @@
 require_once __dir__ . '/../../connecters/DataAccess.php';
 require_once __dir__ . '/../../connecters/UserData.php';
 require_once __dir__ . '/UserController.php';
+require_once __dir__ . '/../../AuthCookie.php';
 
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
@@ -9,6 +10,16 @@ header("Access-Control-Allow-Methods: OPTIONS,GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
+
+if(!AuthCookie::isValid()) {
+    header("'HTTP/1.1 403 Forbidden'");
+	echo json_encode(
+        array("authorized" => false, "message" => "You do not have permission to be here.")
+    );
+    exit();
+}
+
+//echo 'i like pizza.';
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $uri = explode( '/', $uri );
 

@@ -19,17 +19,22 @@ class UserController {
         switch ($this->requestMethod) {
             case 'GET':
                 if ($this->userId) {
-     
                     $response = $this->getUser($this->userId);
                 } else {
                     $response = $this->getAllUsers();
                 };
                 break;
             case 'POST':
-                if ($this->userId) {
-                    $response = $this->updateUser($this->userId);
+                $objJson = json_decode(file_get_contents('php://input'));
+                if (isset($objJson->delete)) {
+                    $response = $this->deleteUser($objJson->id);
                 } else {
-                    $response = $this->createUser();
+                    $user = User::fromJson(file_get_contents('php://input'));
+                    if ($user->id) {
+                        $response = $this->updateUser();
+                    } else {
+                        $response = $this->createUser();
+                    }
                 }
                 break;
             case 'PUT':
@@ -76,43 +81,46 @@ class UserController {
             return $this->unprocessableEntityResponse();
         }
         
-        // error_log('file_get_contents(php://input) : ' . file_get_contents('php://input'));
-        // error_log('$user->expose() : ' . json_encode($user->expose()));
-        
         $userId = $this->userData->insert($user);
         $response['status_code_header'] = 'HTTP/1.1 201 Created';
-        $response['body'] = json_encode(
-            array("userCreated" => true, "userId" => $userId)
-        );
+        $response['body'] = json_encode([
+            "userCreated" => true, 
+            "userId" => $userId
+        ]);
         return $response;
     }
 
-    private function updateUser($id)
+    private function updateUser()
     {
-        $user = $this->userData->find($id);
-        if (!$user) {
-            return $this->notFoundResponse();
-        }
-        $input = (array) json_decode(file_get_contents('php://input'), TRUE);
-        print_r($input);
-        if (!$this->validateUser($input)) {
+        $user = User::fromJson(file_get_contents('php://input'));
+        if (!$this->validateUser($user)) {
             return $this->unprocessableEntityResponse();
         }
-        $this->userData->update($id, $input);
+        $existingUser = $this->userData->find($user->id);
+        if (!$existingUser) {
+            return $this->notFoundResponse();
+        }
+        $this->userData->update($user);
         $response['status_code_header'] = 'HTTP/1.1 200 OK';
-        $response['body'] = null;
+        $response['body'] = json_encode([
+            "userUpdated" => true, 
+            "userId" => $user->id
+        ]);
         return $response;
     }
 
     private function deleteUser($id)
     {
         $result = $this->userData->find($id);
-        if (! $result) {
+
+        if (!$result) {
             return $this->notFoundResponse();
         }
-        $this->userData->delete($id);
+        $deleted = $this->userData->delete($id);
         $response['status_code_header'] = 'HTTP/1.1 200 OK';
         $response['body'] = null;
+
+        error_log('deleting user: ' . $id);
         return $response;
     }
 

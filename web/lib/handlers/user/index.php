@@ -21,7 +21,7 @@ if(!AuthCookie::isValid()) {
 
 //echo 'i like pizza.';
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$uri = explode( '/', $uri );
+$uri = explode('/', $uri);
 
 // all of our endpoints start with /user
 // everything else results in a 404 Not Found
@@ -39,8 +39,6 @@ $userId = null;
 // } else {
 // }
 $userId = (isset($_REQUEST["id"])) ? $_REQUEST["id"] : 0;
-// echo "userId: $userId";
-// exit();
 
 $requestMethod = $_SERVER["REQUEST_METHOD"];
 

@@ -37,10 +37,6 @@ class TestBase extends TestCase
 	        $this->assertEquals($response->getStatusCode(), 200);
 	        $json = json_decode($response->getBody()->getContents());
 
-        	// $authResults = $this->authenticateUser('adam', 'abacadae');
-
-	        // get the user and make sure it's all good
-
 	        $this->cookieJar = CookieJar::fromArray([
 	            'login' => $json->cookie
 	        ], 'localhost');

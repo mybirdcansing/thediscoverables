@@ -29,25 +29,25 @@ it('correctly gets the test admin user', (done) => {
 });
 
 
-// it('correctly creates a new user', (done) => {
-// 	var newUser = {
-// 		'username': 'test-' + uuid.v4(),
-// 		'firstName': 'Ron',
-// 		'lastName': 'Snow',
-// 		'email': 'test-' + uuid.v4() + '@gmail.com',
-// 	};
-// 	userConnector.createUser(newUser, function(id) {
-// 		userConnector.getUser(id, function(user) {
-// 			assert.equal(user.username, newUser.username);
-// 	        assert.equal(user.firstName, newUser.firstName);
-// 	        assert.equal(user.lastName, newUser.lastName);
-// 	        assert.equal(user.email, newUser.email);
-// 	        assert.equal(user.password, '');
-// 	        done();
-// 		});
-// 	});
+it('correctly creates a new user', (done) => {
+	var newUser = {
+		'username': 'test-' + uuid.v4(),
+		'firstName': 'Ron',
+		'lastName': 'Snow',
+		'email': 'test-' + uuid.v4() + '@gmail.com',
+	};
+	userConnector.createUser(newUser, function(id) {
+		userConnector.getUser(id, function(user) {
+			assert.equal(user.username, newUser.username);
+	        assert.equal(user.firstName, newUser.firstName);
+	        assert.equal(user.lastName, newUser.lastName);
+	        assert.equal(user.email, newUser.email);
+	        assert.equal(user.password, '');
+	        done();
+		});
+	});
 	
-// });
+});
 
 
 
@@ -58,7 +58,6 @@ function UserConnector() {
 		
 		var request = new XMLHttpRequest();
 		request.open('GET', this.handlerUrl + '?id=' + id, true);
-		//request.setRequestHeader("cookie", cookie);
 		request.onload = function () {
 	      	var user = JSON.parse(request.responseText);
 
@@ -70,7 +69,6 @@ function UserConnector() {
 	this.createUser = function(user, callback) {
 		var request = new XMLHttpRequest();
 		request.open('POST', this.handlerUrl, true);
-		// request.setRequestHeader("cookie", cookie);
 		request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 		request.onload = function () {
 	      	var json = JSON.parse(request.responseText);

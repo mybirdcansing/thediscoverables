@@ -3,17 +3,13 @@ require_once __dir__ . '/../connecters/DataAccess.php';
 require_once __dir__ . '/../connecters/UserData.php';
 require_once __dir__ . '/../AuthCookie.php';
 
-
-header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
-
-// $username = $_REQUEST['username'];
-// $password = $_REQUEST['password'];
 
 $json = file_get_contents('php://input');
 $objJson = json_decode($json);
 $username = $objJson->username;
 $password = $objJson->password;
+
 if (isset($username) && isset($password)) {
 	$dbConnection = (new DataAccess())->getConnection();
 	$userData = new UserData($dbConnection);

@@ -17,7 +17,6 @@ before(function(done){
 
 
 it('correctly gets the test admin user', (done) => {
-
 	userConnector.getUser('00000000-0000-0000-0000-000000000000', function(user) {
 		assert.equal(user.username, 'adam');
         assert.equal(user.firstName, 'Adam');

@@ -101,15 +101,28 @@ class UserData
             $stmt->execute();
             $stmt->store_result();
             return $userId;
+        } catch (mysqli_sql_exception $e) {
+            $mysqliErrorMessage = $e->getMessage();
+            if (strpos($mysqliErrorMessage, 'username') !== false) {
+                throw new DuplicateUsernameException(
+                    sprintf(USERNAME_TAKEN_MESSAGE, $user->username),
+                    USERNAME_TAKEN_CODE);
+            } elseif (strpos($mysqliErrorMessage, 'email') !== false) {
+                throw new DuplicateEmailException(
+                    sprintf(EMAIL_TAKEN_MESSAGE, $user->email),
+                    EMAIL_TAKEN_CODE);
+            } else {
+                error_log($e->getMessage());
+                throw $e;
+            }
         } catch (\PDOException $e) {
-            exit($e->getMessage());
-        } 
+            error_log($e->getMessage());
+            throw $e;
+        }
     }
 
     public function update($user)
     {
-        error_log("in update user: " . json_encode($user->expose()));
-
         $sql = "
             UPDATE user
                SET
@@ -138,8 +151,23 @@ class UserData
             $stmt->execute();
             $stmt->store_result();
             return $user->id;
+        } catch (mysqli_sql_exception $e) {
+             $mysqliErrorMessage = $e->getMessage();
+            if (strpos($mysqliErrorMessage, 'username') !== false) {
+                throw new DuplicateUsernameException(
+                    sprintf(USERNAME_TAKEN_MESSAGE, $user->username),
+                    USERNAME_TAKEN_CODE);
+            } elseif (strpos($mysqliErrorMessage, 'email') !== false) {
+                throw new DuplicateEmailException(
+                    sprintf(EMAIL_TAKEN_MESSAGE, $user->email),
+                    EMAIL_TAKEN_CODE);
+            } else {
+                error_log($e->getMessage());
+                throw $e;
+            }
         } catch (\PDOException $e) {
-            exit($e->getMessage());
+            error_log($e->getMessage());
+            throw $e;
         }
     }
 
@@ -156,7 +184,6 @@ class UserData
             $stmt->execute();
             $stmt->store_result();
             $rowsEffected = $stmt->num_rows;
-            error_log('$rowsEffected ' . $rowsEffected);
             return $rowsEffected;
         } catch (\PDOException $e) {
             exit($e->getMessage());
@@ -204,4 +231,7 @@ class UserData
         $user->statusId = $row["user_status_id"];
 	    return $user;
 	}
-} 
+}
+
+class DuplicateUsernameException extends Exception{}
+class DuplicateEmailException extends Exception{}

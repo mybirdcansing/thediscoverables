@@ -77,35 +77,65 @@ class UserController {
     private function createUser()
     {
         $user = User::fromJson(file_get_contents('php://input'));
-        if (!$this->validateUser($user)) {
-            return $this->unprocessableEntityResponse();
-        }
+        $validationIssues = $this->validationIssues($user);
         
-        $userId = $this->userData->insert($user);
-        $response['status_code_header'] = 'HTTP/1.1 201 Created';
-        $response['body'] = json_encode([
-            "userCreated" => true, 
-            "userId" => $userId
-        ]);
+        if ((bool)$validationIssues) {
+            return $this->unprocessableEntityResponse([
+                "userCreated" => false,
+                "errorMessages" => $validationIssues
+            ]);
+        }
+        try {
+            $userId = $this->userData->insert($user);
+            $response['status_code_header'] = 'HTTP/1.1 201 Created';
+            $response['body'] = json_encode([
+                "userCreated" => true, 
+                "userId" => $userId
+            ]);
+        } catch (DuplicateUsernameException | DuplicateEmailException $e) {
+            $response['status_code_header'] = 'HTTP/1.1 409 Conflict';
+            $response['body'] = json_encode([
+                "userCreated" => false,
+                "errorMessages" => [$e->getCode() => $e->getMessage()]
+            ]);
+        }
         return $response;
     }
 
     private function updateUser()
     {
         $user = User::fromJson(file_get_contents('php://input'));
-        if (!$this->validateUser($user)) {
-            return $this->unprocessableEntityResponse();
+        $validationIssues = $this->validationIssues($user);
+        if ((bool)$validationIssues) {
+            return $this->unprocessableEntityResponse([
+                "userUpdated" => false,
+                "errorMessages" => $validationIssues
+            ]);
         }
+        
         $existingUser = $this->userData->find($user->id);
         if (!$existingUser) {
             return $this->notFoundResponse();
         }
-        $this->userData->update($user);
-        $response['status_code_header'] = 'HTTP/1.1 200 OK';
-        $response['body'] = json_encode([
-            "userUpdated" => true, 
-            "userId" => $user->id
-        ]);
+
+        try {
+            // error_log("try to update user");
+            $this->userData->update($user);
+
+            $response['status_code_header'] = 'HTTP/1.1 200 OK';
+            $response['body'] = json_encode([
+                "userUpdated" => true, 
+                "userId" => $user->id
+            ]);
+        } catch (DuplicateUsernameException | DuplicateEmailException $e) {
+            $response['status_code_header'] = 'HTTP/1.1 409 Conflict';
+            $response['body'] = json_encode([
+                "userUpdated" => false, 
+                "userId" => $user->id,
+                "errorMessages" => array($e->getCode() => $e->getMessage())
+            ]);
+        }
+
         return $response;
     }
 
@@ -119,25 +149,28 @@ class UserController {
         $deleted = $this->userData->delete($id);
         $response['status_code_header'] = 'HTTP/1.1 200 OK';
         $response['body'] = null;
-
-        error_log('deleting user: ' . $id);
         return $response;
     }
 
-    private function validateUser($input)
+    private function validationIssues($user)
     {
+        $errorMessages = [];
+        if (!isset($user->email) || $user->email == '') {
+            $errorMessages[EMAIL_BLANK_CODE] = EMAIL_BLANK_MESSAGE;
+        }
+        $user->email = trim($user->email);
 
+        if (!filter_var($user->email, FILTER_VALIDATE_EMAIL)) {
+            $errorMessages[EMAIL_INVALID_CODE] = EMAIL_INVALID_MESSAGE;
+        }
 
-
-        return true;
+        return $errorMessages;
     }
 
-    private function unprocessableEntityResponse()
+    private function unprocessableEntityResponse($json)
     {
         $response['status_code_header'] = 'HTTP/1.1 422 Unprocessable Entity';
-        $response['body'] = json_encode([
-            'error' => 'Invalid input'
-        ]);
+        $response['body'] = json_encode($json);
         return $response;
     }
 

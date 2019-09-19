@@ -14,7 +14,7 @@ class TestBase extends TestCase
     {
     	if (!$this->_httpClient) {
     		$this->_httpClient = new Client([
-	            'base_uri' => HANDLER_WEB_ROOT,
+	            'base_uri' => ((new Configuration())->getSettings())->test->HANDLER_WEB_ROOT,
 	            'timeout'  => 2.0,
 	            'cookies' => true,
 	            'http_errors' => false

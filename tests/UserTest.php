@@ -13,12 +13,13 @@ final class UserTest extends TestBase
 
     protected function setUp(): void
     {
+        $settings = ((new Configuration())->getSettings())->test;
         // login as the test user (see sql/schema.sql)
-        $json = $this->authenticateUser(TEST_USERNAME, TEST_PASSWORD);
+        $json = $this->authenticateUser($settings->TEST_USERNAME, $settings->TEST_PASSWORD);
         // set the cookie for future requests
         $this->cookieJar = CookieJar::fromArray([
             'login' => $json->cookie
-        ], TEST_DOMAIN);
+        ], $settings->TEST_DOMAIN);
     }
 
     public function testGET()
@@ -368,7 +369,7 @@ final class UserTest extends TestBase
         ]);
 
         $user = $this->_getUser($user->id);
-        $this->assertEquals($user->statusId, INACTIVE_USER_STATUS_ID);        
+        $this->assertEquals(INACTIVE_USER_STATUS_ID, $user->statusId);        
 
         // now delete the user from the system
         $this->_deleteUser($user->id);

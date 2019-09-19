@@ -1,5 +1,7 @@
 <?php
 require_once __dir__ . '/../consts.php';
+require_once __dir__ . '/../Configuration.php';
+
 
 class DataAccess {
 
@@ -15,7 +17,14 @@ class DataAccess {
     {
         if (!$this->dbConnection) {
         	try {
-				$this->dbConnection = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE);
+
+        		$settings = (new Configuration())->getSettings();
+				
+				$this->dbConnection = new mysqli(
+					$settings->dataAccess->DB_HOST, 
+					$settings->dataAccess->DB_USER, 
+					$settings->dataAccess->DB_PASSWORD, 
+					$settings->dataAccess->DB_DATABASE);
 				$this->dbConnection->set_charset("utf8mb4");
 			} catch(Exception $e) {
 				error_log($e->getMessage());

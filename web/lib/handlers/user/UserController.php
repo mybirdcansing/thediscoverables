@@ -19,21 +19,21 @@ class UserController {
         switch ($this->requestMethod) {
             case 'GET':
                 if ($this->userId) {
-                    $response = $this->getUser($this->userId);
+                    $response = $this->_getUser($this->userId);
                 } else {
-                    $response = $this->getAllUsers();
+                    $response = $this->_getAllUsers();
                 };
                 break;
             case 'POST':
                 $objJson = json_decode(file_get_contents('php://input'));
                 if (isset($objJson->delete)) {
-                    $response = $this->deleteUser($objJson->id);
+                    $response = $this->_deleteUser($objJson->id);
                 } else {
                     $user = User::fromJson(file_get_contents('php://input'));
                     if ($user->id) {
-                        $response = $this->updateUser();
+                        $response = $this->_updateUser();
                     } else {
-                        $response = $this->createUser();
+                        $response = $this->_createUser();
                     }
                 }
                 break;
@@ -46,7 +46,7 @@ class UserController {
                 // use a flag hack in POST
                 break;
             default:
-                $response = $this->notFoundResponse();
+                $response = $this->_notFoundResponse();
                 break;
         }
         header($response['status_code_header']);
@@ -55,7 +55,7 @@ class UserController {
         }
     }
 
-    private function getAllUsers()
+    private function _getAllUsers()
     {
         $result = $this->userData->findAll();
         $response['status_code_header'] = 'HTTP/1.1 200 OK';
@@ -63,24 +63,24 @@ class UserController {
         return $response;
     }
 
-    private function getUser($id)
+    private function _getUser($id)
     {
         $user = $this->userData->find($id);
         if (!$user) {
-            return $this->notFoundResponse();
+            return $this->_notFoundResponse();
         }
         $response['status_code_header'] = 'HTTP/1.1 200 OK';
         $response['body'] = json_encode($user->expose());
         return $response;
     }
 
-    private function createUser()
+    private function _createUser()
     {
         $user = User::fromJson(file_get_contents('php://input'));
-        $validationIssues = $this->validationIssues($user);
+        $validationIssues = $this->_validationIssues($user);
         
         if ((bool)$validationIssues) {
-            return $this->unprocessableEntityResponse([
+            return $this->_unprocessableEntityResponse([
                 "userCreated" => false,
                 "errorMessages" => $validationIssues
             ]);
@@ -102,12 +102,12 @@ class UserController {
         return $response;
     }
 
-    private function updateUser()
+    private function _updateUser()
     {
         $user = User::fromJson(file_get_contents('php://input'));
-        $validationIssues = $this->validationIssues($user);
+        $validationIssues = $this->_validationIssues($user);
         if ((bool)$validationIssues) {
-            return $this->unprocessableEntityResponse([
+            return $this->_unprocessableEntityResponse([
                 "userUpdated" => false,
                 "errorMessages" => $validationIssues
             ]);
@@ -115,7 +115,7 @@ class UserController {
         
         $existingUser = $this->userData->find($user->id);
         if (!$existingUser) {
-            return $this->notFoundResponse();
+            return $this->_notFoundResponse();
         }
 
         try {
@@ -139,12 +139,12 @@ class UserController {
         return $response;
     }
 
-    private function deleteUser($id)
+    private function _deleteUser($id)
     {
         $result = $this->userData->find($id);
 
         if (!$result) {
-            return $this->notFoundResponse();
+            return $this->_notFoundResponse();
         }
         $deleted = $this->userData->delete($id);
         $response['status_code_header'] = 'HTTP/1.1 200 OK';
@@ -152,7 +152,7 @@ class UserController {
         return $response;
     }
 
-    private function validationIssues($user)
+    private function _validationIssues($user)
     {
         $errorMessages = [];
         if (!isset($user->email) || $user->email == '') {
@@ -164,20 +164,67 @@ class UserController {
             $errorMessages[EMAIL_INVALID_CODE] = EMAIL_INVALID_MESSAGE;
         }
 
+        // password
+        if (!isset($user->password) || $user->password == '') {
+            $errorMessages[PASSWORD_BLANK_CODE] = PASSWORD_BLANK_MESSAGE;
+        } else {
+            if (strlen($user->password) > 64) {
+                $errorMessages[PASSWORD_LONG_CODE] = PASSWORD_LONG_MESSAGE;
+            } elseif (strlen($user->password) < 6) {
+                $errorMessages[PASSWORD_SHORT_CODE] = PASSWORD_SHORT_MESSAGE;
+            }
+            if ($this->_isInputStrValid($user->password)) {
+                $errorMessages[PASSWORD_INVALID_CODE] = PASSWORD_INVALID_MESSAGE;
+            }
+        }
+
+        // username
+        if (!isset($user->username) || $user->username == '') {
+            $errorMessages[USERNAME_BLANK_CODE] = USERNAME_BLANK_MESSAGE;
+        } else {
+            if (strlen($user->username) > 64) {
+                $errorMessages[USERNAME_LONG_CODE] = USERNAME_LONG_MESSAGE;
+            } elseif (strlen($user->username) < 4) {
+                $errorMessages[USERNAME_SHORT_CODE] = USERNAME_SHORT_MESSAGE;
+            }
+            if ($this->_isInputStrValid($user->username)) {
+                $errorMessages[USERNAME_INVALID_CODE] = USERNAME_INVALID_MESSAGE;
+            }
+        }
+        
+        if (strlen($user->firstName) > 64) {
+            $errorMessages[FIRSTNAME_LONG_CODE] = FIRSTNAME_LONG_MESSAGE;
+        }
+        if ($this->_isInputStrValid($user->firstName)) {
+            $errorMessages[FIRSTNAME_INVALID_CODE] = FIRSTNAME_INVALID_MESSAGE;
+        }
+
+        if (strlen($user->lastName) > 64) {
+            $errorMessages[LASTNAME_LONG_CODE] = LASTNAME_LONG_MESSAGE;
+        }
+        if ($this->_isInputStrValid($user->lastName)) {
+            $errorMessages[LASTNAME_INVALID_CODE] = LASTNAME_INVALID_MESSAGE;
+        }
+
         return $errorMessages;
     }
 
-    private function unprocessableEntityResponse($json)
+    private function _unprocessableEntityResponse($json)
     {
         $response['status_code_header'] = 'HTTP/1.1 422 Unprocessable Entity';
         $response['body'] = json_encode($json);
         return $response;
     }
 
-    private function notFoundResponse()
+    private function _notFoundResponse()
     {
         $response['status_code_header'] = 'HTTP/1.1 404 Not Found';
         $response['body'] = null;
         return $response;
+    }
+
+    private function _isInputStrValid($str) {
+        // invalid chars are ' \ ` | ; " < > \
+        return preg_match('/[\'\/`\|;"\<\>\\\]/', $str);
     }
 }

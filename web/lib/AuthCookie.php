@@ -3,7 +3,6 @@ require_once __dir__ . '/consts.php';
 
 class AuthCookie 
 {
-
     public static function setCookie($username) {
         $settings = ((new Configuration())->getSettings())->security;
         $loginCookie = $username . ',' . md5($username . $settings->SECRET_WORD);

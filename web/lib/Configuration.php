@@ -4,8 +4,6 @@ declare(strict_types=1);
 class Configuration
 {
 	private $_settings;
-
-
     function __construct() 
     {
     	$json = file_get_contents(__dir__ . '/../config.json');

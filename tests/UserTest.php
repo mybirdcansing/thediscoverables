@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-
+require_once __dir__ . '/../web/lib/Configuration.php';
 require_once __dir__ . '/../web/lib/consts.php';
 require_once __dir__ . '/TestBase.php';
 
@@ -65,23 +65,33 @@ final class UserTest extends TestBase
 
     public function testCreateWithDupeUsername()
     {
-        // create with bad email
-        $email = $this->_uniqueEmail();
-        $password = 'abacadae';
-        $user = new User();
-        $user->username = 'adam';
-        $user->firstName = 'Ron';
-        $user->lastName = 'Snow';
-        $user->email = $email;
-        $user->password = $password;
-        $user->statusId = ACTIVE_USER_STATUS_ID;
+        // first create a new user
+        $username = $this->_uniqueUsername();
+        $user1 = new User();
+        $user1->username = $username;
+        $user1->firstName = 'Ron';
+        $user1->lastName = 'Snow';
+        $user1->email = $this->_uniqueEmail();
+        $user1->password = 'abacadae';
+        $user1->statusId = ACTIVE_USER_STATUS_ID;
+        $user1 = $this->_createUser($user1);
+
+        // now create another user with the same username
+        $user2 = new User();
+        $user2->username = $username;
+        $user2->firstName = 'Ron';
+        $user2->lastName = 'Snow';
+        $user2->email = $this->_uniqueEmail();
+        $user2->password = 'abacadae';
+        $user2->statusId = ACTIVE_USER_STATUS_ID;
 
         $client = $this->getHandlerClient();
 
         $response = $client->post($this->userHandlerPath, [
-            'json' => $user->expose(),
+            'json' => $user2->expose(),
             'cookies' => $this->cookieJar
         ]);
+
         $json = json_decode($response->getBody()->getContents());
         try {
             $this->assertEquals(409, $response->getStatusCode());
@@ -89,8 +99,9 @@ final class UserTest extends TestBase
             $this->assertTrue(isset($json->errorMessages));
             $this->assertArrayHasKey(USERNAME_TAKEN_CODE, (array)$json->errorMessages);
             $this->assertEquals(((array)$json->errorMessages)[USERNAME_TAKEN_CODE], 
-                sprintf(USERNAME_TAKEN_MESSAGE, $user->username));
+                sprintf(USERNAME_TAKEN_MESSAGE, $user2->username));
         } finally {
+            $this->_deleteUser($user1->id);
             if ($json->userCreated) {
                 $this->_deleteUser($json->userId);
             }
@@ -99,104 +110,175 @@ final class UserTest extends TestBase
 
     public function testCreateWithDupeEmail()
     {
-        // create with bad email
-        $email = 'thediscoverables@gmail.com';
-        $password = 'abacadae';
-        $user = new User();
-        $user->username = $this->_uniqueUsername();
-        $user->firstName = 'Ron';
-        $user->lastName = 'Snow';
-        $user->email = $email;
-        $user->password = $password;
-        $user->statusId = ACTIVE_USER_STATUS_ID;
+        // create a new user
+        $email = $this->_uniqueEmail();
+        $user1 = new User();
+        $user1->username = $this->_uniqueUsername();
+        $user1->firstName = 'Ron';
+        $user1->lastName = 'Snow';
+        $user1->email = $email;
+        $user1->password = 'abacadae';
+        $user1->statusId = ACTIVE_USER_STATUS_ID;
+        $user1 = $this->_createUser($user1);
+
+        $emai2 = $this->_uniqueEmail();
+        $user2 = new User();
+        $user2->username = $this->_uniqueUsername();
+        $user2->firstName = 'Ron';
+        $user2->lastName = 'Snow';
+        $user2->email = $email;
+        $user2->password = 'abacadae';
+        $user2->statusId = ACTIVE_USER_STATUS_ID;
 
         $client = $this->getHandlerClient();
 
         $response = $client->post($this->userHandlerPath, [
-            'json' => $user->expose(),
+            'json' => $user2->expose(),
             'cookies' => $this->cookieJar
         ]);
+
         $json = json_decode($response->getBody()->getContents());
-        $this->assertEquals(409, $response->getStatusCode());
-        $this->assertFalse($json->userCreated, 'The created flag was not set to true.');
-        $this->assertTrue(isset($json->errorMessages));
-        $this->assertArrayHasKey(EMAIL_TAKEN_CODE, (array)$json->errorMessages);
-        $this->assertEquals(
-            ((array)$json->errorMessages)[EMAIL_TAKEN_CODE], 
-            sprintf(EMAIL_TAKEN_MESSAGE, $user->email));
+        try {
+            $this->assertEquals(409, $response->getStatusCode());
+            $this->assertFalse($json->userCreated, 'The created flag was not set to true.');
+            $this->assertTrue(isset($json->errorMessages));
+            $this->assertArrayHasKey(EMAIL_TAKEN_CODE, (array)$json->errorMessages);
+            $this->assertEquals(
+                ((array)$json->errorMessages)[EMAIL_TAKEN_CODE], 
+                sprintf(EMAIL_TAKEN_MESSAGE, $user2->email));
+        } finally {
+            $this->_deleteUser($user1->id);
+            if ($json->userCreated) {
+                $this->_deleteUser($json->userId);
+            }
+        }
     }
 
     public function testCreateWithInvalidEmail()
     {
         // create with bad email
-        $email = 'thediscoverablesgmail.com';
-        $password = 'abacadae';
-        $user = new User();
-        $user->username = $this->_uniqueUsername();
-        $user->firstName = 'Ron';
-        $user->lastName = 'Snow';
-        $user->email = $email;
-        $user->password = $password;
-        $user->statusId = ACTIVE_USER_STATUS_ID;
-
-        $client = $this->getHandlerClient();
-
-        $response = $client->post($this->userHandlerPath, [
-            'json' => $user->expose(),
-            'cookies' => $this->cookieJar
-        ]);
-
-        try {        
-            $this->assertEquals(422, $response->getStatusCode());
-            $json = json_decode($response->getBody()->getContents());
-            $this->assertFalse($json->userCreated, 
-                'The created flag was not set to false.');
-            $this->assertTrue(isset($json->errorMessages), 
-                'No errorMessages were sent in the response');
-            $this->assertArrayHasKey(EMAIL_INVALID_CODE, (array)$json->errorMessages);
-            $this->assertEquals(
-                sprintf(EMAIL_INVALID_MESSAGE, $user->email),
-                ((array)$json->errorMessages)[EMAIL_INVALID_CODE]);
-        } finally {
-            if ($json->userCreated) {
-                $this->_deleteUser($json->userId);
-            }
-        }
+        $user = $this->_fleshedOutUser();
+        $user->email = 'thediscoverablesgmail.com';
+        $this->_createWithErrors($user, [EMAIL_INVALID_CODE => EMAIL_INVALID_MESSAGE]);
     }
 
     public function testCreateWithBlankEmail()
     {
-        // create with bad email
-        $email = '';
-        $password = 'abacadae';
-        $user = new User();
-        $user->username = $this->_uniqueUsername();
-        $user->firstName = 'Ron';
-        $user->lastName = 'Snow';
-        $user->email = $email;
-        $user->password = $password;
-        $user->statusId = ACTIVE_USER_STATUS_ID;
+        // create with blank email
+        $user = $this->_fleshedOutUser();
+        $user->email = '';
+        $this->_createWithErrors($user, [EMAIL_BLANK_CODE => EMAIL_BLANK_MESSAGE]);
+    }
 
-        $client = $this->getHandlerClient();
+    public function testCreateWithBlankPassword()
+    {
+        // create with blank password
+        $user = $this->_fleshedOutUser();
+        $user->password = '';
+        $this->_createWithErrors($user, [PASSWORD_BLANK_CODE => PASSWORD_BLANK_MESSAGE]);
+    }
 
-        $response = $client->post($this->userHandlerPath, [
-            'json' => $user->expose(),
-            'cookies' => $this->cookieJar
+    public function testCreateWithLongPassword()
+    {
+        // create with long password
+        $user = $this->_fleshedOutUser();
+        $user->password = '123456789012345678901234567890123456789012345678901234567890123456';
+        $this->_createWithErrors($user, [PASSWORD_LONG_CODE => PASSWORD_LONG_MESSAGE]);
+    }
+
+    public function testCreateWithShortPassword()
+    {
+        // create with long password
+        $user = $this->_fleshedOutUser();
+        $user->password = '12345';
+        $this->_createWithErrors($user, [PASSWORD_SHORT_CODE => PASSWORD_SHORT_MESSAGE]);
+    }
+
+
+    public function testCreateWithInvalidPassword()
+    {
+        // create with invalid char
+        $user = $this->_fleshedOutUser();
+        $user->password = 'dldsafgjshdg\\f';
+        $this->_createWithErrors($user, [PASSWORD_INVALID_CODE => PASSWORD_INVALID_MESSAGE]);
+    }
+
+
+    public function testCreateWithBlankUsername()
+    {
+        // create with blank password
+        $user = $this->_fleshedOutUser();
+        $user->username = '';
+        $this->_createWithErrors($user, [USERNAME_BLANK_CODE => USERNAME_BLANK_MESSAGE]);
+    }
+
+    public function testCreateWithLongUsername()
+    {
+        // create with long password
+        $user = $this->_fleshedOutUser();
+        $user->username = '123456789012345678901234567890123456789012345678901234567890123456';
+        $this->_createWithErrors($user, [USERNAME_LONG_CODE => USERNAME_LONG_MESSAGE]);
+    }
+
+    public function testCreateWithShortUsername()
+    {
+        // create with long password
+        $user = $this->_fleshedOutUser();
+        $user->username = '123';
+        $this->_createWithErrors($user, [USERNAME_SHORT_CODE => USERNAME_SHORT_MESSAGE]);
+    }
+
+
+    public function testCreateWithInvalidUsername()
+    {
+        // create with invalid char
+        $user = $this->_fleshedOutUser();
+        $user->username = 'dldsafgjshdg\\f';
+        $this->_createWithErrors($user, [USERNAME_INVALID_CODE => USERNAME_INVALID_MESSAGE]);
+    }
+
+    public function testCreateWithLongFirstName()
+    {
+        // create with long password
+        $user = $this->_fleshedOutUser();
+        $user->firstName = '123456789012345678901234567890123456789012345678901234567890123456';
+        $this->_createWithErrors($user, [FIRSTNAME_LONG_CODE => FIRSTNAME_LONG_MESSAGE]);
+    }
+
+    public function testCreateWithInvalidFirstName()
+    {
+        // create with invalid char
+        $user = $this->_fleshedOutUser();
+        $user->firstName = 'dldsafgjshdg\\f';
+        $this->_createWithErrors($user, [FIRSTNAME_INVALID_CODE => FIRSTNAME_INVALID_MESSAGE]);
+    }
+
+    public function testCreateWithLongLastName()
+    {
+        // create with long password
+        $user = $this->_fleshedOutUser();
+        $user->lastName = '123456789012345678901234567890123456789012345678901234567890123456';
+        $this->_createWithErrors($user, [LASTNAME_LONG_CODE => LASTNAME_LONG_MESSAGE]);
+    }
+
+    public function testCreateWithInvalidLastName()
+    {
+        // create with invalid char
+        $user = $this->_fleshedOutUser();
+        $user->lastName = 'dldsafgjshdg\\f';
+        $this->_createWithErrors($user, [LASTNAME_INVALID_CODE => LASTNAME_INVALID_MESSAGE]);
+    }
+
+    public function testCreateWithMultipleProblems()
+    {
+        // create with invalid char
+        $user = $this->_fleshedOutUser();
+        $user->lastName = 'dldsafgjshdg\\f';
+        $user->firstName = 'dldsafgjshdg\\f';
+        $this->_createWithErrors($user, [
+            LASTNAME_INVALID_CODE => LASTNAME_INVALID_MESSAGE,
+            FIRSTNAME_INVALID_CODE => FIRSTNAME_INVALID_MESSAGE,
         ]);
-        $json = json_decode($response->getBody()->getContents());
-        try {
-            $this->assertEquals(422, $response->getStatusCode());
-            $this->assertFalse($json->userCreated, 'The created flag was not set to true.');
-            $this->assertTrue(isset($json->errorMessages));
-            $this->assertArrayHasKey(EMAIL_BLANK_CODE, (array)$json->errorMessages);
-            $this->assertEquals(
-                sprintf(EMAIL_BLANK_MESSAGE, $user->email),
-                ((array)$json->errorMessages)[EMAIL_BLANK_CODE]);
-        } finally {
-            if ($json->userCreated) {
-                $this->_deleteUser($json->userId);
-            }
-        }
     }
 
     public function testUpdate()
@@ -345,15 +427,13 @@ final class UserTest extends TestBase
 
     public function testDelete()
     {
-        $username = 'test-user-' . GUID();
-        $email = GUID() . '@test.com';
-
+        $password = 'abacadae';
         $user = new User();
-        $user->username = $username;
+        $user->username = $this->_uniqueUsername();
         $user->firstName = 'Ron';
         $user->lastName = 'Snow';
-        $user->email = $email;
-        $user->password = 'abacadae';
+        $user->email = $this->_uniqueEmail();
+        $user->password = $password;
         $user->statusId = ACTIVE_USER_STATUS_ID;
 
         $user = $this->_createUser($user);
@@ -361,18 +441,30 @@ final class UserTest extends TestBase
         $this->assertEquals($user->statusId, ACTIVE_USER_STATUS_ID);
 
         // first make sure the status update is working to hide users from the user interface
-        $user->statusId = INACTIVE_USER_STATUS_ID;
         $client = $this->getHandlerClient();
         $response = $client->post($this->userHandlerPath, [
-            'json' => $user->expose(),
+            'json' => [
+                'id' => $user->id,
+                'username' => $user->username,
+                'firstName' => $user->firstName,
+                'lastName' => $user->lastName,
+                'email' => $user->email,
+                'password' => $password,
+                'statusId' => INACTIVE_USER_STATUS_ID
+            ],
             'cookies' => $this->cookieJar
         ]);
 
         $user = $this->_getUser($user->id);
-        $this->assertEquals(INACTIVE_USER_STATUS_ID, $user->statusId);        
 
-        // now delete the user from the system
-        $this->_deleteUser($user->id);
+        try {
+            $this->assertEquals($user->statusId, INACTIVE_USER_STATUS_ID);
+        } finally {
+            // now delete the user from the system
+            // this try finally block is just to clean up 
+            // the database if the above assert fails
+            $this->_deleteUser($user->id);
+        }
 
         // make sure the user is gone
         $response = $client->get('user', [
@@ -413,6 +505,34 @@ final class UserTest extends TestBase
         }
     }
 
+    private function _createWithErrors($user, $expectedErrors)
+    {
+        $client = $this->getHandlerClient();
+
+        $response = $client->post($this->userHandlerPath, [
+            'json' => $user->expose(),
+            'cookies' => $this->cookieJar
+        ]);
+        $json = json_decode($response->getBody()->getContents());
+        try {
+            $this->assertEquals(422, $response->getStatusCode());
+            $this->assertTrue(isset($json->userCreated));
+            $this->assertFalse($json->userCreated, 'The created flag was not set to false.');
+            $this->assertTrue(isset($json->errorMessages));
+            $ems = (array)$json->errorMessages;
+            foreach ($expectedErrors as $expectedErrorCode => $expectedErrorMessage) {
+                $this->assertArrayHasKey($expectedErrorCode, $ems);
+                $this->assertEquals($expectedErrorMessage, $ems[$expectedErrorCode]);
+            }
+
+        } finally {
+            // cleanup the database
+            if ($json->userCreated) {
+                $this->_deleteUser($json->userId);
+            }
+        }
+    }
+
     private function _deleteUser($userId)
     {
         $client = $this->getHandlerClient();
@@ -426,6 +546,16 @@ final class UserTest extends TestBase
         $this->assertEquals(200, $response->getStatusCode());
     }
 
+    private function _fleshedOutUser() {
+        $user = new User();
+        $user->username = $this->_uniqueUsername();
+        $user->firstName = 'Ron';
+        $user->lastName = 'Snow';
+        $user->email = $this->_uniqueEmail();
+        $user->password = 'dummypassword';
+        $user->statusId = ACTIVE_USER_STATUS_ID;
+        return $user;
+    }
     private function _uniqueUsername($prefix = 0)
     {
         if ($prefix) {
@@ -438,4 +568,5 @@ final class UserTest extends TestBase
     {
         return GUID() . '@test.com';
     }
+
 }

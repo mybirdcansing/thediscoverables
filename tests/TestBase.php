@@ -10,7 +10,7 @@ class TestBase extends TestCase
 	private $_httpClient = 0;
 	public $cookieJar = 0;
 
-    public function getHandlerClient() 
+    function getHandlerClient() 
     {
     	if (!$this->_httpClient) {
     		$this->_httpClient = new Client([
@@ -23,7 +23,7 @@ class TestBase extends TestCase
     	return $this->_httpClient;
     }
 
-    public function authenticateUser($username, $password) 
+    function authenticateUser($username, $password) 
     {
 		$client = $this->getHandlerClient();
         $response = $client->post('authenticate.php', [

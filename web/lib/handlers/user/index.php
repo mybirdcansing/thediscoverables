@@ -23,17 +23,16 @@ if(!AuthCookie::isValid()) {
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $uri = explode('/', $uri);
 
-// all of our endpoints start with /user
-// everything else results in a 404 Not Found
-// print_r($uri);
-// exit();
+// endpoints start with /user, everything else results in a 404 Not Found
 if ($uri[3] !== 'user') {
     header("HTTP/1.1 404 Not Found");
     exit();
 }
 
-// the user id is, of course, optional and must be a number:
+// the user id is optional and must be a number:
 $userId = null;
+
+// mapping isn't setup on cheap hosting services
 // if (isset($uri[4])) {
 //     $userId = (int) $uri[4];
 // } else {

@@ -1,5 +1,6 @@
 <?php
 require_once __dir__ . '/consts.php';
+require_once __dir__ . '/Configuration.php';
 
 class AuthCookie 
 {

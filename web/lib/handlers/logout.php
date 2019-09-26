@@ -10,5 +10,5 @@ header("Cache-Control: no-cache, must-revalidate");
 
 AuthCookie::logout();
 echo json_encode(
-    array("message" => "You have successfully logged out.")
+    array("authorized" => false, "message" => "You have successfully logged out.")
 );

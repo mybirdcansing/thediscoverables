@@ -17,9 +17,7 @@ class DataAccess {
     {
         if (!$this->dbConnection) {
         	try {
-
         		$settings = (new Configuration())->getSettings();
-				
 				$this->dbConnection = new mysqli(
 					$settings->dataAccess->DB_HOST, 
 					$settings->dataAccess->DB_USER, 

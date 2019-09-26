@@ -67,6 +67,35 @@ class UserData
 		}   
     }
 
+
+    public function getByUsername($username, $user_status_id = 1)
+    {
+        $sql = "
+            SELECT 
+                user_id,
+                username,
+                first_name,
+                last_name,
+                email,
+                user_status_id
+            FROM 
+                user
+            WHERE username = ? AND $user_status_id = ?;
+        ";
+
+        $stmt = $this->dbConnection->prepare($sql);
+        $stmt->bind_param("si", $username, $user_status_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows == 1) {
+            $row = $result->fetch_assoc();
+            $user = $this->_rowToUser($row);
+            return $user;
+        } else {
+            return 0;
+        }   
+    }
+
     public function insert(User $user)
     {
 

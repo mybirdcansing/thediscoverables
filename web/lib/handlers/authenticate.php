@@ -6,7 +6,6 @@ require_once __dir__ . '/../AuthCookie.php';
 header("Content-Type: application/json; charset=UTF-8");
 
 $json = file_get_contents('php://input');
-error_log($json);
 $objJson = json_decode($json);
 $username = $objJson->username;
 $password = $objJson->password;

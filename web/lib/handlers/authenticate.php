@@ -13,6 +13,7 @@ $password = $objJson->password;
 if (isset($username) && isset($password)) {
 	$dbConnection = (new DataAccess())->getConnection();
 	$userData = new UserData($dbConnection);
+	
 	$user = $userData->getAuthenticatedUser($username, $password);
 	if ($user) {
 		$cookie = AuthCookie::setCookie($username);

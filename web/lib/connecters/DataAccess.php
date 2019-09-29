@@ -6,7 +6,6 @@ require_once __dir__ . '/../Configuration.php';
 class DataAccess {
 
     private $dbConnection = null;
-
     public function __construct()
     {
 		mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);	

@@ -34,7 +34,7 @@ class UserData
 			    $users[] = $this->_rowToUser($row);
 			}
             return $users;
-        } catch (\PDOException $e) {
+        } catch (\mysqli_sql_exception $e) {
             exit($e->getMessage());
         }
     }
@@ -96,7 +96,7 @@ class UserData
         }   
     }
 
-    public function insert(User $user)
+    public function insert(User $user, User $administrator)
     {
 
         $sql = "
@@ -109,24 +109,28 @@ class UserData
 					last_name, 
 					password, 
 					user_status_id, 
-                    modified_date, 
-                    created_date
+                    modified_date,
+                    modified_by_id,
+                    created_date,
+                    created_by_id
                 )
-			VALUES (?, ?, ?, ?, ?, ?, 1, now(), now());
+			VALUES (?, ?, ?, ?, ?, ?, 1, now(), ?, now(), ?);
         ";
 
         try {
             $stmt = $this->dbConnection->prepare($sql);
             $hashedPassword = password_hash($user->password, PASSWORD_DEFAULT);
             $userId = GUID();
-            $stmt->bind_param("ssssss",
-                                $userId,
-            					$user->username,
-								$user->email,
-								$user->firstName,
-								$user->lastName,
-								$hashedPassword
-                            );
+            $stmt->bind_param("ssssssss",
+                $userId,
+				$user->username,
+				$user->email,
+				$user->firstName,
+				$user->lastName,
+				$hashedPassword,
+                $administrator->id,
+                $administrator->id
+            );
             $stmt->execute();
             $stmt->store_result();
             return $userId;
@@ -144,13 +148,10 @@ class UserData
                 error_log($e->getMessage());
                 throw $e;
             }
-        } catch (\PDOException $e) {
-            error_log($e->getMessage());
-            throw $e;
         }
     }
 
-    public function update($user)
+    public function update(User $user, User $administrator)
     {
         $sql = "
             UPDATE user
@@ -159,24 +160,24 @@ class UserData
                     email = ?,
                     first_name = ?,
                     last_name  = ?,
-                    password = ?,
                     user_status_id = ?,
-                    modified_date = now()
+                    modified_date = now(),
+                    modified_by_id = ?
                 WHERE user_id = ?;
         ";
 
         try {
             $stmt = $this->dbConnection->prepare($sql);
             $hashedPassword = password_hash($user->password, PASSWORD_DEFAULT);
-            $stmt->bind_param("sssssss", 
-                                $user->username,
-                                $user->email,
-                                $user->firstName,
-                                $user->lastName,
-                                $hashedPassword,
-                                $user->statusId,
-                                $user->id
-                            );
+            $stmt->bind_param("sssssss",
+                $user->username,
+                $user->email,
+                $user->firstName,
+                $user->lastName,
+                $user->statusId,
+                $administrator->id,
+                $user->id
+            );
             $stmt->execute();
             $stmt->store_result();
             return $user->id;
@@ -194,7 +195,27 @@ class UserData
                 error_log($e->getMessage());
                 throw $e;
             }
-        } catch (\PDOException $e) {
+        }
+    }
+
+    public function updatePassword($id, $password, User $administrator)
+    {
+        $sql = "
+            UPDATE user
+               SET
+                    password = ?,
+                    modified_date = now(),
+                    modified_by_id = ?
+                WHERE user_id = ?;
+        ";
+        try {
+            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+            $stmt = $this->dbConnection->prepare($sql);
+            $stmt->bind_param("sss", $hashedPassword, $administrator->id, $id);
+            $stmt->execute();
+            $stmt->store_result();
+            return $id;
+        } catch (\mysqli_sql_exception $e) {
             error_log($e->getMessage());
             throw $e;
         }
@@ -214,7 +235,7 @@ class UserData
             $stmt->store_result();
             $rowsEffected = $stmt->num_rows;
             return $rowsEffected;
-        } catch (\PDOException $e) {
+        } catch (\mysqli_sql_exception $e) {
             exit($e->getMessage());
         }    
     }
@@ -242,6 +263,7 @@ class UserData
 		if ($result->num_rows == 1) {
 		    $row = $result->fetch_assoc();
             if (password_verify($password, $row["password"])) {
+                // error_log("password = " .$password.", row[password] = ". $row['password']);
                 $user = $this->_rowToUser($row);
                 return $user;
             }

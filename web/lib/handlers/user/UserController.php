@@ -6,12 +6,14 @@ class UserController {
     private $requestMethod;
     private $userId;
     private $userData;
+    private $administrator;
 
-    public function __construct($db, $requestMethod, $userId)
+    public function __construct($db, $requestMethod, $userId, $administrator)
     {
         $this->requestMethod = $requestMethod;
         $this->userId = $userId;
         $this->userData = new UserData($db);
+        $this->administrator = $administrator;
     }
 
     public function processRequest()
@@ -28,6 +30,8 @@ class UserController {
                 $objJson = json_decode(file_get_contents('php://input'));
                 if (isset($objJson->delete)) {
                     $response = $this->_deleteUser($objJson->id);
+                } elseif (isset($objJson->updatePassword)) {
+                    $response = $this->_updatePassword($objJson->id, $objJson->password);
                 } else {
                     $user = User::fromJson(file_get_contents('php://input'));
                     if ($user->id) {
@@ -77,7 +81,7 @@ class UserController {
     private function _createUser()
     {
         $user = User::fromJson(file_get_contents('php://input'));
-        $validationIssues = $this->_validationIssues($user);
+        $validationIssues = $this->_validationIssues($user, true);
         
         if ((bool)$validationIssues) {
             return $this->_unprocessableEntityResponse([
@@ -86,7 +90,7 @@ class UserController {
             ]);
         }
         try {
-            $userId = $this->userData->insert($user);
+            $userId = $this->userData->insert($user, $this->administrator);
             $response['status_code_header'] = 'HTTP/1.1 201 Created';
             $response['body'] = json_encode([
                 "userCreated" => true, 
@@ -105,7 +109,7 @@ class UserController {
     private function _updateUser()
     {
         $user = User::fromJson(file_get_contents('php://input'));
-        $validationIssues = $this->_validationIssues($user);
+        $validationIssues = $this->_validationIssues($user, false);
         if ((bool)$validationIssues) {
             return $this->_unprocessableEntityResponse([
                 "userUpdated" => false,
@@ -120,7 +124,7 @@ class UserController {
 
         try {
             // error_log("try to update user");
-            $this->userData->update($user);
+            $this->userData->update($user, $this->administrator);
 
             $response['status_code_header'] = 'HTTP/1.1 200 OK';
             $response['body'] = json_encode([
@@ -139,6 +143,40 @@ class UserController {
         return $response;
     }
 
+    private function _updatePassword($id, $password)
+    {
+        $validationIssues = $this->_validatePassword($password);
+        if ((bool)$validationIssues) {
+            return $this->_unprocessableEntityResponse([
+                "userUpdated" => false,
+                "errorMessages" => $validationIssues
+            ]);
+        }
+        
+        $existingUser = $this->userData->find($id);
+        if (!$existingUser) {
+            return $this->_notFoundResponse();
+        }
+
+        try {
+            $this->userData->updatePassword($id, $password, $this->administrator);
+
+            $response['status_code_header'] = 'HTTP/1.1 200 OK';
+            $response['body'] = json_encode([
+                "userPasswordUpdated" => true, 
+                "userId" => $id
+            ]);
+        } catch (DuplicateUsernameException | DuplicateEmailException $e) {
+            $response['status_code_header'] = 'HTTP/1.1 409 Conflict';
+            $response['body'] = json_encode([
+                "userPasswordUpdated" => false, 
+                "userId" => $user->id,
+                "errorMessages" => array($e->getCode() => $e->getMessage())
+            ]);
+        }
+
+        return $response;
+    }
     private function _deleteUser($id)
     {
         $result = $this->userData->find($id);
@@ -151,8 +189,25 @@ class UserController {
         $response['body'] = null;
         return $response;
     }
+    private function _validatePassword($password)
+    {
+        $errorMessages = [];
+        if (!isset($password) || $password == '') {
+            $errorMessages[PASSWORD_BLANK_CODE] = PASSWORD_BLANK_MESSAGE;
+        } else {
+            if (strlen($password) > 64) {
+                $errorMessages[PASSWORD_LONG_CODE] = PASSWORD_LONG_MESSAGE;
+            } elseif (strlen($password) < 6) {
+                $errorMessages[PASSWORD_SHORT_CODE] = PASSWORD_SHORT_MESSAGE;
+            }
+            if ($this->_isInputStrValid($password)) {
+                $errorMessages[PASSWORD_INVALID_CODE] = PASSWORD_INVALID_MESSAGE;
+            }
+        }
+        return $errorMessages;
+    }
 
-    private function _validationIssues($user)
+    private function _validationIssues($user, $checkPassword)
     {
         $errorMessages = [];
         if (!isset($user->email) || $user->email == '') {
@@ -165,16 +220,9 @@ class UserController {
         }
 
         // password
-        if (!isset($user->password) || $user->password == '') {
-            $errorMessages[PASSWORD_BLANK_CODE] = PASSWORD_BLANK_MESSAGE;
-        } else {
-            if (strlen($user->password) > 64) {
-                $errorMessages[PASSWORD_LONG_CODE] = PASSWORD_LONG_MESSAGE;
-            } elseif (strlen($user->password) < 6) {
-                $errorMessages[PASSWORD_SHORT_CODE] = PASSWORD_SHORT_MESSAGE;
-            }
-            if ($this->_isInputStrValid($user->password)) {
-                $errorMessages[PASSWORD_INVALID_CODE] = PASSWORD_INVALID_MESSAGE;
+        if ($checkPassword) {
+            foreach ($this->_validatePassword($user->password) as $code => $message) {
+                $errorMessages[$code] = $message;
             }
         }
 

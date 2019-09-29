@@ -15,7 +15,9 @@ final class UserTest extends TestBase
     {
         $settings = ((new Configuration())->getSettings())->test;
         // login as the test user (see sql/schema.sql)
+        // echo "TEST_USERNAME: $settings->TEST_USERNAME, TEST_PASSWORD $settings->TEST_PASSWORD\n";
         $json = $this->authenticateUser($settings->TEST_USERNAME, $settings->TEST_PASSWORD);
+        // echo "setUp JSON:" . json_encode($json);
         // set the cookie for future requests
         $this->cookieJar = CookieJar::fromArray([
             'login' => $json->cookie
@@ -281,6 +283,43 @@ final class UserTest extends TestBase
         ]);
     }
 
+    public function testUpdatePassword() {
+        // first make a user
+        $user = new User();
+        $username = $this->_uniqueUsername();
+        $email = $this->_uniqueEmail();
+        $password = 'peoplearepeople';
+        $user->username = $username;
+        $user->firstName = 'Ron';
+        $user->lastName = 'Snow';
+        $user->email = $email;
+        $user->password = $password;
+        $user->statusId = ACTIVE_USER_STATUS_ID;
+
+        $user = $this->_createUser($user);
+        $updatedPassword = GUID();
+        $client = $this->getHandlerClient();
+        $response = $client->post($this->userHandlerPath, [
+            'json' => [
+                'id' => $user->id,
+                'password' => $updatedPassword,
+                'updatePassword' => 1
+            ],
+            'cookies' => $this->cookieJar
+        ]);
+
+        $json = json_decode($response->getBody()->getContents());
+        try {
+            $this->assertEquals($response->getStatusCode(), 200);
+            $this->assertTrue($json->userPasswordUpdated, 'The userUpdated flag was not set to true.');
+            // make sure it's all good
+            $authResponse = $this->authenticateUser($username, $updatedPassword);
+            $this->assertTrue($authResponse->authenticated, 'User was not authenticated.');
+        } finally {
+            $this->_deleteUser($json->userId);
+        }
+    }
+
     public function testUpdate()
     {
         // first make a user
@@ -299,7 +338,7 @@ final class UserTest extends TestBase
 
         $updatedUsername = $this->_uniqueUsername();
         $updatedEmail = $this->_uniqueEmail();
-        $updatedPassword = 'updatedpassword';
+        
         $client = $this->getHandlerClient();
         $response = $client->post($this->userHandlerPath, [
             'json' => [
@@ -308,7 +347,6 @@ final class UserTest extends TestBase
                 'firstName' => 'James',
                 'lastName' => 'Nuckolls',
                 'email' => $updatedEmail,
-                'password' => $updatedPassword,
                 'statusId' => 1
             ],
             'cookies' => $this->cookieJar
@@ -327,9 +365,6 @@ final class UserTest extends TestBase
             $this->assertEquals($updatedUsername, $user->username);
             $this->assertEquals($updatedEmail, $user->email);
             $this->assertEquals(ACTIVE_USER_STATUS_ID, $user->statusId);
-
-            $authResponse = $this->authenticateUser($updatedUsername, $updatedPassword);
-            $this->assertTrue($authResponse->authenticated, 'User was not authenticated.');
         } finally {
             $this->_deleteUser($json->userId);
         }
@@ -361,7 +396,6 @@ final class UserTest extends TestBase
                 'firstName' => 'James',
                 'lastName' => 'Nuckolls',
                 'email' => $this->_uniqueEmail(),
-                'password' => 'updatedpassword',
                 'statusId' => ACTIVE_USER_STATUS_ID
             ],
             'cookies' => $this->cookieJar
@@ -407,7 +441,6 @@ final class UserTest extends TestBase
                     'firstName' => 'James',
                     'lastName' => 'Nuckolls',
                     'email' => $dupeEmail,
-                    'password' => 'updatedpassword',
                     'statusId' => 1
                 ],
                 'cookies' => $this->cookieJar

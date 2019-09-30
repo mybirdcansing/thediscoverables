@@ -16,7 +16,7 @@ if (AuthCookie::isValid()) {
 	$isAuthenticated = 'false';
 	$administrator = $blankAdministrator;
 }
-echo password_hash('abacadae', PASSWORD_DEFAULT);
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -56,6 +56,14 @@ echo password_hash('abacadae', PASSWORD_DEFAULT);
 		 padding-right: 20px;
 		}
 
+		ul.loginErrors {
+			color: red;
+			list-style-type: none;
+		}
+
+		.link {
+			cursor: pointer; color: blue;
+		}
 		br {
 		 clear: left;
 		}
@@ -92,6 +100,9 @@ echo password_hash('abacadae', PASSWORD_DEFAULT);
 
 	<script type="text/html" id="login-template">
 		<form data-bind="submit: login">
+			<ul data-bind="foreach: loginErrors" class="loginErrors">
+				<li data-bind='text:$data'></li>
+			</ul>
 			<label for="username">Username</label>
 			<input id="username" name="username"><br>
 			<label for="password">Password</label>
@@ -123,9 +134,8 @@ echo password_hash('abacadae', PASSWORD_DEFAULT);
 		            	<span data-bind="text: email"></span>
 		            </td>
 		            <td>
-		            	<span 
-		            		style='cursor: pointer; color: blue' 
-		            		data-bind="click: $root.openEditUser.bind(this, $parent)">edit</span>
+		            	<span class="link" 
+		            		data-bind="click: $root.openEditUser.bind($data, $parent)">edit</span>
 		            </td>
 		        </tr>
 		    </tbody>
@@ -168,11 +178,11 @@ function AdminViewModel(administrator, blankAdministrator, isAuthenticated) {
 		this.blankAdministrator = blankAdministrator;
 		this.isAuthenticated = ko.observable(isAuthenticated);
 		this.administrator = ko.mapping.fromJS(administrator);
+		this.loginErrors = ko.observableArray([]);
 		this.userConnector = new UserConnector();
 		this.currentPage = ko.observable('blank');
 		this.users = ko.observableArray();
 		this.userToEdit = ko.observable();
-
 		this.pageToDisplay = function(model) {
 			if (model.isAuthenticated()) {
 				return model.currentPage() + '-template';
@@ -187,11 +197,14 @@ function AdminViewModel(administrator, blankAdministrator, isAuthenticated) {
 			this.userConnector.authenticate(input, 
 				function (data, textStatus, jqXHR) {
 	            	self.isAuthenticated(data.authenticated);
+	            	console.log(data, textStatus, jqXHR);
 					ko.mapping.fromJS(data.user, self.administrator);
 	            }, 
 	            function(data, textStatus, errorThrown) {
 	            	self.isAuthenticated(false);
-					console.log('request failed! ' + textStatus);
+	            	self.loginErrors(Object.values(data.errorMessages).reverse());
+	            	console.log(data, textStatus, errorThrown);
+					
 			    });
 		};
 
@@ -259,7 +272,7 @@ function AdminViewModel(administrator, blankAdministrator, isAuthenticated) {
 	            	callback(data, textStatus, jqXHR);
 	            },
 	            error: function(data, textStatus, errorThrown) {
-	            	errorCallback(data, textStatus, errorThrown);
+	            	errorCallback(data.responseJSON, textStatus, errorThrown);
 			    }
 	        });
 		};
@@ -275,7 +288,7 @@ function AdminViewModel(administrator, blankAdministrator, isAuthenticated) {
 	            	callback(data, textStatus, jqXHR);
 	            },
 	            error: function(data, textStatus, errorThrown) {
-	            	errorCallback(data, textStatus, errorThrown);
+	            	errorCallback(data.responseJSON, textStatus, errorThrown);
 			    }
 	        });
 		};
@@ -299,10 +312,11 @@ function AdminViewModel(administrator, blankAdministrator, isAuthenticated) {
 	            contentType: 'application/json',
 	            cache: false,
 	            success: function (data, textStatus, jqXHR) {
+	            	// console.log(data);
 	            	callback(data, textStatus, jqXHR);
 	            },
 	            error: function(data, textStatus, errorThrown) {
-	            	errorCallback(data, textStatus, errorThrown);
+	            	errorCallback(data.responseJSON, textStatus, errorThrown);
 			    },
 	            data: JSON.stringify(input)
 	        });
@@ -319,7 +333,7 @@ function AdminViewModel(administrator, blankAdministrator, isAuthenticated) {
 	            	callback(data, textStatus, jqXHR);
 	            },
 	            error: function(data, textStatus, errorThrown) {
-	            	errorCallback(data, textStatus, errorThrown);
+	            	errorCallback(data.responseJSON, textStatus, errorThrown);
 			    }
 	        });
 		};

@@ -286,14 +286,11 @@ final class UserTest extends TestBase
     public function testUpdatePassword() {
         // first make a user
         $user = new User();
-        $username = $this->_uniqueUsername();
-        $email = $this->_uniqueEmail();
-        $password = 'peoplearepeople';
-        $user->username = $username;
+        $user->username = $this->_uniqueUsername();
         $user->firstName = 'Ron';
         $user->lastName = 'Snow';
-        $user->email = $email;
-        $user->password = $password;
+        $user->email = $this->_uniqueEmail();
+        $user->password = 'abacadae';
         $user->statusId = ACTIVE_USER_STATUS_ID;
 
         $user = $this->_createUser($user);
@@ -313,10 +310,40 @@ final class UserTest extends TestBase
             $this->assertEquals($response->getStatusCode(), 200);
             $this->assertTrue($json->userPasswordUpdated, 'The userUpdated flag was not set to true.');
             // make sure it's all good
-            $authResponse = $this->authenticateUser($username, $updatedPassword);
+            $authResponse = $this->authenticateUser($user->username, $updatedPassword);
             $this->assertTrue($authResponse->authenticated, 'User was not authenticated.');
         } finally {
-            $this->_deleteUser($json->userId);
+            $this->_deleteUser($user->id);
+        }
+    }
+    
+    public function testAuthenticateWithInvalidPassword() {
+        // first make a user
+        $user = new User();
+        $password = 'abacadae';
+        $user->username = $this->_uniqueUsername();
+        $user->firstName = 'Ron';
+        $user->lastName = 'Snow';
+        $user->email = $this->_uniqueEmail();
+        $user->password = $password;
+        $user->statusId = ACTIVE_USER_STATUS_ID;
+
+        $user = $this->_createUser($user);
+
+        try {
+            $client = $this->getHandlerClient();
+            $response = $client->post('authenticate.php', [
+                'json' => [
+                    'username' => $user->username,
+                    'password' => 'badpassword'
+                ]
+            ]);
+            
+            $this->assertEquals($response->getStatusCode(), 401);
+            $json = json_decode($response->getBody()->getContents());
+            $this->assertFalse($json->authenticated, 'User was authenticated.');
+        } finally {
+            $this->_deleteUser($user->id);
         }
     }
 

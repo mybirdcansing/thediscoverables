@@ -1,5 +1,5 @@
 <?php
-require_once __dir__ . '/consts.php';
+require_once __dir__ . '/messages.php';
 require_once __dir__ . '/Configuration.php';
 
 class AuthCookie 
@@ -7,6 +7,14 @@ class AuthCookie
     public static function setCookie($username) {
         $settings = ((new Configuration())->getSettings())->security;
         $loginCookie = $username . ',' . md5($username . $settings->SECRET_WORD);
+
+        // $params = [
+        //     'expires' => time() + (3600 * 24 * 30), 
+        //     'path' => rawurlencode('/'),
+        //     'samesite' => rawurlencode('None')
+        // ];
+        // 'domain' =>  rawurlencode($domain)),
+        // setcookie($settings->LOGIN_COOKIE_NAME, $loginCookie, $params);
     	setcookie($settings->LOGIN_COOKIE_NAME, $loginCookie, time() + (3600 * 24 * 30), '/');
         return $loginCookie;
     }

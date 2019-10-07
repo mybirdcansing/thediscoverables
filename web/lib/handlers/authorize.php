@@ -1,5 +1,5 @@
 <?php
-require_once __dir__ . '/../consts.php';
+require_once __dir__ . '/../messages.php';
 require_once __dir__ . '/../AuthCookie.php';
 
 // authorization handler

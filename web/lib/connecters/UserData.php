@@ -221,12 +221,69 @@ class UserData
         }
     }
 
-    public function delete($id)
+    public function insertPasswordResetToken(User $user, User $administrator)
     {
         $sql = "
-            DELETE FROM user
-            WHERE user_id = ?;
+            INSERT INTO 
+                reset_password (
+                    token,
+                    user_id,
+                    created_date,
+                    created_by_id
+                )
+            VALUES (?, ?, now(), ?);
         ";
+        try {
+            $token = GUID();
+            $stmt = $this->dbConnection->prepare($sql);
+            $stmt->bind_param("sss", $token, $user->id, $administrator->id);
+            $stmt->execute();
+            $stmt->store_result();
+            return $token;
+        } catch (\mysqli_sql_exception $e) {
+            error_log($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function deletePasswordResetToken($token)
+    {
+        $sql = "
+            DELETE FROM reset_password
+            WHERE token = ?;
+        ";
+        try {
+            $stmt = $this->dbConnection->prepare($sql);
+            $stmt->bind_param("s", $token);
+            $stmt->execute();
+            $stmt->store_result();
+            return $stmt->num_rows;
+        } catch (\mysqli_sql_exception $e) {
+            error_log($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function deletePasswordResetTokens($userId)
+    {
+        $sql = "DELETE FROM reset_password WHERE user_id = ?;";
+        try {
+            $stmt = $this->dbConnection->prepare($sql);
+            $stmt->bind_param("s", $userId);
+            $stmt->execute();
+            $stmt->store_result();
+            $rowsEffected = $stmt->num_rows;
+            return $rowsEffected;
+        } catch (\mysqli_sql_exception $e) {
+            exit($e->getMessage());
+        }    
+    }
+
+    public function delete($id)
+    {
+        $this->deletePasswordResetTokens($id);
+
+        $sql = "DELETE FROM user WHERE user_id = ?;";
 
         try {
             $stmt = $this->dbConnection->prepare($sql);
@@ -253,11 +310,11 @@ class UserData
                 user_status_id
 		  	FROM user 
 		  	WHERE user_status_id = 1 
-		  	AND username = ?;
+		  	AND (username = ? OR email = ?);
 		";
 
 		$stmt = $this->dbConnection->prepare($sql);
-		$stmt->bind_param("s", $username);
+		$stmt->bind_param("ss", $username, $username);
 		$stmt->execute();
 		$result = $stmt->get_result();
 		if ($result->num_rows == 1) {

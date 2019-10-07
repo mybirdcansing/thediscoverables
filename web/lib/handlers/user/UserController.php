@@ -148,7 +148,7 @@ class UserController {
         $validationIssues = $this->_validatePassword($password);
         if ((bool)$validationIssues) {
             return $this->_unprocessableEntityResponse([
-                "userUpdated" => false,
+                "userPasswordUpdated" => false,
                 "errorMessages" => $validationIssues
             ]);
         }
@@ -189,6 +189,7 @@ class UserController {
         $response['body'] = null;
         return $response;
     }
+
     private function _validatePassword($password)
     {
         $errorMessages = [];

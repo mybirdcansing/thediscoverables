@@ -25,6 +25,7 @@ if (AuthCookie::isValid()) {
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.css">
 	
 	<link rel="stylesheet" href="styles.css">
+
 </head>
 <body>
 	<p>
@@ -163,7 +164,6 @@ if (AuthCookie::isValid()) {
 		this.users = ko.observableArray();
 		this.userToUpdate = ko.observable();
 		this.validationErrors = ko.observableArray([]);
-
 		this.pageToDisplay = function(model) {
 			if (model.isAuthenticated()) {
 				return model.currentPage() + '-template';
@@ -179,6 +179,7 @@ if (AuthCookie::isValid()) {
 				function (data, textStatus, jqXHR) {
 					self.loginErrors([]);
 	            	self.isAuthenticated(data.authenticated);
+	            	console.log(data, textStatus, jqXHR);
 					ko.mapping.fromJS(data.user, self.administrator);
 	            }, 
 	            function(data, textStatus, errorThrown) {
@@ -282,13 +283,10 @@ if (AuthCookie::isValid()) {
 			        }
 			    }
 			});
-
-
-
 		};
-
 		this.openMusic = function() {
 			self.currentPage('music');
+
 		};
 	};
 </script>

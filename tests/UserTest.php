@@ -303,7 +303,6 @@ final class UserTest extends TestBase
         // request the password update email
 
         try {
-
             $response = $client->post('requestpasswordreset.php', [
                 'json' => $user->expose(),
                 'cookies' => $this->cookieJar
@@ -326,6 +325,7 @@ final class UserTest extends TestBase
             // // make sure it's all good
             // $authResponse = $this->authenticateUser($user->username, $updatedPassword);
             // $this->assertTrue($authResponse->authenticated, 'User was not authenticated.');
+
         } finally {
             $this->_deleteUser($user->id);
         }

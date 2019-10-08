@@ -31,7 +31,8 @@ class UserController {
                 if (isset($objJson->delete)) {
                     $response = $this->_deleteUser($objJson->id);
                 } elseif (isset($objJson->updatePassword)) {
-                    $response = $this->_updatePassword($objJson->id, $objJson->password);
+
+                    $response = $this->_updatePassword();
                 } else {
                     $user = User::fromJson(file_get_contents('php://input'));
                     if ($user->id) {
@@ -143,8 +144,13 @@ class UserController {
         return $response;
     }
 
-    private function _updatePassword($id, $password)
+    private function _updatePassword()
     {
+        $objJson = json_decode(file_get_contents('php://input'));
+
+        $token = $objJson->token;
+        $password = $objJson->password;
+
         $validationIssues = $this->_validatePassword($password);
         if ((bool)$validationIssues) {
             return $this->_unprocessableEntityResponse([
@@ -153,27 +159,26 @@ class UserController {
             ]);
         }
         
-        $existingUser = $this->userData->find($id);
-        if (!$existingUser) {
+        $tokenData = $this->userData->getPasswordResetTokenInfo($token);
+
+        if (!$tokenData) {
             return $this->_notFoundResponse();
         }
 
-        try {
-            $this->userData->updatePassword($id, $password, $this->administrator);
-
-            $response['status_code_header'] = 'HTTP/1.1 200 OK';
-            $response['body'] = json_encode([
-                "userPasswordUpdated" => true, 
-                "userId" => $id
-            ]);
-        } catch (DuplicateUsernameException | DuplicateEmailException $e) {
-            $response['status_code_header'] = 'HTTP/1.1 409 Conflict';
-            $response['body'] = json_encode([
-                "userPasswordUpdated" => false, 
-                "userId" => $user->id,
-                "errorMessages" => array($e->getCode() => $e->getMessage())
-            ]);
+        $user = $this->userData->find($tokenData->userId);
+        if (!$user) {
+            return $this->_notFoundResponse();
         }
+
+        $this->userData->updatePassword($user->id, $password, $user);
+
+        $this->userData->markPasswordTokenUsed($token);
+
+        $response['status_code_header'] = 'HTTP/1.1 200 OK';
+        $response['body'] = json_encode([
+            "userPasswordUpdated" => true, 
+            "userId" => $tokenData->userId
+        ]);
 
         return $response;
     }

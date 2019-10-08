@@ -198,13 +198,32 @@ class UserData
         }
     }
 
+    public function markPasswordTokenUsed($token)
+    {
+        $sql = "
+            UPDATE reset_password
+            SET used = ''
+            WHERE token = ?;
+        ";
+
+        try {
+            $stmt = $this->dbConnection->prepare($sql);
+            $stmt->bind_param("s", $token);
+            $stmt->execute();
+            $stmt->store_result();
+            return $stmt->num_rows;
+        } catch (\mysqli_sql_exception $e) {
+            error_log($e->getMessage());
+            throw $e;
+        }
+    }
+
     public function updatePassword($id, $password, User $administrator)
     {
         $sql = "
             UPDATE user
                SET
                     password = ?,
-                    modified_date = now(),
                     modified_by_id = ?
                 WHERE user_id = ?;
         ";
@@ -228,10 +247,11 @@ class UserData
                 reset_password (
                     token,
                     user_id,
+                    expiration_date,
                     created_date,
                     created_by_id
                 )
-            VALUES (?, ?, now(), ?);
+            VALUES (?, ?, DATE_ADD(now(), INTERVAL 2 DAY), now(), ?);
         ";
         try {
             $token = GUID();
@@ -274,6 +294,100 @@ class UserData
             $stmt->store_result();
             $rowsEffected = $stmt->num_rows;
             return $rowsEffected;
+        } catch (\mysqli_sql_exception $e) {
+            exit($e->getMessage());
+        }    
+    }
+
+
+    public function getPasswordResetTokens($userId)
+    {
+
+        function tokenObj($token, $expirationDate)
+        {
+            return new class($token, $expirationDate) {
+                public $token;
+                public $expirationDate;
+                public function __construct($token, $expirationDate)
+                {
+                    $this->token = $token;
+                    $this->expirationDate = $expirationDate;
+                }
+            };
+        }
+
+        $sql = "
+            SELECT 
+                token, 
+                expiration_date
+            FROM reset_password 
+            WHERE used IS NULL 
+            AND user_id = ? 
+            AND expiration_date > now() 
+            ORDER BY expiration_date asc;
+        ";
+
+        try {
+            $stmt = $this->dbConnection->prepare($sql);
+            $stmt->bind_param("s", $userId);
+            
+            $stmt->execute();            
+            $result = $stmt->get_result();
+            $tokens = [];
+            while ($row = $result->fetch_assoc()) {
+                // $tokens[$row["token"]] = $row["expiration_date"];
+                $tokens[] = tokenObj($row["token"], $row["expiration_date"]);
+            }
+            return $tokens;
+        } catch (\mysqli_sql_exception $e) {
+            exit($e->getMessage());
+        }    
+    }
+
+    public function getPasswordResetTokenInfo($token)
+    {
+
+        function tokenInfo($token, $expirationDate, $userId)
+        {
+            return new class($token, $expirationDate, $userId) {
+                public $token;
+                public $expirationDate;
+                public $userId;
+
+                public function __construct($token, $expirationDate, $userId)
+                {
+                    $this->token = $token;
+                    $this->expirationDate = $expirationDate;
+                    $this->userId = $userId;
+                }
+            };
+        }
+
+        $sql = "
+            SELECT 
+                token, 
+                expiration_date,
+                user_id
+            FROM reset_password 
+            WHERE token = ? 
+            AND used IS NULL
+            AND expiration_date > now();
+        ";
+
+        try {
+            $stmt = $this->dbConnection->prepare($sql);
+            $stmt->bind_param("s", $token);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if ($result->num_rows == 1) {
+                $row = $result->fetch_assoc();
+                return tokenInfo(
+                    $row["token"], 
+                    $row["expiration_date"], 
+                    $row["user_id"]
+                );
+            }
+            return false;
         } catch (\mysqli_sql_exception $e) {
             exit($e->getMessage());
         }    

@@ -18,7 +18,7 @@ final class UserTest extends TestBase
         $testSettomgs = $this->settings->test;
         // login as the test user (see sql/schema.sql)
         $json = $this->authenticateUser($testSettomgs->TEST_USERNAME, $testSettomgs->TEST_PASSWORD);
-        // echo "setUp JSON:" . json_encode($json);
+
         // set the cookie for future requests
         $this->cookieJar = CookieJar::fromArray([
             'login' => $json->cookie
@@ -285,46 +285,54 @@ final class UserTest extends TestBase
     }
 
     public function testUpdatePassword() {
+        $ts = $this->settings->test;
         // first make a user
         $user = new User();
         $user->username = $this->_uniqueUsername();
         $user->firstName = 'Ron';
         $user->lastName = 'Snow';
-        $user->email = $this->settings->test->TEST_EMAIL;
+        $user->email = $this->_uniqueEmail();
         $user->password = 'abacadae';
         $user->statusId = ACTIVE_USER_STATUS_ID;
 
         $user = $this->_createUser($user);
         
-        $updatedPassword = GUID();
+        $updatedPassword = 'UpdatedPassword';
 
         $client = $this->getHandlerClient();
         
-        // request the password update email
 
         try {
+            // request the password update email
             $response = $client->post('requestpasswordreset.php', [
                 'json' => $user->expose(),
                 'cookies' => $this->cookieJar
             ]);
             
-            echo $response->getBody()->getContents();
+            // can't get the token from the email, so go to DB directly
+            $dbConnection = (new DataAccess())->getConnection();
+            $userData = new UserData($dbConnection);
+            $tokens = $userData->getPasswordResetTokens($user->id);
+            // use the first one on the list
+            $tokenData = reset($tokens);
 
-            // $response = $client->post($this->userHandlerPath, [
-            //     'json' => [
-            //         'id' => $user->id,
-            //         'password' => $updatedPassword,
-            //         'updatePassword' => 1
-            //     ],
-            //     'cookies' => $this->cookieJar
-            // ]);
+            $updateData = [
+                'updatePassword' => 1,
+                'token' => $tokenData->token,
+                'password' => $updatedPassword
+            ];
 
-            // $json = json_decode($response->getBody()->getContents());
-            // $this->assertEquals($response->getStatusCode(), 200);
-            // $this->assertTrue($json->userPasswordUpdated, 'The userUpdated flag was not set to true.');
-            // // make sure it's all good
-            // $authResponse = $this->authenticateUser($user->username, $updatedPassword);
-            // $this->assertTrue($authResponse->authenticated, 'User was not authenticated.');
+            $response = $client->post($this->userHandlerPath, [
+                'json' => $updateData,
+                'cookies' => $this->cookieJar
+            ]);
+
+            $json = json_decode($response->getBody()->getContents());
+            $this->assertEquals($response->getStatusCode(), 200);
+            $this->assertTrue($json->userPasswordUpdated, 'The userUpdated flag was not set to true.');
+            // make sure it's all good
+            $authResponse = $this->authenticateUser($user->username, $updatedPassword);
+            $this->assertTrue($authResponse->authenticated, 'User was not authenticated.');
 
         } finally {
             $this->_deleteUser($user->id);

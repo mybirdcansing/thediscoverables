@@ -11,12 +11,13 @@ require_once __dir__ . '/../lib/connecters/UserData.php';
 <html>
 <head>
 	<title>The Discoverables Administration</title>
-	<link rel="stylesheet" href="styles.css">
+	<link rel="stylesheet" href="styles.css?v=1.1">
 </head>
 <body>
 	<p>
-	thediscoverables.com html Administration
+	The Discoverables Administration
 	</p>
+
 	<div id='page' data-bind="template: { name: pageToDisplay, data: $data}"></div>
 
 	<script type="text/html" id="enter-new-password-template">
@@ -26,13 +27,15 @@ require_once __dir__ . '/../lib/connecters/UserData.php';
 				<li data-bind='text:$data'></li>
 			</ul>
 			<label for="password">New Password</label>
-			<input id="password" type="password" name="password"><br>
+			<input type="password" name="password"><br>
 			<label for="confirm">Confirm</label>
-			<input id="confirm" type="password" name="confirm"><br>
+			<input type="password" name="confirm"><br>
 			<div style="padding-left: 150px"><input type="submit" type="password" name="submit" value="submit" class="button" /></div>
 		</form>
 	</script>
-
+	<script type="text/html" id="success-template">
+		<p>Your password has been updated. <a href="/admin/">Enter the admin site.</a></p>
+	</script>
 </body>
 <!-- <script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js'></script> -->
 <script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.js'></script>
@@ -57,33 +60,36 @@ require_once __dir__ . '/../lib/connecters/UserData.php';
 		};
 
 		this.updatePassword = function(formElement) {
-			debugger;
 			var input = {};
 			$(formElement).serializeArray().map(function(x){input[x.name] = x.value;});
-			// var errors = [], i = 0;
-			// if (input['password'] === '') {
-			// 	errors[i++] = 
-			// }
-			input['token'] = getUrlParameter('token');
-			input['updatePassword'] = 1;
-			
-			this.userConnector.resetPassword(input, 
+
+			if (input.password !== input.confirm) {
+				self.validationErrors(["The passwords don't match"]);
+				return;
+			}
+			var data = {
+				'updatePassword' : 1,
+				'password' : input.password,
+				'token' : this._getUrlParameter('token')
+			};
+
+			this.userConnector.resetPassword(data, 
 				function (data, textStatus, jqXHR) {
-					debugger;
 					self.validationErrors([]);
-	            	// show thank you message
+	            	self.currentPage('success');
 	            }, 
 	            function(data, textStatus, errorThrown) {
 	            	debugger;
 	            	self.validationErrors(Object.values(data.errorMessages).reverse());
 			    });
 		};
-	};
-	function getUrlParameter(name) {
-	    name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-	    var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-	    var results = regex.exec(location.search);
-	    return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+
+		this._getUrlParameter = function(name) {
+		    name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+		    var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+		    var results = regex.exec(location.search);
+		    return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+		}
 	};
 </script>
 </html>

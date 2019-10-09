@@ -40,6 +40,13 @@ define("LASTNAME_INVALID_MESSAGE", "The last name may not contain invalid charac
 define("AUTH_FAILED_CODE", 1016);
 define("AUTH_FAILED_MESSAGE", "Authentication failed, please try again.");
 
+define("USER_NOT_FOUND_CODE", 1017);
+define("USER_NOT_FOUND_MESSAGE", "User not found.");
+
+define("PASSWORD_TOKEN_NOT_FOUND_CODE", 1018);
+define("PASSWORD_TOKEN_NOT_FOUND_MESSAGE", "Password token not found or already used.");
+
+
 //
 define("ACTIVE_USER_STATUS_ID", 1);
 define("INACTIVE_USER_STATUS_ID", 2);
@@ -47,8 +54,7 @@ define("INACTIVE_USER_STATUS_ID", 2);
 // global methods
 function GUID()
 {
-    if (function_exists('com_create_guid') === true)
-    {
+    if (function_exists('com_create_guid') === true) {
         return trim(com_create_guid(), '{}');
     }
 

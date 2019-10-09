@@ -147,7 +147,6 @@ class UserController {
     private function _updatePassword()
     {
         $objJson = json_decode(file_get_contents('php://input'));
-
         $token = $objJson->token;
         $password = $objJson->password;
 
@@ -160,9 +159,13 @@ class UserController {
         }
         
         $tokenData = $this->userData->getPasswordResetTokenInfo($token);
-
         if (!$tokenData) {
-            return $this->_notFoundResponse();
+            return $this->_notFoundResponse([
+                "userPasswordUpdated" => false, 
+                "errorMessages" => [
+                    PASSWORD_TOKEN_NOT_FOUND_CODE => PASSWORD_TOKEN_NOT_FOUND_MESSAGE
+                ]
+            ]);
         }
 
         $user = $this->userData->find($tokenData->userId);
@@ -182,6 +185,7 @@ class UserController {
 
         return $response;
     }
+
     private function _deleteUser($id)
     {
         $result = $this->userData->find($id);
@@ -270,10 +274,17 @@ class UserController {
         return $response;
     }
 
-    private function _notFoundResponse()
+    private function _notFoundResponse($json = null)
     {
+        if ($json == null) {
+            $json = [
+                "errorMessages" => [
+                    USER_NOT_FOUND_CODE => USER_NOT_FOUND_MESSAGE
+                ]
+            ];
+        }
         $response['status_code_header'] = 'HTTP/1.1 404 Not Found';
-        $response['body'] = null;
+        $response['body'] = json_encode($json);
         return $response;
     }
 

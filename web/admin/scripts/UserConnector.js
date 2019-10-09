@@ -126,7 +126,6 @@ function UserConnector() {
             contentType: 'application/json',
             cache: false,
             success: function (data, textStatus, jqXHR) {
-            	debugger;
             	callback(data, textStatus, jqXHR);
             },
             error: function(data, textStatus, errorThrown) {

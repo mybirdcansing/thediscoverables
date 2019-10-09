@@ -35,18 +35,18 @@ p.formTitle {
 }
 
 .password-reset label {
- display: block;
- width: 200px;
- float: left;
- margin-bottom: 10px;
+	display: block;
+	width: 200px;
+	float: left;
+	margin-bottom: 10px;
 }
 
 form label, input {
- display: block;
- width: 150px;
- float: left;
- margin-bottom: 10px;
- font-size: 11pt;
+	display: block;
+	width: 150px;
+	float: left;
+	margin-bottom: 10px;
+	font-size: 11pt;
 }
 
 
@@ -55,11 +55,11 @@ form label {
 }
 
 label {
- width: 75px;
- padding-right: 20px;
+	width: 75px;
+	padding-right: 20px;
 }
 
-ul.loginErrors {
+ul.loginErrors, ul.validationErrors {
 	color: red;
 	list-style-type: none;
 }

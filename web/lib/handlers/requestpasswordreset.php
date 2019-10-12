@@ -15,24 +15,33 @@ header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
+// if(!AuthCookie::isValid()) {
+//     header("'HTTP/1.1 403 Forbidden'");
+// 	echo json_encode(
+//         array(
+//         	"authorized" => false, 
+//         	"passwordResetSent" => false, 
+//         	"message" => "You do not have permission to be here."
+//         )
+//     );
+//     exit();
+// }
 
-if(!AuthCookie::isValid()) {
-    header("'HTTP/1.1 403 Forbidden'");
-	echo json_encode(
-        array(
-        	"authorized" => false, 
-        	"passwordResetSent" => false, 
-        	"message" => "You do not have permission to be here."
-        )
-    );
-    exit();
+$objJson = json_decode(file_get_contents('php://input'));
+
+$userData = new UserData((new DataAccess())->getConnection());
+
+$user = 0;
+
+if (isset($objJson->username)) {
+	$user = $userData->getByUsername($objJson->username);
 }
 
-$user = User::fromJson(file_get_contents('php://input'));
-$dbConnection = (new DataAccess())->getConnection();
-$userData = new UserData($dbConnection);
-$existingUser = $userData->find($user->id);
-if (!$existingUser) {
+if (!$user && isset($objJson->email)) {
+	$user = $userData->getByEmail($objJson->email);
+}
+
+if (!$user) {
     header('HTTP/1.1 404 Not Found');
 	echo json_encode(
         array(
@@ -42,8 +51,15 @@ if (!$existingUser) {
     exit();
 }
 
-$administrator = $userData->getByUsername(AuthCookie::getUsername());
-$token = $userData->insertPasswordResetToken($user, $administrator);
+// if there is an authenticated user, they are using the admin page
+// to request the reset
+if(AuthCookie::isValid()) {
+	$requester = $userData->getByUsername(AuthCookie::getUsername());
+} else {
+	$requester = $user;
+}
+
+$token = $userData->insertPasswordResetToken($user, $requester);
 $settings = (new Configuration())->getSettings();
 // put a row in a table and send an email
 
@@ -56,12 +72,12 @@ $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS; //'tls';
 $mail->SMTPAuth = true;
 $mail->Username = $settings->email->USER;
 $mail->Password = $settings->email->PASSWORD;
-$mail->setFrom('thediscoverables@gmail.com', 'The Discoverables Support');
-$mail->addReplyTo('thediscoverables@gmail.com', 'The Discoverables Support');
+$mail->setFrom($settings->email->FROM_ADDRESS, $settings->email->FROM_NAME);
+$mail->addReplyTo($settings->email->FROM_ADDRESS, $settings->email->FROM_NAME);
 $mail->addAddress($user->email, "$user->firstName $user->lastName");
 $mail->Subject = 'Administration: The Discoverables';
 $link = 'http://' . $settings->host->DOMAIN . '/admin/updatepassword.php?token=' . $token;
-$msg = "<p>Click this link to update you're The Discoverables administration site password.</p>";
+$msg = "<p>Click this <a href=\"$link\">link</a> to update your password for The Discoverables administration site.</p>";
 $msg = $msg . "<a href='" . $link . "'>Update Password</a>";
 $msg = wordwrap($msg, 70);
 $mail->msgHTML($msg, __DIR__);

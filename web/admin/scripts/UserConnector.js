@@ -111,7 +111,6 @@ function UserConnector() {
             	callback(data, textStatus, jqXHR);
             },
             error: function(data, textStatus, errorThrown) {
-            	debugger;
             	errorCallback(data.responseJSON, textStatus, errorThrown);
 		    },
 		    data: JSON.stringify(user)

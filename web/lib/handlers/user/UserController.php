@@ -157,7 +157,7 @@ class UserController {
                 "errorMessages" => $validationIssues
             ]);
         }
-        
+
         $tokenData = $this->userData->getPasswordResetTokenInfo($token);
         if (!$tokenData) {
             return $this->_notFoundResponse([
@@ -290,6 +290,6 @@ class UserController {
 
     private function _isInputStrValid($str) {
         // invalid chars are ' \ ` | ; " < > \
-        return preg_match('/[\'\/`\|;"\<\>\\\]/', $str);
+        return preg_match('/[\'\/`\|;@"\<\>\\\]/', $str);
     }
 }

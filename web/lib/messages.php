@@ -25,17 +25,17 @@ define("PASSWORD_LONG_MESSAGE", "The password must be 64 characters or less.");
 define("PASSWORD_SHORT_CODE", 1006);
 define("PASSWORD_SHORT_MESSAGE", "The password must be at least 6 characters.");
 define("PASSWORD_INVALID_CODE", 1007);
-define("PASSWORD_INVALID_MESSAGE", "The password may not contain invalid characters (&#x27; \ &#x60; | ; &#x22; &#x3C; &#x3E; \).");
+define("PASSWORD_INVALID_MESSAGE", "The password may not contain invalid characters (&#x27; \ &#x60; | ; @ &#x22; &#x3C; &#x3E; \).");
 
 define("FIRSTNAME_LONG_CODE", 1012);
 define("FIRSTNAME_LONG_MESSAGE", "The first name must be 64 characters or less.");
 define("FIRSTNAME_INVALID_CODE", 1013);
-define("FIRSTNAME_INVALID_MESSAGE", "The first name may not contain invalid characters (&#x27; \ &#x60; | ; &#x22; &#x3C; &#x3E; \).");
+define("FIRSTNAME_INVALID_MESSAGE", "The first name may not contain invalid characters (&#x27; \ &#x60; | ; @ &#x22; &#x3C; &#x3E; \).");
 
 define("LASTNAME_LONG_CODE", 1014);
 define("LASTNAME_LONG_MESSAGE", "The last name must be 64 characters or less.");
 define("LASTNAME_INVALID_CODE", 1015);
-define("LASTNAME_INVALID_MESSAGE", "The last name may not contain invalid characters (&#x27; \ &#x60; | ; &#x22; &#x3C; &#x3E; \).");
+define("LASTNAME_INVALID_MESSAGE", "The last name may not contain invalid characters (&#x27; \ &#x60; | ; @ &#x22; &#x3C; &#x3E; \).");
 
 define("AUTH_FAILED_CODE", 1016);
 define("AUTH_FAILED_MESSAGE", "Authentication failed, please try again.");
@@ -46,6 +46,8 @@ define("USER_NOT_FOUND_MESSAGE", "User not found.");
 define("PASSWORD_TOKEN_NOT_FOUND_CODE", 1018);
 define("PASSWORD_TOKEN_NOT_FOUND_MESSAGE", "Password token not found or already used.");
 
+define("ENTER_EMAIL_OR_USERNAME_CODE", 1019);
+define("ENTER_EMAIL_OR_USERNAME_MESSAGE", "Please enter an email or a username.");
 
 //
 define("ACTIVE_USER_STATUS_ID", 1);

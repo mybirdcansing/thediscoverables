@@ -38,13 +38,13 @@ if (AuthCookie::isValid()) {
 		</div>
 		<div>MENUE</div>
 		<div>
-			<button data-bind='click: openUsers'>
-				Users
+			<button data-bind='click: openMusic'>
+				Music
 			</button>
 		</div>
 		<div>
-			<button data-bind='click: openMusic'>
-				Music
+			<button data-bind='click: openUsers'>
+				Users
 			</button>
 		</div>
 		<br/>
@@ -81,8 +81,8 @@ if (AuthCookie::isValid()) {
 			<input name="username"><br>
 			<label for="email">Email</label>
 			<input name="email"><br>
-			<input type="submit" name="cancel" value="cancel" class="button" /> 
 			<input type="submit" name="submit" value="submit" class="button" />
+			<input type="button" data-bind="click:cancelPasswordResetRequest" name="cancel" value="cancel" class="button" /> 
 		</form>
 	</script>
 
@@ -151,6 +151,7 @@ if (AuthCookie::isValid()) {
 			<label for="email">Email</label>
 			<input name="email" data-bind="value: email" /><br>
 			<input type="submit" name="submit" value="submit" class="button" />
+			<input type="button" data-bind="click:$parent.cancelEditUser" name="cancel" value="cancel" class="button" /> 
 		</form>
 	</script>
 
@@ -168,13 +169,7 @@ if (AuthCookie::isValid()) {
 <script type='text/javascript' src='scripts/UserConnector.js'></script>
 <script type='text/javascript'>
 	$(function() {
-		var model = new AdminViewModel(
-			<?php echo "$administrator, $blankAdministrator, $isAuthenticated" ?>);
-			// if (model.isAuthenticated()) {
-			// 	model.currentPage('blank');
-			// } else {
-			// 	model.currentPage('login');
-			// }
+		var model = new AdminViewModel(<?php echo "$administrator, $blankAdministrator, $isAuthenticated" ?>);
 		ko.applyBindings(model, document.body);
 	});
 
@@ -190,11 +185,7 @@ if (AuthCookie::isValid()) {
 		this.userToUpdate = ko.observable();
 		this.validationErrors = ko.observableArray([]);
 		this.pageToDisplay = function(model) {
-			//if (model.isAuthenticated()) {
 				return model.currentPage() + '-template';
-			// } else {
-			// 	return 'login-template';
-			// }
 		};
 
 		this.login = function(formElement) {
@@ -202,10 +193,10 @@ if (AuthCookie::isValid()) {
 			$(formElement).serializeArray().map(function(x){input[x.name] = x.value;});
 			this.userConnector.authenticate(input, 
 				function (data, textStatus, jqXHR) {
-					self.currentPage('blank');
 					self.loginErrors([]);
 	            	self.isAuthenticated(data.authenticated);
 					ko.mapping.fromJS(data.user, self.administrator);
+					self.currentPage('music');
 	            }, 
 	            function(data, textStatus, errorThrown) {
 	            	self.isAuthenticated(false);
@@ -241,6 +232,10 @@ if (AuthCookie::isValid()) {
 			root.currentPage('edit-user');
 		};
 
+		this.cancelEditUser = function() {
+			self.currentPage('users');
+		};
+
 		this.updateUser = function() {
 			var successCallback = function (data, textStatus, jqXHR) {
 				self.openUsers();
@@ -256,19 +251,60 @@ if (AuthCookie::isValid()) {
 		};
 
 		this.openPasswordResetForm = function() {
-			debugger;
 			self.currentPage("password-recovery");
+		};
+
+		this.cancelPasswordResetRequest = function() {
+			self.currentPage("login");
 		};
 
 		this.requestPasswordReset = function(formElement) {
 			var input = {};
 			$(formElement).serializeArray().map(function(x){input[x.name] = x.value;});
-
+			
+			var processingAltert = $.alert({
+					title: 'Processed',
+					content: 'Your request is being processed.',
+					boxWidth: '500px',
+    				useBootstrap: false,
+    				lazyOpen: true,
+    				animation: 'none',
+    				buttons: {}
+    			});
+			var hasValidationIssues = false;
+			setTimeout(function() {
+				if(!hasValidationIssues) {
+					if (processingAltert.isClosed()) processingAltert.open();
+				}
+			}, 300);
 			var successCallback = function (data, textStatus, jqXHR) {
-				self.currentPage('login');
+				hasValidationIssues = false;
+				if (processingAltert.isOpen()) processingAltert.close();
+				// debugger;
+				self.loginErrors([]);
+				$.alert({
+					title: 'Done!',
+					content: 'An email was sent to <b>' + data.user.email + '</b>. Follow the directions in that eamil to reset your password.',
+					boxWidth: '500px',
+    				useBootstrap: false,
+    				animation: 'none',
+    				backgroundDismiss: true,
+    				escapeKey: 'esc',
+    				buttons: {
+				        OK: {
+				        	action: function () { 
+								self.currentPage('login');
+				        	},
+				        	keys: ['enter']
+				        }
+				    }
+    			});
+
             };
             var failedCallback = function(data, textStatus, errorThrown) {
-				console.log('request failed! ' + textStatus);
+            	hasValidationIssues = true;
+            	if (processingAltert.isOpen()) processingAltert.close();
+            	self.loginErrors(Object.values(data.errorMessages).reverse());
 		    };
 
 			self.userConnector.requestPasswordReset(
@@ -286,6 +322,7 @@ if (AuthCookie::isValid()) {
     				useBootstrap: false,
     				animation: 'none',
     				escapeKey: 'esc',
+    				backgroundDismiss: true,
     				autoClose: 'Okay|2000',
     				buttons: {
 				        Okay: {
@@ -306,6 +343,7 @@ if (AuthCookie::isValid()) {
     			useBootstrap: false,
     			draggable: true,
     			dragWindowBorder: false,
+    			backgroundDismiss: true,
     			animation: 'none',
 			    buttons: {
 			        confirm: {
@@ -327,7 +365,6 @@ if (AuthCookie::isValid()) {
 		};
 		this.openMusic = function() {
 			self.currentPage('music');
-
 		};
 	};
 </script>

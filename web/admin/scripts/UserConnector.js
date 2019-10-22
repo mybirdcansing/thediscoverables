@@ -38,15 +38,21 @@ function UserConnector() {
         });
 	};
 
-	this.createUser = function(user, callback) {
-		var request = new XMLHttpRequest();
-		request.open('POST', this.handlerUrl, true);
-		request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		request.onload = function () {
-	      	var json = JSON.parse(request.responseText);
-	        callback(json.userId);
-		}
-		request.send(JSON.stringify(user));
+	this.createUser = function(user, callback, errorCallback) {
+		$.ajax({
+            url: this.handlerUrl,
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json',
+            cache: false,
+            success: function (data, textStatus, jqXHR) {
+            	callback(data, textStatus, jqXHR);
+            },
+            error: function(data, textStatus, errorThrown) {
+            	errorCallback(data.responseJSON, textStatus, errorThrown);
+		    },
+		    data: JSON.stringify(user)
+        });
 	};
 
 	this.updateUser = function(user, callback, errorCallback) {
@@ -74,7 +80,6 @@ function UserConnector() {
             contentType: 'application/json',
             cache: false,
             success: function (data, textStatus, jqXHR) {
-            	// console.log(data);
             	callback(data, textStatus, jqXHR);
             },
             error: function(data, textStatus, errorThrown) {
@@ -128,7 +133,6 @@ function UserConnector() {
             	callback(data, textStatus, jqXHR);
             },
             error: function(data, textStatus, errorThrown) {
-            	debugger;
             	errorCallback(data.responseJSON, textStatus, errorThrown);
 		    },
 		    data: JSON.stringify(data)

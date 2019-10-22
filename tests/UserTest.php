@@ -25,16 +25,6 @@ final class UserTest extends TestBase
         ], $testSettomgs->TEST_DOMAIN);
     }
 
-    // public function testGET()
-    // {
-    //     // This test user was created in the setup of the database. See sql/schema.sql
-    //     $user = $this->_getUser('00000000-0000-0000-0000-000000000000');
-    //     $this->assertEquals('adam', $user->username, '`username` is incorrect');
-    //     $this->assertEquals('Adam J', $user->firstName, '`firstName` is incorrect');
-    //     $this->assertEquals('Cohen', $user->lastName, '`lastName` is incorrect');
-    //     $this->assertEquals('thediscoverables@gmail.com', $user->email, '`email` is incorrect');
-    // }
-
     public function testCreate()
     {
         // created unique usernames and emails to allow for db contraints
@@ -638,6 +628,7 @@ final class UserTest extends TestBase
         $user->statusId = ACTIVE_USER_STATUS_ID;
         return $user;
     }
+    
     private function _uniqueUsername($prefix = 0)
     {
         if ($prefix) {

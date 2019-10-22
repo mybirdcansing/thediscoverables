@@ -15,7 +15,6 @@ require_once __dir__ . '/../lib/connecters/UserData.php';
 	<p>
 	The Discoverables Administration
 	</p>
-
 	<div id='page' data-bind="template: { name: pageToDisplay, data: $data}"></div>
 
 	<script type="text/html" id="enter-new-password-template">
@@ -44,8 +43,7 @@ require_once __dir__ . '/../lib/connecters/UserData.php';
 <script type='text/javascript' src='scripts/UserConnector.js'></script>
 <script type='text/javascript'>
 	$(function() {
-		var passwordResetViewModel = new PasswordResetViewModel()
-		ko.applyBindings(passwordResetViewModel, document.body);
+		ko.applyBindings(new PasswordResetViewModel(), document.body);
 	});
 	function PasswordResetViewModel() {
 		var self = this;

@@ -1,14 +1,13 @@
-//
-//
-// Use this to conect to the server
+
+// Use this to conect to the server for user related requests
 function UserConnector() {
  	//todo: move this into a config file
  	this.handlerBase = '/lib/handlers';
- 	this.handlerUrl = this.handlerBase + '/user/index.php';
+ 	this.handlerUrl = this.handlerBase + '/user/';
 
 	this.getUser = function(id, callback, errorCallback) {
 		$.ajax({
-            url: this.handlerUrl + '?id=' + id,
+            url: this.handlerUrl + id,
             type: 'get',
             dataType: 'json',
             contentType: 'application/json',
@@ -57,7 +56,7 @@ function UserConnector() {
 
 	this.updateUser = function(user, callback, errorCallback) {
 		$.ajax({
-            url: this.handlerUrl,
+            url: this.handlerUrl + user.id,
             type: 'POST',
             dataType: 'json',
             contentType: 'application/json',

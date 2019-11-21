@@ -1,10 +1,3 @@
-<?php
-// authorization handler
-require_once __DIR__ . '/../lib/messages.php';
-require_once __DIR__ . '/../lib/AuthCookie.php';
-require_once __dir__ . '/../lib/connecters/DataAccess.php';
-require_once __dir__ . '/../lib/connecters/UserData.php';
-?>
 <!DOCTYPE html>
 <html>
 <head>

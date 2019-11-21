@@ -1,16 +1,17 @@
 <?php
+require_once __DIR__ . '/../../messages.php';
 
 class UserController {
 
     private $db;
-    private $requestMethod;
+    private $action;
     private $userId;
     private $userData;
     private $administrator;
 
-    public function __construct($db, $requestMethod, $userId, $administrator)
+    public function __construct($db, $action, $userId, $administrator)
     {
-        $this->requestMethod = $requestMethod;
+        $this->action = $action;
         $this->userId = $userId;
         $this->userData = new UserData($db);
         $this->administrator = $administrator;
@@ -18,37 +19,25 @@ class UserController {
 
     public function processRequest()
     {
-        switch ($this->requestMethod) {
-            case 'GET':
+        switch ($this->action) {
+            case GET_ACTION:
                 if ($this->userId) {
-                    $response = $this->_getUser($this->userId);
+                    $response = $this->_getUser();
                 } else {
                     $response = $this->_getAllUsers();
                 };
                 break;
-            case 'POST':
-                $objJson = json_decode(file_get_contents('php://input'));
-                if (isset($objJson->delete)) {
-                    $response = $this->_deleteUser($objJson->id);
-                } elseif (isset($objJson->updatePassword)) {
-
-                    $response = $this->_updatePassword();
-                } else {
-                    $user = User::fromJson(file_get_contents('php://input'));
-                    if ($user->id) {
-                        $response = $this->_updateUser();
-                    } else {
-                        $response = $this->_createUser();
-                    }
-                }
+            case DELETE_ACTION:
+                $response = $this->_deleteUser();
                 break;
-            case 'PUT':
-                // doesn't work on most budget hosting services, so we'll 
-                // use the userId hack in POST
+            case UPDATE_PASSWORD_ACTION:
+                $response = $this->_updatePassword();
                 break;
-            case 'DELETE':
-                // doesn't work on most budget hosting services, so we'll 
-                // use a flag hack in POST
+            case UPDATE_ACTION:
+                $response = $this->_updateUser();
+                break;
+            case CREATE_ACTION:
+                $response = $this->_createUser();
                 break;
             default:
                 $response = $this->_notFoundResponse();
@@ -68,9 +57,9 @@ class UserController {
         return $response;
     }
 
-    private function _getUser($id)
+    private function _getUser()
     {
-        $user = $this->userData->find($id);
+        $user = $this->userData->find($this->userId);
         if (!$user) {
             return $this->_notFoundResponse();
         }
@@ -186,14 +175,14 @@ class UserController {
         return $response;
     }
 
-    private function _deleteUser($id)
+    private function _deleteUser()
     {
-        $result = $this->userData->find($id);
+        $result = $this->userData->find($this->userId);
 
         if (!$result) {
             return $this->_notFoundResponse();
         }
-        $deleted = $this->userData->delete($id);
+        $deleted = $this->userData->delete($this->userId);
         $response['status_code_header'] = 'HTTP/1.1 200 OK';
         $response['body'] = null;
         return $response;

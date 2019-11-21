@@ -9,7 +9,7 @@ use GuzzleHttp\Cookie\CookieJar;
 
 final class UserTest extends TestBase
 {
-    private $userHandlerPath = 'user/index.php';
+    private $userHandlerPath = 'user/';
     private $settings;
 
     protected function setUp(): void
@@ -54,6 +54,16 @@ final class UserTest extends TestBase
             $this->_deleteUser($user->id);
         }
 
+    }
+
+    public function testGetWithInvalidUUID()
+    {
+        $client = $this->getHandlerClient();
+        $invalidUUID = '0-0';
+        $response = $client->get($this->userHandlerPath . $invalidUUID, [
+            'cookies' => $this->cookieJar
+        ]);
+        $this->assertEquals(404, $response->getStatusCode());
     }
 
     public function testCreateWithDupeUsername()
@@ -286,12 +296,9 @@ final class UserTest extends TestBase
         $user->statusId = ACTIVE_USER_STATUS_ID;
 
         $user = $this->_createUser($user);
-        
         $updatedPassword = 'UpdatedPassword';
 
         $client = $this->getHandlerClient();
-        
-
         try {
             // request the password update email
             $response = $client->post('requestpasswordreset.php', [
@@ -307,12 +314,12 @@ final class UserTest extends TestBase
             $tokenData = reset($tokens);
 
             $updateData = [
-                'updatePassword' => 1,
+                // 'updatePassword' => 1,
                 'token' => $tokenData->token,
                 'password' => $updatedPassword
             ];
 
-            $response = $client->post($this->userHandlerPath, [
+            $response = $client->post($this->userHandlerPath . $user->id . '/password', [
                 'json' => $updateData,
                 'cookies' => $this->cookieJar
             ]);
@@ -379,7 +386,7 @@ final class UserTest extends TestBase
         $updatedEmail = $this->_uniqueEmail();
         
         $client = $this->getHandlerClient();
-        $response = $client->post($this->userHandlerPath, [
+        $response = $client->post($this->userHandlerPath . $user->id, [
             'json' => [
                 'id' => $user->id,
                 'username' => $updatedUsername,
@@ -428,7 +435,7 @@ final class UserTest extends TestBase
         $updatedUsername = 'adam';
 
         $client = $this->getHandlerClient();
-        $response = $client->post($this->userHandlerPath, [
+        $response = $client->post($this->userHandlerPath . $user->id, [
             'json' => [
                 'id' => $user->id,
                 'username' => $updatedUsername,
@@ -473,7 +480,7 @@ final class UserTest extends TestBase
             $dupeEmail = 'thediscoverables@gmail.com';
 
             $client = $this->getHandlerClient();
-            $response = $client->post($this->userHandlerPath, [
+            $response = $client->post($this->userHandlerPath . $user->id, [
                 'json' => [
                     'id' => $user->id,
                     'username' => $this->_uniqueUsername('DupeEmail2'),
@@ -509,12 +516,11 @@ final class UserTest extends TestBase
         $user->statusId = ACTIVE_USER_STATUS_ID;
 
         $user = $this->_createUser($user);
-
         $this->assertEquals($user->statusId, ACTIVE_USER_STATUS_ID);
 
         // first make sure the status update is working to hide users from the user interface
         $client = $this->getHandlerClient();
-        $response = $client->post($this->userHandlerPath, [
+        $response = $client->post($this->userHandlerPath . $user->id, [
             'json' => [
                 'id' => $user->id,
                 'username' => $user->username,
@@ -539,8 +545,7 @@ final class UserTest extends TestBase
         }
 
         // make sure the user is gone
-        $response = $client->get('user', [
-            'query' => 'id=' . $user->id,
+        $response = $client->get($this->userHandlerPath . $user->id, [
             'cookies' => $this->cookieJar
         ]);
 
@@ -550,8 +555,7 @@ final class UserTest extends TestBase
     private function _getUser($userId)
     {
         $client = $this->getHandlerClient();
-        $response = $client->get('user', [
-            'query' => 'id=' . $userId,
+        $response = $client->get($this->userHandlerPath . $userId, [
             'cookies' => $this->cookieJar
         ]);
         $this->assertEquals(200, $response->getStatusCode());
@@ -608,11 +612,10 @@ final class UserTest extends TestBase
     private function _deleteUser($userId)
     {
         $client = $this->getHandlerClient();
-        $response = $client->post($this->userHandlerPath, [
-            'json' => [
-                'id' => $userId,
-                'delete' => true,
-            ],
+        $response = $client->post($this->userHandlerPath . $userId . '/delete', [
+            // 'json' => [
+            //     'delete' => true,
+            // ],
             'cookies' => $this->cookieJar
         ]);
         $this->assertEquals(200, $response->getStatusCode());

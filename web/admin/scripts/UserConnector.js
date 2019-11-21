@@ -55,6 +55,7 @@ function UserConnector() {
 	};
 
 	this.updateUser = function(user, callback, errorCallback) {
+		debugger;
 		$.ajax({
             url: this.handlerUrl + user.id,
             type: 'POST',
@@ -123,7 +124,7 @@ function UserConnector() {
 
 	this.resetPassword = function(data, callback, errorCallback) {
 		$.ajax({
-            url: this.handlerUrl,
+            url: this.handlerUrl + '00000000-0000-0000-0000-000000000000/password',
             type: 'POST',
             dataType: 'json',
             contentType: 'application/json',

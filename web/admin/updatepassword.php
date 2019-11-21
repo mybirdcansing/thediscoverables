@@ -57,7 +57,6 @@
 				return;
 			}
 			var data = {
-				'updatePassword' : 1,
 				'password' : input.password,
 				'token' : this._getUrlParameter('token')
 			};
@@ -68,7 +67,6 @@
 	            	self.currentPage('success');
 	            }, 
 	            function(data, textStatus, errorThrown) {
-	            	debugger;
 	            	self.validationErrors(Object.values(data.errorMessages).reverse());
 			    });
 		};

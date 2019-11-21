@@ -34,10 +34,10 @@ if ($uri[3] !== 'user') {
 $userId = null;
 if (isset($uri[4]) && $uri[4] != '') {
     $userId = $uri[4];  
-    if (!preg_match('/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i', $userId)) {
-    	header("HTTP/1.1 404 Not Found");
-    	exit();
-	}
+ //    if (!preg_match('/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i', $userId)) {
+ //    	header("HTTP/1.1 404 Not Found");
+ //    	exit();
+	// }
 }
 
 

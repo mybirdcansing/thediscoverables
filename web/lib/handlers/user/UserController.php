@@ -218,14 +218,12 @@ class UserController {
             $errorMessages[EMAIL_INVALID_CODE] = EMAIL_INVALID_MESSAGE;
         }
 
-        // password
         if ($checkPassword) {
             foreach ($this->_validatePassword($user->password) as $code => $message) {
                 $errorMessages[$code] = $message;
             }
         }
 
-        // username
         if (!isset($user->username) || $user->username == '') {
             $errorMessages[USERNAME_BLANK_CODE] = USERNAME_BLANK_MESSAGE;
         } else {
@@ -278,7 +276,7 @@ class UserController {
     }
 
     private function _isInputStrValid($str) {
-        // invalid chars are ' \ ` | ; " < > \
+        // invalid chars are ' \ ` | ; @ " < > \
         return preg_match('/[\'\/`\|;@"\<\>\\\]/', $str);
     }
 }

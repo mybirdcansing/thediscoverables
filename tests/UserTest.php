@@ -477,7 +477,7 @@ final class UserTest extends TestBase
         $user = $this->_createUser($user);
         try
         {
-            $dupeEmail = 'thediscoverables@gmail.com';
+            $dupeEmail = 'mybirdcansing@gmail.com';
 
             $client = $this->getHandlerClient();
             $response = $client->post($this->userHandlerPath . $user->id, [

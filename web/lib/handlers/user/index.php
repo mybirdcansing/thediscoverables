@@ -29,7 +29,6 @@ if ($uri[3] !== 'user') {
     exit();
 }
 
-
 // the user id is, of course, optional and must be a uuid:
 $userId = null;
 if (isset($uri[4]) && $uri[4] != '') {
@@ -40,6 +39,10 @@ if (isset($uri[4]) && $uri[4] != '') {
 	// }
 }
 
+$requestAction = null;
+if (isset($uri[5]) && $uri[5] != '') {
+	$requestAction = $uri[5];
+} 
 
 $action = null;
 switch ($_SERVER["REQUEST_METHOD"]) {
@@ -47,20 +50,14 @@ switch ($_SERVER["REQUEST_METHOD"]) {
          $action = GET_ACTION;
         break;
     case 'POST':
-        if (isset($uri[5]) && $uri[5] != '') {
-        	$requestAction = $uri[5];
-        	if ($requestAction == 'delete') {
-            	$action = DELETE_ACTION;
-        	} elseif ($requestAction == 'password') {
-        		$action = UPDATE_PASSWORD_ACTION;
-        	}
-        } 
-        if (!$action) {
-            if ($userId) {
-                $action = UPDATE_ACTION;
-            } else {
-                $action = CREATE_ACTION;
-            }
+    	if ($requestAction == 'delete') {
+	    	$action = DELETE_ACTION;
+		} elseif ($requestAction == 'password') {
+			$action = UPDATE_PASSWORD_ACTION;
+		} elseif ($userId) {
+            $action = UPDATE_ACTION;
+        } else {
+            $action = CREATE_ACTION;
         }
         break;
     case 'PUT':

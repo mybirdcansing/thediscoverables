@@ -1,4 +1,3 @@
-
 // Use this to conect to the server for user related requests
 function UserConnector() {
  	//todo: move this into a config file
@@ -55,7 +54,6 @@ function UserConnector() {
 	};
 
 	this.updateUser = function(user, callback, errorCallback) {
-		debugger;
 		$.ajax({
             url: this.handlerUrl + user.id,
             type: 'POST',

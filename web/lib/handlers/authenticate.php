@@ -9,11 +9,9 @@ header("Access-Control-Allow-Methods: OPTIONS,GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
-
-$json = file_get_contents('php://input');
-$objJson = json_decode($json);
-$username = $objJson->username;
-$password = $objJson->password;
+$input = json_decode(file_get_contents('php://input'));
+$username = $input->username;
+$password = $input->password;
 
 if (isset($username) && isset($password)) {
 	$dbConnection = (new DataAccess())->getConnection();

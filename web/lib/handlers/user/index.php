@@ -75,6 +75,7 @@ switch ($_SERVER["REQUEST_METHOD"]) {
 // pass the request method and user ID to the PersonController and process the HTTP request:
 $dbConnection = (new DataAccess())->getConnection();
 $userData = new UserData($dbConnection);
+
 $administrator = $userData->getByUsername(AuthCookie::getUsername());
 $controller = new UserController($dbConnection, $action, $userId, $administrator);
 $controller->processRequest();

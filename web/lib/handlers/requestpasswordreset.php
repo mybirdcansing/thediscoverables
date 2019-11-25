@@ -5,7 +5,7 @@ require_once __dir__ . '/../AuthCookie.php';
 require_once __dir__ . '/../Configuration.php';
 require_once __dir__ . '/../../../vendor/PHPMailer/src/PHPMailer.php';
 require_once __dir__ . '/../../../vendor/PHPMailer/src/SMTP.php';
-// require_once __dir__ . '/../../../vendor/autoload.php';
+
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 
@@ -15,14 +15,12 @@ header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
-$inputJsonObj = json_decode(file_get_contents('php://input'));
+$input = json_decode(file_get_contents('php://input'));
 
-$userData = new UserData((new DataAccess())->getConnection());
+$user = null;
 
-$user = 0;
-
-if ((!isset($inputJsonObj->username) || strlen($inputJsonObj->username) == 0) 
-	&& (!isset($inputJsonObj->email) || strlen($inputJsonObj->email) == 0)) {
+if ((!isset($input->username) || strlen($input->username) == 0) 
+	&& (!isset($input->email) || strlen($input->email) == 0)) {
 	header('HTTP/1.1 400 Bad Request');
 	echo json_encode(
         array(
@@ -34,12 +32,13 @@ if ((!isset($inputJsonObj->username) || strlen($inputJsonObj->username) == 0)
     exit();
 }
 
-if (isset($inputJsonObj->username)) {
-	$user = $userData->getByUsername($inputJsonObj->username);
+$userData = new UserData((new DataAccess())->getConnection());
+if (isset($input->username)) {
+	$user = $userData->getByUsername($input->username);
 }
 
-if (!$user && isset($inputJsonObj->email)) {
-	$user = $userData->getByEmail($inputJsonObj->email);
+if (!$user && isset($input->email)) {
+	$user = $userData->getByEmail($input->email);
 }
 
 if (!$user) {
@@ -62,9 +61,9 @@ if(AuthCookie::isValid()) {
 	$requester = $user;
 }
 
+// put a row in a table and send an email
 $token = $userData->insertPasswordResetToken($user, $requester);
 $settings = (new Configuration())->getSettings();
-// put a row in a table and send an email
 
 $mail = new PHPMailer;
 $mail->isSMTP();

@@ -43,6 +43,11 @@ class UserController {
                 $response = $this->_notFoundResponse();
                 break;
         }
+
+        if (array_key_exists('problem_header', $response)) {
+            header('Content-Type: application/problem+json; charset=UTF-8');
+        }
+
         header($response['status_code_header']);
         if ($response['body']) {
             echo $response['body'];
@@ -52,8 +57,9 @@ class UserController {
     private function _getAllUsers()
     {
         $result = $this->userData->findAll();
-        $response['status_code_header'] = 'HTTP/1.1 200 OK';
-        $response['body'] = json_encode(array_map(function($val) { return $val->expose(); }, $result));
+        return $this->_okResponse(array_map(function($val) { 
+            return $val->expose(); 
+        }, $result));
         return $response;
     }
 
@@ -63,8 +69,7 @@ class UserController {
         if (!$user) {
             return $this->_notFoundResponse();
         }
-        $response['status_code_header'] = 'HTTP/1.1 200 OK';
-        $response['body'] = json_encode($user->expose());
+        return $this->_okResponse($user->expose());
         return $response;
     }
 
@@ -87,8 +92,7 @@ class UserController {
                 "userId" => $userId
             ]);
         } catch (DuplicateUsernameException | DuplicateEmailException $e) {
-            $response['status_code_header'] = 'HTTP/1.1 409 Conflict';
-            $response['body'] = json_encode([
+            return $this->_conflictResponse([
                 "userCreated" => false,
                 "errorMessages" => [$e->getCode() => $e->getMessage()]
             ]);
@@ -113,17 +117,14 @@ class UserController {
         }
 
         try {
-            // error_log("try to update user");
             $this->userData->update($user, $this->administrator);
 
-            $response['status_code_header'] = 'HTTP/1.1 200 OK';
-            $response['body'] = json_encode([
+            return $this->_okResponse([
                 "userUpdated" => true, 
                 "userId" => $user->id
             ]);
         } catch (DuplicateUsernameException | DuplicateEmailException $e) {
-            $response['status_code_header'] = 'HTTP/1.1 409 Conflict';
-            $response['body'] = json_encode([
+            return $this->_conflictResponse([
                 "userUpdated" => false, 
                 "userId" => $user->id,
                 "errorMessages" => array($e->getCode() => $e->getMessage())
@@ -166,8 +167,7 @@ class UserController {
 
         $this->userData->markPasswordTokenUsed($token);
 
-        $response['status_code_header'] = 'HTTP/1.1 200 OK';
-        $response['body'] = json_encode([
+        return $this->_okResponse([
             "userPasswordUpdated" => true, 
             "userId" => $tokenData->userId
         ]);
@@ -178,14 +178,12 @@ class UserController {
     private function _deleteUser()
     {
         $result = $this->userData->find($this->userId);
-
         if (!$result) {
             return $this->_notFoundResponse();
         }
         $deleted = $this->userData->delete($this->userId);
-        $response['status_code_header'] = 'HTTP/1.1 200 OK';
-        $response['body'] = null;
-        return $response;
+        
+        return $this->_okResponse();
     }
 
     private function _validatePassword($password)
@@ -247,6 +245,7 @@ class UserController {
         if (strlen($user->lastName) > 64) {
             $errorMessages[LASTNAME_LONG_CODE] = LASTNAME_LONG_MESSAGE;
         }
+
         if ($this->_isInputStrValid($user->lastName)) {
             $errorMessages[LASTNAME_INVALID_CODE] = LASTNAME_INVALID_MESSAGE;
         }
@@ -254,15 +253,32 @@ class UserController {
         return $errorMessages;
     }
 
-    private function _unprocessableEntityResponse($json)
+    private function _okResponse($json = null)
     {
+        $response['status_code_header'] = 'HTTP/1.1 200 OK';
+        $response['body'] = $json ? json_encode($json) : null;
+        return $response;
+    }
+
+    private function _conflictResponse($json = null)
+    {
+        $response['problem_header'] = true;
+        $response['status_code_header'] = 'HTTP/1.1 409 Conflict';
+        $response['body'] = $json ? json_encode($json) : null;
+        return $response;
+    }
+
+    private function _unprocessableEntityResponse($json = null)
+    {
+        $response['problem_header'] = true;
         $response['status_code_header'] = 'HTTP/1.1 422 Unprocessable Entity';
-        $response['body'] = json_encode($json);
+        $response['body'] = $json ? json_encode($json) : null;
         return $response;
     }
 
     private function _notFoundResponse($json = null)
     {
+        $response['problem_header'] = true;
         if ($json == null) {
             $json = [
                 "errorMessages" => [

@@ -477,7 +477,7 @@ final class UserTest extends TestBase
         $user = $this->_createUser($user);
         try
         {
-            $dupeEmail = 'mybirdcansing@gmail.com';
+            $dupeEmail = 'thediscoverables@gmail.com';
 
             $client = $this->getHandlerClient();
             $response = $client->post($this->userHandlerPath . $user->id, [
@@ -613,9 +613,6 @@ final class UserTest extends TestBase
     {
         $client = $this->getHandlerClient();
         $response = $client->post($this->userHandlerPath . $userId . '/delete', [
-            // 'json' => [
-            //     'delete' => true,
-            // ],
             'cookies' => $this->cookieJar
         ]);
         $this->assertEquals(200, $response->getStatusCode());

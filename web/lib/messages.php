@@ -49,9 +49,27 @@ define("PASSWORD_TOKEN_NOT_FOUND_MESSAGE", "Password token not found or already 
 define("ENTER_EMAIL_OR_USERNAME_CODE", 1019);
 define("ENTER_EMAIL_OR_USERNAME_MESSAGE", "Please enter an email or a username.");
 
+define("TITLE_BLANK_CODE", 1020);
+define("TITLE_BLANK_MESSAGE", "Please enter a title.");
+define("TITLE_LONG_CODE", 1021);
+define("TITLE_LONG_MESSAGE", "The title must be 255 characters or less.");
+define("TITLE_INVALID_CODE", 1022);
+define("TITLE_INVALID_MESSAGE", "The title may not contain invalid characters (&#x27; \ &#x60; | ; @ &#x22; &#x3C; &#x3E; \).");
+
+define("TITLE_TAKEN_CODE", 1023);
+define("TITLE_TAKEN_MESSAGE", "The title (%s) is taken. Please use another.");
+
 //
+
 define("ACTIVE_USER_STATUS_ID", 1);
 define("INACTIVE_USER_STATUS_ID", 2);
+
+
+
+
+define("SONG_NOT_FOUND_CODE", 1020);
+define("SONG_NOT_FOUND_MESSAGE", "Song not found.");
+
 
 define("CREATE_ACTION", "CREATE");
 define("UPDATE_ACTION", "UPDATE");

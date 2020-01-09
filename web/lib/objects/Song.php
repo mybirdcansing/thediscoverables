@@ -1,16 +1,14 @@
 <?php
 declare(strict_types=1);
+// require __dir__ . '/JsonConvertible.php';
 
-class User {
+class Song {
 
     public $id;
-    public $username;
-    public $firstName;
-    public $lastName;
-    public $email;
-    public $password;
-    public $statusId;
-
+    public $title;
+    public $filename;
+    public $description;
+    
     function __construct() {
     }
     
@@ -37,8 +35,8 @@ class User {
        return $result;
     }
 
-   function toJson()
-   {
+    function toJson()
+    {
       return json_encode($this);
-   }
+    }
 }

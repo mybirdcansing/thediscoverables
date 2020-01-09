@@ -72,7 +72,7 @@ function AdminViewModel(administrator, blankAdministrator, isAuthenticated) {
 	    };
 
 		$.confirm({
-		    title: 'Confirm!',
+		    title: 'Delete user?',
 		    content: 'Are you sure you want to delete ' + user.firstName() + " " + user.lastName() + "'s account?",
 		    boxWidth: '500px',
 			useBootstrap: false,
@@ -227,7 +227,7 @@ function AdminViewModel(administrator, blankAdministrator, isAuthenticated) {
 	    };
 
 		$.confirm({
-		    title: 'Confirm!',
+		    title: 'Request password reset?',
 		    content: 'Send password reset email to ' + user.email() + '?',
 		    boxWidth: '500px',
 			useBootstrap: false,

@@ -70,7 +70,6 @@ class UserController {
             return $this->_notFoundResponse();
         }
         return $this->_okResponse($user->expose());
-        return $response;
     }
 
     private function _createUser()

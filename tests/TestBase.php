@@ -9,6 +9,20 @@ class TestBase extends TestCase
 {
 	private $_httpClient = 0;
 	public $cookieJar = 0;
+    public $settings;
+
+    protected function setUp(): void
+    {
+        $this->settings = ((new Configuration())->getSettings());
+        $testSettomgs = $this->settings->test;
+        // login as the test user (see sql/schema.sql)
+        $json = $this->authenticateUser($testSettomgs->TEST_USERNAME, $testSettomgs->TEST_PASSWORD);
+
+        // set the cookie for future requests
+        $this->cookieJar = CookieJar::fromArray([
+            'login' => $json->cookie
+        ], $testSettomgs->TEST_DOMAIN);
+    }
 
     function getHandlerClient() 
     {

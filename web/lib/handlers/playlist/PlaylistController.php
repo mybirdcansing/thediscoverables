@@ -1,19 +1,19 @@
 <?php
 require_once __DIR__ . '/../../messages.php';
 
-class SongController {
+class PlaylistController {
 
     private $db;
     private $action;
-    private $songId;
-    private $songData;
+    private $playlistId;
+    private $playlistData;
     private $administrator;
 
-    public function __construct($dbConnection, $action, $songId, $administrator)
+    public function __construct($dbConnection, $action, $playlistId, $administrator)
     {
-        $this->songData = new SongData($dbConnection);
+        $this->playlistData = new PlaylistData($dbConnection);
         $this->action = $action;
-        $this->songId = $songId;
+        $this->playlistId = $playlistId;
         $this->administrator = $administrator;
     }
 
@@ -22,20 +22,20 @@ class SongController {
 
         switch ($this->action) {
             case GET_ACTION:
-                if ($this->songId) {
-                    $response = $this->_getSong();
+                if ($this->playlistId) {
+                    $response = $this->_getPlaylist();
                 } else {
-                    $response = $this->_getAllSongs();
+                    $response = $this->_getAllPlaylists();
                 };
                 break;
             case DELETE_ACTION:
-                $response = $this->_deleteSong();
+                $response = $this->_deletePlaylist();
                 break;
             case UPDATE_ACTION:
-                $response = $this->_updateSong();
+                $response = $this->_updatePlaylist();
                 break;
             case CREATE_ACTION:
-                $response = $this->_createSong();
+                $response = $this->_createPlaylist();
                 break;
             default:
                 $response = $this->_notFoundResponse();
@@ -52,78 +52,78 @@ class SongController {
         }
     }
 
-    private function _getAllSongs()
+    private function _getAllPlaylists()
     {
-        $result = $this->songData->findAll();
+        $result = $this->playlistData->findAll();
         return $this->_okResponse(array_map(function($val) { 
             return $val->expose(); 
         }, $result));
         return $response;
     }
 
-    private function _getSong()
+    private function _getPlaylist()
     {
-        $song = $this->songData->find($this->songId);
-        if (!$song) {
+        $playlist = $this->playlistData->find($this->playlistId);
+        if (!$playlist) {
             return $this->_notFoundResponse();
         }
-        return $this->_okResponse($song->expose());
+        return $this->_okResponse($playlist->expose());
     }
 
-    private function _createSong()
+    private function _createPlaylist()
     {
-        $song = Song::fromJson(file_get_contents('php://input'));
-        $validationIssues = $this->_validationIssues($song);
+        $playlist = Playlist::fromJson(file_get_contents('php://input'));
+        $validationIssues = $this->_validationIssues($playlist);
         
         if ((bool)$validationIssues) {
             return $this->_unprocessableEntityResponse([
-                "songCreated" => false,
+                "playlistCreated" => false,
                 "errorMessages" => $validationIssues
             ]);
         }
         try {
-            $songId = $this->songData->insert($song, $this->administrator);
+            $playlistId = $this->playlistData->insert($playlist, $this->administrator);
             $response['status_code_header'] = 'HTTP/1.1 201 Created';
             $response['body'] = json_encode([
-                "songCreated" => true, 
-                "songId" => $songId
+                "playlistCreated" => true, 
+                "playlistId" => $playlistId
             ]);
         } catch (DuplicateTitleException $e) {
             return $this->_conflictResponse([
-                "songCreated" => false,
+                "playlistCreated" => false,
                 "errorMessages" => [$e->getCode() => $e->getMessage()]
             ]);
         }
         return $response;
     }
 
-    private function _updateSong()
+    private function _updatePlaylist()
     {
-        $song = Song::fromJson(file_get_contents('php://input'));
-        $validationIssues = $this->_validationIssues($song);
+        $playlist = Playlist::fromJson(file_get_contents('php://input'));
+        $validationIssues = $this->_validationIssues($playlist);
         if ((bool)$validationIssues) {
             return $this->_unprocessableEntityResponse([
-                "songUpdated" => false,
+                "playlistUpdated" => false,
                 "errorMessages" => $validationIssues
             ]);
         }
         
-        $existingSong = $this->songData->find($song->id);
-        if (!$existingSong) {
+        $existingPlaylist = $this->playlistData->find($playlist->id);
+        if (!$existingPlaylist) {
             return $this->_notFoundResponse();
         }
 
         try {
-            $this->songData->update($song, $this->administrator);
+            $this->playlistData->update($playlist, $this->administrator);
 
             return $this->_okResponse([
-                "songUpdated" => true, 
-                "songId" => $song->id
+                "playlistUpdated" => true, 
+                "playlistId" => $playlist->id
             ]);
         } catch (DuplicateTitleException $e) {
             return $this->_conflictResponse([
-                "songUpdated" => false, 
-                "songId" => $song->id,
+                "playlistUpdated" => false, 
+                "playlistId" => $playlist->id,
                 "errorMessages" => array($e->getCode() => $e->getMessage())
             ]);
         }
@@ -131,28 +131,29 @@ class SongController {
         return $response;
     }
 
-    private function _deleteSong()
+    private function _deletePlaylist()
     {
-        $result = $this->songData->find($this->songId);
+
+        $result = $this->playlistData->find($this->playlistId);
         if (!$result) {
             return $this->_notFoundResponse();
         }
-        $deleted = $this->songData->delete($this->songId);
+        $deleted = $this->playlistData->delete($this->playlistId);
         
         return $this->_okResponse();
     }
 
-    private function _validationIssues($song)
+    private function _validationIssues($playlist)
     {
         $errorMessages = [];
         
-        if (!isset($song->title) || $song->title == '') {
+        if (!isset($playlist->title) || $playlist->title == '') {
             $errorMessages[TITLE_BLANK_CODE] = TITLE_BLANK_MESSAGE;
         } else {
-            if (strlen($song->title) > 64) {
+            if (strlen($playlist->title) > 64) {
                 $errorMessages[TITLE_LONG_CODE] = TITLE_LONG_MESSAGE;
             }
-            if ($this->_isInputStrValid($song->title)) {
+            if ($this->_isInputStrValid($playlist->title)) {
                 $errorMessages[TITLE_INVALID_CODE] = TITLE_INVALID_MESSAGE;
             }
         }
@@ -188,7 +189,7 @@ class SongController {
         if ($json == null) {
             $json = [
                 "errorMessages" => [
-                    SONG_NOT_FOUND_CODE => SONG_NOT_FOUND_MESSAGE
+                    PLAYLIST_NOT_FOUND_CODE => PLAYLIST_NOT_FOUND_MESSAGE
                 ]
             ];
         }

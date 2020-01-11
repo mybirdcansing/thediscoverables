@@ -170,7 +170,6 @@ function AdminViewModel(administrator, blankAdministrator, isAuthenticated) {
 		var successCallback = function (data, textStatus, jqXHR) {
 			hasValidationIssues = false;
 			if (processingAltert.isOpen()) processingAltert.close();
-			// debugger;
 			self.loginErrors([]);
 			$.alert({
 				title: 'Done!',

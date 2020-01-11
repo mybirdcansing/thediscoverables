@@ -3,13 +3,19 @@ declare(strict_types=1);
 
 abstract class JsonConvertible
 {
-   static function fromJson($json)
-   {
-       $result = new static();
-       $objJson = json_decode($json);
-       $class = new \ReflectionClass($result);
-       $publicProps = $class->getProperties(\ReflectionProperty::IS_PUBLIC);
-       foreach ($publicProps as $prop) {
+  
+    public function expose()
+    {
+      return get_object_vars($this);
+    }
+
+    static function fromJson($json)
+    {
+        $result = new static();
+        $objJson = json_decode($json);
+        $class = new \ReflectionClass($result);
+        $publicProps = $class->getProperties(\ReflectionProperty::IS_PUBLIC);
+        foreach ($publicProps as $prop) {
             $propName = $prop->name;
             if (isset($objJson->$propName)) {
                 $prop->setValue($result, $objJson->$propName);
@@ -17,13 +23,12 @@ abstract class JsonConvertible
             else {
                 $prop->setValue($result, null);
             }
-       }
-       return $result;
-   }
+        }
+        return $result;
+    }
 
-   function toJson()
-   {
+    function toJson()
+    {
       return json_encode($this);
-   }
-
+    }
 }

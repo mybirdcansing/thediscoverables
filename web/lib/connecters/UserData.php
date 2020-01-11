@@ -1,5 +1,7 @@
 <?php
 require_once __dir__ . '/../objects/User.php';
+require_once __dir__ . '/../objects/DuplicateUsernameException.php';
+require_once __dir__ . '/../objects/DuplicateEmailException.php';
 
 class UserData
 { 
@@ -361,7 +363,6 @@ class UserData
             $result = $stmt->get_result();
             $tokens = [];
             while ($row = $result->fetch_assoc()) {
-                // $tokens[$row["token"]] = $row["expiration_date"];
                 $tokens[] = tokenObj($row["token"], $row["expiration_date"]);
             }
             return $tokens;
@@ -460,7 +461,6 @@ class UserData
 		if ($result->num_rows == 1) {
 		    $row = $result->fetch_assoc();
             if (password_verify($password, $row["password"])) {
-                // error_log("password = " .$password.", row[password] = ". $row['password']);
                 $user = $this->_rowToUser($row);
                 return $user;
             }
@@ -480,6 +480,3 @@ class UserData
 	    return $user;
 	}
 }
-
-class DuplicateUsernameException extends Exception{}
-class DuplicateEmailException extends Exception{}

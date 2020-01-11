@@ -1,9 +1,10 @@
 <?php
+require_once __dir__ . '/../objects/Playlist.php';
 require_once __dir__ . '/../objects/Song.php';
 require_once __dir__ . '/../objects/User.php';
 require_once __dir__ . '/../objects/DuplicateTitleException.php';
 
-class SongData
+class PlaylistData
 { 
 	private $dbConnection = null;
 
@@ -16,20 +17,19 @@ class SongData
     {
         $sql = "
             SELECT 
-				song_id,
+				playlist_id,
 				title,
-				filename,
 				description
 		  	FROM 
-		  		song;";
+		  		playlist;";
 
         try {
 			$stmt = $this->dbConnection->query($sql);
-            $songs = [];
+            $playlists = [];
 			while ($row = $stmt->fetch_assoc()) {
-			    $songs[] = $this->_rowToSong($row);
+			    $playlists[] = $this->_rowToPlaylist($row);
 			}
-            return $songs;
+            return $playlists;
         } catch (\mysqli_sql_exception $e) {
             exit($e->getMessage());
         }
@@ -39,13 +39,12 @@ class SongData
     {
         $sql = "
             SELECT 
-                song_id,
+                playlist_id,
                 title,
-                filename,
                 description
 		  	FROM 
-		  		song
-		  	WHERE song_id = ?;
+		  		playlist
+		  	WHERE playlist_id = ?;
         ";
 
 		$stmt = $this->dbConnection->prepare($sql);
@@ -54,49 +53,47 @@ class SongData
 		$result = $stmt->get_result();
 		if ($result->num_rows == 1) {
 		    $row = $result->fetch_assoc();
-		    $song = $this->_rowToSong($row);
-		    return $song;
+		    $playlist = $this->_rowToPlaylist($row);
+		    return $playlist;
 		} else {
 			return 0;
 		}   
     }
 
-    public function insert(Song $song, User $administrator)
+    public function insert(Playlist $playlist, User $administrator)
     {
         $sql = "
 			INSERT INTO 
-				song (
-                    song_id,
+				playlist (
+                    playlist_id,
                     title,
-                    description, 
-                    filename,
+                    description,
                     modified_date,
                     modified_by_id,
                     created_date,
                     created_by_id
                 )
-			VALUES (?, ?, ?, ?, now(), ?, now(), ?);
+			VALUES (?, ?, ?, now(), ?, now(), ?);
         ";
 
         try {
             $stmt = $this->dbConnection->prepare($sql);
-            $songId = GUID();
-            $stmt->bind_param("ssssss",
-                $songId,
-				$song->title,
-				$song->description,
-				$song->filename,
+            $playlistId = GUID();
+            $stmt->bind_param("sssss",
+                $playlistId,
+				$playlist->title,
+				$playlist->description,
                 $administrator->id,
                 $administrator->id
             );
             $stmt->execute();
             $stmt->store_result();
-            return $songId;
+            return $playlistId;
         } catch (mysqli_sql_exception $e) {
            $mysqliErrorMessage = $e->getMessage();
            if (strpos($mysqliErrorMessage, 'title') !== false) {
                 throw new DuplicateTitleException(
-                    sprintf(TITLE_TAKEN_MESSAGE, $song->title), TITLE_TAKEN_CODE);
+                    sprintf(TITLE_TAKEN_MESSAGE, $playlist->title), TITLE_TAKEN_CODE);
             } else {
                 error_log($e->getMessage());
                 throw $e;
@@ -104,36 +101,34 @@ class SongData
         }
     }
 
-    public function update(Song $song, User $administrator)
+    public function update(Playlist $playlist, User $administrator)
     {
         $sql = "
-            UPDATE song
+            UPDATE playlist
                 SET
                     title = ?,
                     description = ?, 
-                    filename = ?,
                     modified_date = now(),
                     modified_by_id = ?
-                WHERE song_id = ?;
+                WHERE playlist_id = ?;
         ";
 
         try {
             $stmt = $this->dbConnection->prepare($sql);
-            $stmt->bind_param("sssss",
-                $song->title,
-                $song->description,
-                $song->filename,
+            $stmt->bind_param("ssss",
+                $playlist->title,
+                $playlist->description,
                 $administrator->id,
-                $song->id
+                $playlist->id
             );
             $stmt->execute();
             $stmt->store_result();
-            return $song->id;
+            return $playlist->id;
         } catch (mysqli_sql_exception $e) {
            $mysqliErrorMessage = $e->getMessage();
            if (strpos($mysqliErrorMessage, 'title') !== false) {
                 throw new DuplicateTitleException(
-                    sprintf(TITLE_TAKEN_MESSAGE, $song->title), TITLE_TAKEN_CODE);
+                    sprintf(TITLE_TAKEN_MESSAGE, $playlist->title), TITLE_TAKEN_CODE);
             } else {
                 error_log($e->getMessage());
                 throw $e;
@@ -143,9 +138,9 @@ class SongData
 
     public function delete($id)
     {
-        $this->leavePlaylists($id);
+        // if playlist is in an album, throw an exception
 
-        $sql = "DELETE FROM song WHERE song_id = ?;";
+        $sql = "DELETE FROM playlist WHERE playlist_id = ?;";
 
         try {
             $stmt = $this->dbConnection->prepare($sql);
@@ -161,7 +156,7 @@ class SongData
 
     public function leavePlaylists($id)
     {
-        $sql = "DELETE FROM playlist_song WHERE song_id = ?";
+        $sql = "DELETE FROM playlist_song WHERE playlist_id = ?";
 
         try {
             $stmt = $this->dbConnection->prepare($sql);
@@ -175,13 +170,12 @@ class SongData
         }    
     }
 
-	private function _rowToSong($row)
+	private function _rowToPlaylist($row)
     {
-	    $song = new Song();
-	    $song->id = $row["song_id"];
-	    $song->title = $row["title"];
-	    $song->description = $row["description"];
-	    $song->filename = $row["filename"];
-	    return $song;
+	    $playlist = new Playlist();
+	    $playlist->id = $row["playlist_id"];
+	    $playlist->title = $row["title"];
+	    $playlist->description = $row["description"];
+	    return $playlist;
 	}
 }

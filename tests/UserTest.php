@@ -10,20 +10,6 @@ use GuzzleHttp\Cookie\CookieJar;
 final class UserTest extends TestBase
 {
     private $userHandlerPath = 'user/';
-    private $settings;
-
-    protected function setUp(): void
-    {
-        $this->settings = ((new Configuration())->getSettings());
-        $testSettomgs = $this->settings->test;
-        // login as the test user (see sql/schema.sql)
-        $json = $this->authenticateUser($testSettomgs->TEST_USERNAME, $testSettomgs->TEST_PASSWORD);
-
-        // set the cookie for future requests
-        $this->cookieJar = CookieJar::fromArray([
-            'login' => $json->cookie
-        ], $testSettomgs->TEST_DOMAIN);
-    }
 
     public function testCreate()
     {
@@ -191,7 +177,6 @@ final class UserTest extends TestBase
 
     public function testCreateWithShortPassword()
     {
-        // create with long password
         $user = $this->_fleshedOutUser();
         $user->password = '12345';
         $this->_createWithErrors($user, [PASSWORD_SHORT_CODE => PASSWORD_SHORT_MESSAGE]);
@@ -209,7 +194,6 @@ final class UserTest extends TestBase
 
     public function testCreateWithBlankUsername()
     {
-        // create with blank password
         $user = $this->_fleshedOutUser();
         $user->username = '';
         $this->_createWithErrors($user, [USERNAME_BLANK_CODE => USERNAME_BLANK_MESSAGE]);
@@ -217,7 +201,6 @@ final class UserTest extends TestBase
 
     public function testCreateWithLongUsername()
     {
-        // create with long password
         $user = $this->_fleshedOutUser();
         $user->username = '123456789012345678901234567890123456789012345678901234567890123456';
         $this->_createWithErrors($user, [USERNAME_LONG_CODE => USERNAME_LONG_MESSAGE]);
@@ -225,7 +208,6 @@ final class UserTest extends TestBase
 
     public function testCreateWithShortUsername()
     {
-        // create with long password
         $user = $this->_fleshedOutUser();
         $user->username = '123';
         $this->_createWithErrors($user, [USERNAME_SHORT_CODE => USERNAME_SHORT_MESSAGE]);
@@ -234,7 +216,6 @@ final class UserTest extends TestBase
 
     public function testCreateWithInvalidUsername()
     {
-        // create with invalid char
         $user = $this->_fleshedOutUser();
         $user->username = 'dldsafgjshdg\\f';
         $this->_createWithErrors($user, [USERNAME_INVALID_CODE => USERNAME_INVALID_MESSAGE]);
@@ -242,7 +223,6 @@ final class UserTest extends TestBase
 
     public function testCreateWithLongFirstName()
     {
-        // create with long password
         $user = $this->_fleshedOutUser();
         $user->firstName = '123456789012345678901234567890123456789012345678901234567890123456';
         $this->_createWithErrors($user, [FIRSTNAME_LONG_CODE => FIRSTNAME_LONG_MESSAGE]);
@@ -581,7 +561,7 @@ final class UserTest extends TestBase
         }
     }
 
-    private function _createWithErrors($user, $expectedErrors)
+    private function _createWithErrors($user, $expectedErrors, $expectedErrorCode = 422)
     {
         $client = $this->getHandlerClient();
 
@@ -591,7 +571,7 @@ final class UserTest extends TestBase
         ]);
         $json = json_decode($response->getBody()->getContents());
         try {
-            $this->assertEquals(422, $response->getStatusCode());
+            $this->assertEquals($expectedErrorCode, $response->getStatusCode());
             $this->assertTrue(isset($json->userCreated));
             $this->assertFalse($json->userCreated, 'The created flag was not set to false.');
             $this->assertTrue(isset($json->errorMessages));
@@ -600,7 +580,6 @@ final class UserTest extends TestBase
                 $this->assertArrayHasKey($expectedErrorCode, $ems);
                 $this->assertEquals($expectedErrorMessage, $ems[$expectedErrorCode]);
             }
-
         } finally {
             // cleanup the database
             if ($json->userCreated) {
@@ -618,7 +597,8 @@ final class UserTest extends TestBase
         $this->assertEquals(200, $response->getStatusCode());
     }
 
-    private function _fleshedOutUser() {
+    private function _fleshedOutUser()
+    {
         $user = new User();
         $user->username = $this->_uniqueUsername();
         $user->firstName = 'Ron';

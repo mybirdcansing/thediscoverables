@@ -27,11 +27,12 @@ class SongData
 			$stmt = $this->dbConnection->query($sql);
             $songs = [];
 			while ($row = $stmt->fetch_assoc()) {
-			    $songs[] = $this->_rowToSong($row);
+			    $songs[] = $this->rowToSong($row);
 			}
             return $songs;
         } catch (\mysqli_sql_exception $e) {
-            exit($e->getMessage());
+            error_log($e->getMessage());
+            throw $e;
         }
     }
 
@@ -54,7 +55,7 @@ class SongData
 		$result = $stmt->get_result();
 		if ($result->num_rows == 1) {
 		    $row = $result->fetch_assoc();
-		    $song = $this->_rowToSong($row);
+		    $song = $this->rowToSong($row);
 		    return $song;
 		} else {
 			return 0;
@@ -141,41 +142,43 @@ class SongData
         }
     }
 
-    public function delete($id)
+    public function delete($songId)
     {
-        $this->leavePlaylists($id);
+        $this->_leaveAllPlaylists($songId);
 
         $sql = "DELETE FROM song WHERE song_id = ?;";
 
         try {
             $stmt = $this->dbConnection->prepare($sql);
-            $stmt->bind_param("s", $id);
+            $stmt->bind_param("s", $songId);
             $stmt->execute();
             $stmt->store_result();
             $rowsEffected = $stmt->num_rows;
             return $rowsEffected;
         } catch (\mysqli_sql_exception $e) {
-            exit($e->getMessage());
-        }    
+            error_log($e->getMessage());
+            throw $e;
+        }
     }
 
-    public function leavePlaylists($id)
+    public function _leaveAllPlaylists($songId)
     {
         $sql = "DELETE FROM playlist_song WHERE song_id = ?";
 
         try {
             $stmt = $this->dbConnection->prepare($sql);
-            $stmt->bind_param("s", $id);
+            $stmt->bind_param("s", $songId);
             $stmt->execute();
             $stmt->store_result();
             $rowsEffected = $stmt->num_rows;
             return $rowsEffected;
         } catch (\mysqli_sql_exception $e) {
-            exit($e->getMessage());
+            error_log($e->getMessage());
+            throw $e;
         }    
     }
 
-	private function _rowToSong($row)
+	public function rowToSong($row)
     {
 	    $song = new Song();
 	    $song->id = $row["song_id"];

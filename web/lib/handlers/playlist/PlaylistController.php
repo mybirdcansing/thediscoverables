@@ -8,20 +8,25 @@ class PlaylistController {
     private $playlistId;
     private $playlistData;
     private $administrator;
+    private $songData;
+    private $songId;
 
-    public function __construct($dbConnection, $action, $playlistId, $administrator)
+    public function __construct($dbConnection, $action, $playlistId, $songId, $administrator)
     {
+
+        $this->songData = new SongData($dbConnection);
         $this->playlistData = new PlaylistData($dbConnection);
         $this->action = $action;
         $this->playlistId = $playlistId;
+        $this->songId = $songId;
         $this->administrator = $administrator;
     }
 
     public function processRequest()
     {
-
         switch ($this->action) {
             case GET_ACTION:
+
                 if ($this->playlistId) {
                     $response = $this->_getPlaylist();
                 } else {
@@ -36,6 +41,9 @@ class PlaylistController {
                 break;
             case CREATE_ACTION:
                 $response = $this->_createPlaylist();
+                break;
+            case ADD_TO_PLAYLIST_ACTION:
+                $response = $this->_addTooPlaylist();
                 break;
             default:
                 $response = $this->_notFoundResponse();
@@ -73,8 +81,8 @@ class PlaylistController {
     private function _createPlaylist()
     {
         $playlist = Playlist::fromJson(file_get_contents('php://input'));
+
         $validationIssues = $this->_validationIssues($playlist);
-        
         if ((bool)$validationIssues) {
             return $this->_unprocessableEntityResponse([
                 "playlistCreated" => false,
@@ -133,13 +141,43 @@ class PlaylistController {
 
     private function _deletePlaylist()
     {
-
         $result = $this->playlistData->find($this->playlistId);
         if (!$result) {
             return $this->_notFoundResponse();
         }
-        $deleted = $this->playlistData->delete($this->playlistId);
-        
+        error_log("_deletePlaylist()");
+        $this->playlistData->delete($this->playlistId);
+        return $this->_okResponse();
+    }
+
+    public function _addTooPlaylist()
+    {
+        $song = $this->songData->find($this->songId);
+        if (!$song) {
+            return $this->_notFoundResponse();
+        }
+        $playlist = $this->playlistData->find($this->playlistId);
+        if (!$playlist) {
+            return $this->_notFoundResponse();
+        }
+        $this->playlistData->addToPlaylist($this->playlistId, $this->songId, $this->administrator);
+        $playlist = $this->playlistData->find($this->playlistId);
+        return $this->_okResponse($playlist->expose());
+    }
+
+    public function _removeFromPlaylist()
+    {
+        $song = $this->songData->find($this->songId);
+        if (!$song) {
+            return $this->_notFoundResponse();
+        }
+        $playlist = $this->playlistData->find($this->playlistId);
+        if (!$playlist) {
+            return $this->_notFoundResponse(null, 
+                [PLAYLIST_NOT_FOUND_CODE => PLAYLIST_NOT_FOUND_MESSAGE]);
+        }
+        $this->songData->removeFromPlaylist($this->playlistId, $this->songId, $this->playlistId);
+
         return $this->_okResponse();
     }
 

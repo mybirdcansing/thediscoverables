@@ -59,23 +59,22 @@ define("TITLE_INVALID_MESSAGE", "The title may not contain invalid characters (&
 define("TITLE_TAKEN_CODE", 1023);
 define("TITLE_TAKEN_MESSAGE", "The title (%s) is taken. Please use another.");
 
-//
+define("PLAYLIST_NOT_FOUND_CODE", 1023);
+define("PLAYLIST_NOT_FOUND_MESSAGE", "Playlist not found.");
+
+define("SONG_NOT_FOUND_CODE", 1024);
+define("SONG_NOT_FOUND_MESSAGE", "Song not found.");
 
 define("ACTIVE_USER_STATUS_ID", 1);
 define("INACTIVE_USER_STATUS_ID", 2);
-
-
-
-
-define("SONG_NOT_FOUND_CODE", 1020);
-define("SONG_NOT_FOUND_MESSAGE", "Song not found.");
-
 
 define("CREATE_ACTION", "CREATE");
 define("UPDATE_ACTION", "UPDATE");
 define("DELETE_ACTION", "DELETE");
 define("GET_ACTION", "GET");
 define("UPDATE_PASSWORD_ACTION", "UPDATE_PASSWORD");
+define("ADD_TO_PLAYLIST_ACTION", "ADD_TO_PLAYLIST_ACTION");
+define("REMOVE_FROM_PLAYLIST_ACTION", "REMOVE_FROM_PLAYLIST_ACTION");
 
 
 // global methods

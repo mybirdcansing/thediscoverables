@@ -1,6 +1,7 @@
 <?php
 require_once __dir__ . '/../../connecters/DataAccess.php';
 require_once __dir__ . '/../../connecters/playlistData.php';
+require_once __DIR__ . '/../../connecters/SongData.php';
 require_once __dir__ . '/../../connecters/UserData.php';
 require_once __dir__ . '/playlistController.php';
 require_once __dir__ . '/../../AuthCookie.php';
@@ -41,6 +42,10 @@ if (isset($uri[5]) && $uri[5] != '') {
 	$requestAction = $uri[5];
 }
 
+$songId = null;
+if (isset($uri[6]) && $uri[6] != '') {
+    $songId = $uri[6];
+}
 
 $action = null;
 switch ($_SERVER["REQUEST_METHOD"]) {
@@ -50,7 +55,11 @@ switch ($_SERVER["REQUEST_METHOD"]) {
     case 'POST':
     	if ($requestAction == 'delete') {
 	    	$action = DELETE_ACTION;
-		} elseif ($playlistId) {
+		} elseif ($requestAction == 'addsong') {
+            $action = ADD_TO_PLAYLIST_ACTION;
+        } elseif ($requestAction == 'removesong') {
+            $action = REMOVE_FROM_PLAYLIST_ACTION;
+        } elseif ($playlistId) {
             $action = UPDATE_ACTION;
         } else {
             $action = CREATE_ACTION;
@@ -72,5 +81,5 @@ switch ($_SERVER["REQUEST_METHOD"]) {
 $dbConnection = (new DataAccess())->getConnection();
 $userData = new UserData($dbConnection);
 $administrator = $userData->getByUsername(AuthCookie::getUsername());
-$controller = new PlaylistController($dbConnection, $action, $playlistId, $administrator);
+$controller = new PlaylistController($dbConnection, $action, $playlistId, $songId, $administrator);
 $controller->processRequest();

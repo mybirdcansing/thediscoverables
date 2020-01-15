@@ -31,7 +31,8 @@ class PlaylistData
 			}
             return $playlists;
         } catch (\mysqli_sql_exception $e) {
-            exit($e->getMessage());
+            error_log($e->getMessage());
+            throw $e;
         }
     }
 
@@ -44,7 +45,7 @@ class PlaylistData
                 description
 		  	FROM 
 		  		playlist
-		  	WHERE playlist_id = ?;
+		  	WHERE playlist_id = ?; 
         ";
 
 		$stmt = $this->dbConnection->prepare($sql);
@@ -54,14 +55,49 @@ class PlaylistData
 		if ($result->num_rows == 1) {
 		    $row = $result->fetch_assoc();
 		    $playlist = $this->_rowToPlaylist($row);
-		    return $playlist;
 		} else {
 			return 0;
-		}   
+		}
+
+        $sql = "
+            SELECT 
+                s.song_id,
+                s.title,
+                s.description,
+                s.filename
+            FROM song s
+            JOIN playlist_song pls ON 
+                s.song_id = pls.song_id
+            WHERE pls.playlist_id =  '" . $id . "';
+        ";
+
+        $playlist->songs = [];
+        try {
+            $stmt2 = $this->dbConnection->query($sql);
+            // $stmt2->bind_param("s", $id);
+            while ($row = $stmt2->fetch_assoc()) {
+                $playlist->songs[] = $this->rowToSong($row);
+            }
+        } catch (\mysqli_sql_exception $e) {
+            error_log($e->getMessage());
+            throw $e;
+        }
+	    return $playlist;
+    }
+
+    public function rowToSong($row)
+    {
+        $song = new Song();
+        $song->id = $row["song_id"];
+        $song->title = $row["title"];
+        $song->description = $row["description"];
+        $song->filename = $row["filename"];
+        return $song;
     }
 
     public function insert(Playlist $playlist, User $administrator)
     {
+
         $sql = "
 			INSERT INTO 
 				playlist (
@@ -79,13 +115,15 @@ class PlaylistData
         try {
             $stmt = $this->dbConnection->prepare($sql);
             $playlistId = GUID();
+            $adminId = $administrator->id;
             $stmt->bind_param("sssss",
                 $playlistId,
 				$playlist->title,
 				$playlist->description,
-                $administrator->id,
-                $administrator->id
+                $adminId,
+                $adminId
             );
+
             $stmt->execute();
             $stmt->store_result();
             return $playlistId;
@@ -139,7 +177,9 @@ class PlaylistData
     public function delete($id)
     {
         // if playlist is in an album, throw an exception
-
+        error_log("PlaylistData::delete:id " . $id);
+        $this->removeAllSongsFromPlaylist($id);
+        
         $sql = "DELETE FROM playlist WHERE playlist_id = ?;";
 
         try {
@@ -150,26 +190,77 @@ class PlaylistData
             $rowsEffected = $stmt->num_rows;
             return $rowsEffected;
         } catch (\mysqli_sql_exception $e) {
-            exit($e->getMessage());
+            error_log($e->getMessage());
+            throw $e;
         }    
     }
 
-    public function leavePlaylists($id)
+    public function addToPlaylist($playlistId, $songId, User $administrator)
     {
-        $sql = "DELETE FROM playlist_song WHERE playlist_id = ?";
+        $sql = "
+            INSERT INTO 
+                playlist_song (
+                    playlist_song_id,
+                    song_id,
+                    playlist_id,
+                    created_date,
+                    created_by_id
+                )
+            VALUES (?, ?, ?, now(), ?);
+        ";
 
         try {
             $stmt = $this->dbConnection->prepare($sql);
-            $stmt->bind_param("s", $id);
+            $playlistSongId = GUID();
+            $stmt->bind_param("ssss",
+                $playlistSongId,
+                $songId,
+                $playlistId,
+                $administrator->id
+            );
+            $stmt->execute();
+            $stmt->store_result();
+
+            return $playlistSongId;
+        } catch (mysqli_sql_exception $e) {
+            error_log($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function removeFromPlaylist($playlistId, $songId)
+    {
+        $sql = "DELETE FROM playlist_song WHERE song_id = ? AND playlist_id = ?;";
+        $rowsEffected = 0;
+        try {
+            $stmt = $this->dbConnection->prepare($sql);
+            $stmt->bind_param("ss", $songId, $playlistId);
             $stmt->execute();
             $stmt->store_result();
             $rowsEffected = $stmt->num_rows;
             return $rowsEffected;
         } catch (\mysqli_sql_exception $e) {
-            exit($e->getMessage());
-        }    
+            error_log($e->getMessage());
+            throw $e;
+        }
     }
 
+    public function removeAllSongsFromPlaylist($playlistId)
+    {
+        $sql = "DELETE FROM playlist_song WHERE playlist_id = ?;";
+        $rowsEffected = 0;
+        try {
+            $stmt = $this->dbConnection->prepare($sql);
+            $stmt->bind_param("s", $playlistId);
+            $stmt->execute();
+            $stmt->store_result();
+            $rowsEffected = $stmt->num_rows;
+            return $rowsEffected;
+        } catch (\mysqli_sql_exception $e) {
+            error_log($e->getMessage());
+            throw $e;
+        }
+    }
 	private function _rowToPlaylist($row)
     {
 	    $playlist = new Playlist();

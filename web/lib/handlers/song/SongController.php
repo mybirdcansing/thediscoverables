@@ -11,10 +11,10 @@ class SongController {
 
     public function __construct($dbConnection, $action, $songId, $administrator)
     {
-        $this->songData = new SongData($dbConnection);
         $this->action = $action;
         $this->songId = $songId;
         $this->administrator = $administrator;
+        $this->songData = new SongData($dbConnection);
     }
 
     public function processRequest()
@@ -133,8 +133,8 @@ class SongController {
 
     private function _deleteSong()
     {
-        $result = $this->songData->find($this->songId);
-        if (!$result) {
+        $song = $this->songData->find($this->songId);
+        if (!$song) {
             return $this->_notFoundResponse();
         }
         $deleted = $this->songData->delete($this->songId);

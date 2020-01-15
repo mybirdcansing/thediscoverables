@@ -37,7 +37,8 @@ class UserData
 			}
             return $users;
         } catch (\mysqli_sql_exception $e) {
-            exit($e->getMessage());
+            error_log($e->getMessage());
+            throw $e;
         }
     }
 
@@ -323,7 +324,8 @@ class UserData
             $rowsEffected = $stmt->num_rows;
             return $rowsEffected;
         } catch (\mysqli_sql_exception $e) {
-            exit($e->getMessage());
+            error_log($e->getMessage());
+            throw $e;
         }    
     }
 
@@ -367,7 +369,8 @@ class UserData
             }
             return $tokens;
         } catch (\mysqli_sql_exception $e) {
-            exit($e->getMessage());
+            error_log($e->getMessage());
+            throw $e;
         }    
     }
 
@@ -416,7 +419,8 @@ class UserData
             }
             return false;
         } catch (\mysqli_sql_exception $e) {
-            exit($e->getMessage());
+            error_log($e->getMessage());
+            throw $e;
         }    
     }
 
@@ -434,7 +438,8 @@ class UserData
             $rowsEffected = $stmt->num_rows;
             return $rowsEffected;
         } catch (\mysqli_sql_exception $e) {
-            exit($e->getMessage());
+            error_log($e->getMessage());
+            throw $e;
         }    
     }
 

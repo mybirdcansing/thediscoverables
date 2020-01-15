@@ -7,6 +7,7 @@ class Playlist extends JsonConvertible {
     public $id;
     public $title;
     public $description;
+    public $songs = [];
 
     function __construct() {
     }

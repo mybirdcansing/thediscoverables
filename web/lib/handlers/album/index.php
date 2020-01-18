@@ -1,9 +1,8 @@
 <?php
 require_once __dir__ . '/../../connecters/DataAccess.php';
-require_once __dir__ . '/../../connecters/PlaylistData.php';
-require_once __DIR__ . '/../../connecters/SongData.php';
+require_once __DIR__ . '/../../connecters/AlbumData.php';
 require_once __dir__ . '/../../connecters/UserData.php';
-require_once __dir__ . '/PlaylistController.php';
+require_once __dir__ . '/AlbumController.php';
 require_once __dir__ . '/../../AuthCookie.php';
 require_once __DIR__ . '/../../messages.php';
 
@@ -12,7 +11,6 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: OPTIONS,GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
-
 
 if(!AuthCookie::isValid()) {
     header("'HTTP/1.1 403 Forbidden'");
@@ -25,16 +23,16 @@ if(!AuthCookie::isValid()) {
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $uri = explode('/', $uri);
 
-// endpoints start with /playlist, everything else results in a 404 Not Found
-if ($uri[3] !== 'playlist') {
+// endpoints start with /album, everything else results in a 404 Not Found
+if ($uri[3] !== 'album') {
     header("HTTP/1.1 404 Not Found");
     exit();
 }
 
-// the user id is, of course, optional and must be a uuid:
-$playlistId = null;
+// the album id is, of course, optional and must be a uuid:
+$albumId = null;
 if (isset($uri[4]) && $uri[4] != '') {
-    $playlistId = $uri[4];  
+    $albumId = $uri[4];  
 }
 
 $requestAction = null;
@@ -42,12 +40,8 @@ if (isset($uri[5]) && $uri[5] != '') {
 	$requestAction = $uri[5];
 }
 
-$songId = null;
-if (isset($uri[6]) && $uri[6] != '') {
-    $songId = $uri[6];
-}
-
 $action = null;
+
 switch ($_SERVER["REQUEST_METHOD"]) {
     case 'GET':
          $action = GET_ACTION;
@@ -55,11 +49,7 @@ switch ($_SERVER["REQUEST_METHOD"]) {
     case 'POST':
     	if ($requestAction == 'delete') {
 	    	$action = DELETE_ACTION;
-		} elseif ($requestAction == 'addsong') {
-            $action = ADD_TO_PLAYLIST_ACTION;
-        } elseif ($requestAction == 'removesong') {
-            $action = REMOVE_FROM_PLAYLIST_ACTION;
-        } elseif ($playlistId) {
+        } elseif ($albumId) {
             $action = UPDATE_ACTION;
         } else {
             $action = CREATE_ACTION;
@@ -81,5 +71,8 @@ switch ($_SERVER["REQUEST_METHOD"]) {
 $dbConnection = (new DataAccess())->getConnection();
 $userData = new UserData($dbConnection);
 $administrator = $userData->getByUsername(AuthCookie::getUsername());
-$controller = new PlaylistController($dbConnection, $action, $playlistId, $songId, $administrator);
+
+
+
+$controller = new AlbumController($dbConnection, $action, $albumId, $administrator);
 $controller->processRequest();

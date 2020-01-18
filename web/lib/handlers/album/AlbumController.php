@@ -1,53 +1,42 @@
 <?php
 require_once __DIR__ . '/../../messages.php';
 
-class PlaylistController {
+class AlbumController {
 
     private $db;
     private $action;
-    private $playlistId;
-    private $playlistData;
+    private $albumId;
+    private $albumData;
     private $administrator;
-    private $songData;
-    private $songId;
 
-    public function __construct($dbConnection, $action, $playlistId, $songId, $administrator)
+    public function __construct($dbConnection, $action, $albumId, $administrator)
     {
-
-        $this->songData = new SongData($dbConnection);
-        $this->playlistData = new PlaylistData($dbConnection);
+        $this->albumData = new AlbumData($dbConnection);
         $this->action = $action;
-        $this->playlistId = $playlistId;
-        $this->songId = $songId;
+        $this->albumId = $albumId;
         $this->administrator = $administrator;
     }
 
     public function processRequest()
     {
+
         switch ($this->action) {
             case GET_ACTION:
-
-                if ($this->playlistId) {
-                    $response = $this->_getPlaylist();
+                if ($this->albumId) {
+                    $response = $this->_getAlbum();
                 } else {
-                    $response = $this->_getAllPlaylists();
+                    $response = $this->_getAllAlbums();
                 };
                 break;
             case DELETE_ACTION:
-                $response = $this->_deletePlaylist();
+                $response = $this->_deleteAlbum();
                 break;
             case UPDATE_ACTION:
-                $response = $this->_updatePlaylist();
+                $response = $this->_updateAlbum();
                 break;
             case CREATE_ACTION:
-                $response = $this->_createPlaylist();
+                $response = $this->_createAlbum();
                 break;
-            case ADD_TO_PLAYLIST_ACTION:
-                $response = $this->_addTooPlaylist();
-                break;
-            case REMOVE_FROM_PLAYLIST_ACTION:
-                $response = $this->_removeFromPlaylist();
-                break;   
             default:
                 $response = $this->_notFoundResponse();
                 break;
@@ -63,78 +52,76 @@ class PlaylistController {
         }
     }
 
-    private function _getAllPlaylists()
+    private function _getAllAlbums()
     {
-        $result = $this->playlistData->findAll();
+        $result = $this->albumData->findAll();
         return $this->_okResponse(array_map(function($val) { 
             return $val->expose(); 
         }, $result));
         return $response;
     }
 
-    private function _getPlaylist()
+    private function _getAlbum()
     {
-        $playlist = $this->playlistData->find($this->playlistId);
-        if (!$playlist) {
+        $album = $this->albumData->find($this->albumId);
+        if (!$album) {
             return $this->_notFoundResponse();
         }
-        return $this->_okResponse($playlist->expose());
+        return $this->_okResponse($album->expose());
     }
 
-    private function _createPlaylist()
+    private function _createAlbum()
     {
-        $playlist = Playlist::fromJson(file_get_contents('php://input'));
-
-        $validationIssues = $this->_validationIssues($playlist);
+        $album = Album::fromJson(file_get_contents('php://input'));
+        $validationIssues = $this->_validationIssues($album);
         if ((bool)$validationIssues) {
             return $this->_unprocessableEntityResponse([
-                "playlistCreated" => false,
+                "albumCreated" => false,
                 "errorMessages" => $validationIssues
             ]);
         }
         try {
-            $playlistId = $this->playlistData->insert($playlist, $this->administrator);
+            $albumId = $this->albumData->insert($album, $this->administrator);
             $response['status_code_header'] = 'HTTP/1.1 201 Created';
             $response['body'] = json_encode([
-                "playlistCreated" => true, 
-                "playlistId" => $playlistId
+                "albumCreated" => true, 
+                "albumId" => $albumId
             ]);
         } catch (DuplicateTitleException $e) {
             return $this->_conflictResponse([
-                "playlistCreated" => false,
+                "albumCreated" => false,
                 "errorMessages" => [$e->getCode() => $e->getMessage()]
             ]);
         }
         return $response;
     }
 
-    private function _updatePlaylist()
+    private function _updateAlbum()
     {
-        $playlist = Playlist::fromJson(file_get_contents('php://input'));
-        $validationIssues = $this->_validationIssues($playlist);
+        $album = Album::fromJson(file_get_contents('php://input'));
+        $validationIssues = $this->_validationIssues($album);
         if ((bool)$validationIssues) {
             return $this->_unprocessableEntityResponse([
-                "playlistUpdated" => false,
+                "albumUpdated" => false,
                 "errorMessages" => $validationIssues
             ]);
         }
         
-        $existingPlaylist = $this->playlistData->find($playlist->id);
-        if (!$existingPlaylist) {
+        $existingAlbum = $this->albumData->find($album->id);
+        if (!$existingAlbum) {
             return $this->_notFoundResponse();
         }
 
         try {
-            $this->playlistData->update($playlist, $this->administrator);
-
+            $this->albumData->update($album, $this->administrator);
             return $this->_okResponse([
-                "playlistUpdated" => true, 
-                "playlistId" => $playlist->id
+                "albumUpdated" => true, 
+                "albumId" => $album->id
             ]);
         } catch (DuplicateTitleException $e) {
             return $this->_conflictResponse([
-                "playlistUpdated" => false, 
-                "playlistId" => $playlist->id,
+                "albumUpdated" => false, 
+                "albumId" => $album->id,
                 "errorMessages" => array($e->getCode() => $e->getMessage())
             ]);
         }
@@ -142,59 +129,27 @@ class PlaylistController {
         return $response;
     }
 
-    private function _deletePlaylist()
+    private function _deleteAlbum()
     {
-        $result = $this->playlistData->find($this->playlistId);
+        $result = $this->albumData->find($this->albumId);
         if (!$result) {
             return $this->_notFoundResponse();
         }
-        $this->playlistData->delete($this->playlistId);
+        $this->albumData->delete($this->albumId);
         return $this->_okResponse();
     }
 
-    public function _addTooPlaylist()
-    {
-        $song = $this->songData->find($this->songId);
-        if (!$song) {
-            return $this->_notFoundResponse();
-        }
-        $playlist = $this->playlistData->find($this->playlistId);
-        if (!$playlist) {
-            return $this->_notFoundResponse();
-        }
-        $this->playlistData->addToPlaylist($this->playlistId, $this->songId, $this->administrator);
-        $playlist = $this->playlistData->find($this->playlistId);
-        return $this->_okResponse($playlist->expose());
-    }
-
-    public function _removeFromPlaylist()
-    {
-        $song = $this->songData->find($this->songId);
-        if (!$song) {
-            return $this->_notFoundResponse();
-        }
-        $playlist = $this->playlistData->find($this->playlistId);
-        if (!$playlist) {
-            return $this->_notFoundResponse(null, 
-                [PLAYLIST_NOT_FOUND_CODE => PLAYLIST_NOT_FOUND_MESSAGE]);
-        }
-        $this->playlistData->removeFromPlaylist($this->playlistId, $this->songId);
-
-        $playlist = $this->playlistData->find($this->playlistId);
-        return $this->_okResponse($playlist->expose());
-    }
-
-    private function _validationIssues($playlist)
+    private function _validationIssues($album)
     {
         $errorMessages = [];
         
-        if (!isset($playlist->title) || $playlist->title == '') {
+        if (!isset($album->title) || $album->title == '') {
             $errorMessages[TITLE_BLANK_CODE] = TITLE_BLANK_MESSAGE;
         } else {
-            if (strlen($playlist->title) > 64) {
+            if (strlen($album->title) > 64) {
                 $errorMessages[TITLE_LONG_CODE] = TITLE_LONG_MESSAGE;
             }
-            if ($this->_isInputStrValid($playlist->title)) {
+            if ($this->_isInputStrValid($album->title)) {
                 $errorMessages[TITLE_INVALID_CODE] = TITLE_INVALID_MESSAGE;
             }
         }

@@ -9,9 +9,8 @@ use GuzzleHttp\Cookie\CookieJar;
 
 final class PlaylistTest extends TestBase
 {
-    public $playlistHandlerPath = 'playlist/';
 
-    public function testCreate()
+    public function testCreateSong()
     {
         $playlist = $this->fleshedOutPlaylist();
         $createdPlaylist = $this->createPlaylist($playlist);
@@ -23,7 +22,7 @@ final class PlaylistTest extends TestBase
         }
     }
 
-    public function testUpdate()
+    public function testUpdateSong()
     {
         $modifiedPlaylist = $this->createPlaylist($this->fleshedOutPlaylist());
         $modifiedPlaylist->title = GUID();
@@ -38,7 +37,7 @@ final class PlaylistTest extends TestBase
         }
     }
 
-    public function testCreateDupeTitle()
+    public function testCreateSongWithDupeTitle()
     {
         $playlist = $this->fleshedOutPlaylist();
         $playlist = $this->createPlaylist($playlist);
@@ -47,7 +46,7 @@ final class PlaylistTest extends TestBase
         $this->deletePlaylist($playlist->id);
     }
 
-    public function testCreateWithLongTitle()
+    public function testCreateSongWithLongTitle()
     {
         // create with long title
         $playlist = $this->fleshedOutPlaylist();
@@ -55,20 +54,19 @@ final class PlaylistTest extends TestBase
         $this->createPlaylistWithErrors($playlist, [TITLE_LONG_CODE => TITLE_LONG_MESSAGE], 422);
     }
 
-    public function testCreateWithBlankTitle()
+    public function testCreateSongWithBlankTitle()
     {
         $playlist = $this->fleshedOutPlaylist();
         $playlist->title = '';
         $this->createPlaylistWithErrors($playlist, [TITLE_BLANK_CODE => TITLE_BLANK_MESSAGE], 422);
     }
 
-    public function testAddToPlaylist()
+    public function testAddSongToPlaylist()
     {
         $playlist = $this->createPlaylist($this->fleshedOutPlaylist());
         $song1 = $this->createSong($this->fleshedOutSong());
         $song2 = $this->createSong($this->fleshedOutSong());
         $playlistWithSong = $this->addSongToPlaylist($playlist, $song1);
-        // error_log("Playlist::fromJson:  " . json_encode($playlistWithSong));
         $this->assertEquals(count($playlistWithSong->songs), 1);
         $song1InPlaylist = $playlistWithSong->songs[0];
         $this->assertEquals($song1InPlaylist->title, $song1->title);
@@ -89,105 +87,18 @@ final class PlaylistTest extends TestBase
         $this->deleteSong($song2->id);
     }
 
-    public function testRemoveFromPlaylist()
+    public function testRemoveSongFromPlaylist()
     {
-
+        $playlist = $this->createPlaylist($this->fleshedOutPlaylist());
+        $song1 = $this->createSong($this->fleshedOutSong());
+        $playlistWithSongs = $this->addSongToPlaylist($playlist, $song1);
+        $song2 = $this->createSong($this->fleshedOutSong());
+        $playlis = $this->removeSongFromPlaylist($playlist, $song2);
+        $this->assertEquals(count($playlis->songs), 1);
+        $song1InPlaylist = $playlis->songs[0];
+        $this->assertEquals($song1InPlaylist->title, $song1->title);
+        $this->deletePlaylist($playlist->id);
+        $this->deleteSong($song1->id);
+        $this->deleteSong($song2->id);
     }
-
-    public function addSongToPlaylist($playlist, $song)
-    {
-        $client = $this->getHandlerClient();
-        $response = $client->post($this->playlistHandlerPath . $playlist->id . '/addsong/' . $song->id, [
-            'cookies' => $this->cookieJar
-        ]);
-        return Playlist::fromJson($response->getBody()->getContents());
-    }
-
-    public function getPlaylist($id)
-    {
-        $client = $this->getHandlerClient();
-        $response = $client->get($this->playlistHandlerPath . $id, [
-            'cookies' => $this->cookieJar
-        ]);
-
-        $this->assertEquals(200, $response->getStatusCode());
-        return Playlist::fromJson($response->getBody()->getContents());
-    }
-
-    public function createPlaylist($playlist)
-    {
-        $client = $this->getHandlerClient();
-        $response = $client->post($this->playlistHandlerPath, [
-            'json' => $playlist->expose(),
-            'cookies' => $this->cookieJar
-        ]);
-        $json = json_decode($response->getBody()->getContents());
-        
-        $this->assertTrue($json->playlistCreated, '`playlistCreated` should be true');
-        $this->assertEquals(201, $response->getStatusCode());
-        return $this->getPlaylist($json->playlistId);
-    }
-
-    public function createPlaylistWithErrors($playlist, $expectedErrors, $expectedStatusCode)
-    {
-        $client = $this->getHandlerClient();
-        $response = $client->post($this->playlistHandlerPath, [
-            'json' => $playlist->expose(),
-            'cookies' => $this->cookieJar
-        ]);
-        $json = json_decode($response->getBody()->getContents());
-        try {
-            $this->assertEquals($expectedStatusCode, $response->getStatusCode());
-            $this->assertTrue(isset($json->playlistCreated));
-            $this->assertFalse($json->playlistCreated, 'The created flag was not set to false.');
-            $this->assertTrue(isset($json->errorMessages));
-            $ems = (array)$json->errorMessages;
-            foreach ($expectedErrors as $expectedErrorCode => $expectedErrorMessage) {
-                $this->assertArrayHasKey($expectedErrorCode, $ems);
-                $this->assertEquals($expectedErrorMessage, $ems[$expectedErrorCode]
-                );
-            }
-        } catch (Exception $e) {
-            // cleanup the database
-            if ($json->playlistCreated) {
-                $this->deletePlaylist($json->playlistId);
-            }
-        }
-    }
-
-    public function updatePlaylist($playlist)
-    {
-        $client = $this->getHandlerClient();
-        $response = $client->post($this->playlistHandlerPath . $playlist->id, [
-            'json' => $playlist->expose(),
-            'cookies' => $this->cookieJar
-        ]);
-        $json = json_decode($response->getBody()->getContents());
-        $this->assertTrue($json->playlistUpdated, '`playlistUpdated` should be true');
-        try {
-            $this->assertEquals(200, $response->getStatusCode());
-            return $this->getPlaylist($json->playlistId);
-        } catch (Exception $e) {
-            $this->deletePlaylist($json->playlistId);
-            throw $e;
-        }
-    }
-
-    public function fleshedOutPlaylist()
-    {
-        $playlist = new Playlist();
-        $playlist->title = GUID();
-        $playlist->description = 'This is a good playlist!';
-        return $playlist;
-    }
-
-    public function deletePlaylist($id)
-    {
-        $client = $this->getHandlerClient();
-        $response = $client->post($this->playlistHandlerPath . $id . '/delete', [
-            'cookies' => $this->cookieJar
-        ]);
-        $this->assertEquals(200, $response->getStatusCode());
-    }
-
 }

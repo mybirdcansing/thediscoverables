@@ -85,16 +85,6 @@ class PlaylistData
 	    return $playlist;
     }
 
-    public function rowToSong($row)
-    {
-        $song = new Song();
-        $song->id = $row["song_id"];
-        $song->title = $row["title"];
-        $song->description = $row["description"];
-        $song->filename = $row["filename"];
-        return $song;
-    }
-
     public function insert(Playlist $playlist, User $administrator)
     {
 
@@ -177,9 +167,8 @@ class PlaylistData
     public function delete($id)
     {
         // if playlist is in an album, throw an exception
-        error_log("PlaylistData::delete:id " . $id);
         $this->removeAllSongsFromPlaylist($id);
-        
+
         $sql = "DELETE FROM playlist WHERE playlist_id = ?;";
 
         try {
@@ -261,6 +250,7 @@ class PlaylistData
             throw $e;
         }
     }
+
 	private function _rowToPlaylist($row)
     {
 	    $playlist = new Playlist();
@@ -269,4 +259,14 @@ class PlaylistData
 	    $playlist->description = $row["description"];
 	    return $playlist;
 	}
+
+    public function rowToSong($row)
+    {
+        $song = new Song();
+        $song->id = $row["song_id"];
+        $song->title = $row["title"];
+        $song->description = $row["description"];
+        $song->filename = $row["filename"];
+        return $song;
+    }
 }

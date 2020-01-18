@@ -38,7 +38,7 @@ final class SongTest extends TestBase
         }
     }
 
-    public function testCreateDupeTitle()
+    public function testCreateSongWithDupeTitle()
     {
         $song = $this->fleshedOutSong();
         $song = $this->createSong($song);
@@ -47,7 +47,7 @@ final class SongTest extends TestBase
         $this->deleteSong($song->id);
     }
 
-    public function testCreateWithLongTitle()
+    public function testCreateSongWithLongTitle()
     {
         // create with long title
         $song = $this->fleshedOutSong();
@@ -55,12 +55,11 @@ final class SongTest extends TestBase
         $this->createSongWithErrors($song, [TITLE_LONG_CODE => TITLE_LONG_MESSAGE], 422);
     }
 
-    public function testCreateWithBlankTitle()
+    public function testCreateSongWithBlankTitle()
     {
         $song = $this->fleshedOutSong();
         $song->title = '';
         $this->createSongWithErrors($song, [TITLE_BLANK_CODE => TITLE_BLANK_MESSAGE], 422);
     }
-
 
 }

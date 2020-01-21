@@ -162,7 +162,7 @@ class SongController {
     private function _okResponse($json = null)
     {
         $response['status_code_header'] = 'HTTP/1.1 200 OK';
-        $response['body'] = $json ? json_encode($json) : null;
+        $response['body'] = $json ? json_encode($json) : "{}";
         return $response;
     }
 

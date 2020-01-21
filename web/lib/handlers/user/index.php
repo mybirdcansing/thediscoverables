@@ -1,9 +1,9 @@
 <?php
 require_once __dir__ . '/../../connecters/DataAccess.php';
 require_once __dir__ . '/../../connecters/UserData.php';
-require_once __dir__ . '/UserController.php';
-require_once __dir__ . '/../../AuthCookie.php';
+require_once __dir__ . '/../../objects/AuthCookie.php';
 require_once __DIR__ . '/../../messages.php';
+require_once __dir__ . '/UserController.php';
 
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");

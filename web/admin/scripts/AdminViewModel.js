@@ -6,9 +6,12 @@ function AdminViewModel(administrator, blankAdministrator, isAuthenticated) {
 	this.administrator = ko.mapping.fromJS(administrator);
 	this.loginErrors = ko.observableArray([]);
 	this.userConnector = new UserConnector();
+	this.songConnector = new SongConnector();
 	this.currentPage = ko.observable(isAuthenticated ? 'blank' : 'login');
 	this.users = ko.observableArray();
+	this.songs = ko.observableArray();
 	this.userToUpdate = ko.observable();
+	this.songToUpdate = ko.observable();
 	this.validationErrors = ko.observableArray([]);
 	this.pageToDisplay = function(model) {
 			return model.currentPage() + '-template';
@@ -57,11 +60,19 @@ function AdminViewModel(administrator, blankAdministrator, isAuthenticated) {
 		self.currentPage('create-user');
 	};
 
+	this.openCreateSong = function() {
+		self.currentPage('create-song');
+	};
+
 	this.openEditUser = function(root, user) {
 		root.userToUpdate(user);
 		root.currentPage('edit-user');
 	};
 
+	this.openEditSong = function(root, song) {
+		root.songToUpdate(song);
+		root.currentPage('edit-song');
+	};
 	this.deleteUser = function(root, user) {
 		var successCallback = function (data, textStatus, jqXHR) {
 			self.openUsers();
@@ -136,6 +147,10 @@ function AdminViewModel(administrator, blankAdministrator, isAuthenticated) {
 
 	this.cancelUserForm = function() {
 		self.currentPage('users');
+	};
+
+	this.cancelSongForm = function() {
+		self.currentPage('songs');
 	};
 
 	this.openPasswordResetForm = function() {
@@ -253,7 +268,90 @@ function AdminViewModel(administrator, blankAdministrator, isAuthenticated) {
 		});
 	};
 
-	this.openMusic = function() {
-		self.currentPage('music');
+	this.openSongs = function() {
+		var successCallback = function (data, textStatus, jqXHR) {
+			self.songs.removeAll();
+			for (var i = 0; i < data.length; i++) {
+				self.songs.push(ko.mapping.fromJS(data[i]));
+			}
+			self.currentPage('songs');
+        };
+        var failedCallback = function(data, textStatus, errorThrown) {
+			console.log('request failed! ' + textStatus);
+	    };
+		this.songConnector.getSongs(successCallback, failedCallback);
+	};
+
+	this.createSong = function(formElement) {
+		var input = {};
+		$(formElement).serializeArray().map(function(x){input[x.name] = x.value;});
+		var successCallback = function (data, textStatus, jqXHR) {
+			self.openSongs();
+        };
+        var failedCallback = function(data, textStatus, errorThrown) {
+        	if (data.errorMessages) {
+				self.validationErrors(Object.values(data.errorMessages).reverse());
+			}
+			console.log('request failed! ' + textStatus);
+	    };
+		self.songConnector.createSong(input, successCallback, failedCallback);
+	};
+
+	this.updateSong = function() {
+		var successCallback = function (data, textStatus, jqXHR) {
+			self.openSongs();
+        };
+        var failedCallback = function(data, textStatus, errorThrown) {
+        	if (data.errorMessages) {
+				self.validationErrors(Object.values(data.errorMessages).reverse());
+			}
+			console.log('request failed! ' + textStatus);
+	    };
+		self.songConnector.updateSong(
+			 ko.mapping.toJS(self.songToUpdate()), successCallback, failedCallback);
+	};
+
+	this.cancelUserForm = function() {
+		self.currentPage('blank');
+	};
+
+
+	this.deleteSong = function(root, song) {
+		var successCallback = function (data, textStatus, jqXHR) {
+			debugger;
+			self.openSongs();
+        };
+
+        var failedCallback = function(data, textStatus, errorThrown) {
+        	debugger;
+			console.log('request failed! ' + textStatus);
+	    };
+
+		$.confirm({
+		    title: 'Delete song?',
+		    content: 'Are you sure you want to delete "' + song.title() + '"?',
+		    boxWidth: '500px',
+			useBootstrap: false,
+			draggable: true,
+			dragWindowBorder: false,
+			backgroundDismiss: true,
+			animation: 'none',
+		    buttons: {
+		        confirm: {
+		        	btnClass: 'btn-blue',
+		        	action: function () {
+						root.songConnector.deleteSong(
+							ko.mapping.toJS(song), 
+							successCallback, 
+							failedCallback);
+					},
+					keys: ['enter']
+		        },
+		        cancel: {
+		        	action: function () { },
+		        	keys: ['esc']
+		        }
+		    }
+		});
 	};
 };

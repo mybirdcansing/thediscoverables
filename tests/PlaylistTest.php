@@ -1,6 +1,5 @@
 <?php
 declare(strict_types=1);
-require_once __dir__ . '/../web/lib/Configuration.php';
 require_once __dir__ . '/../web/lib/messages.php';
 require_once __dir__ . '/TestBase.php';
 

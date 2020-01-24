@@ -88,7 +88,7 @@ class PlaylistData
     public function insert(Playlist $playlist, User $administrator)
     {
 
-        $sql = "
+        $sql1 = "
 			INSERT INTO 
 				playlist (
                     playlist_id,
@@ -103,10 +103,11 @@ class PlaylistData
         ";
 
         try {
-            $stmt = $this->dbConnection->prepare($sql);
+            $stmt1 = $this->dbConnection->prepare($sql1);
+            $this->dbConnection->autocommit(FALSE);
             $playlistId = GUID();
             $adminId = $administrator->id;
-            $stmt->bind_param("sssss",
+            $stmt1->bind_param("sssss",
                 $playlistId,
 				$playlist->title,
 				$playlist->description,
@@ -114,18 +115,46 @@ class PlaylistData
                 $adminId
             );
 
-            $stmt->execute();
-            $stmt->store_result();
+            $stmt1->execute();
+
+            $sql2 = "
+                INSERT INTO 
+                    playlist_song (
+                        playlist_song_id,
+                        song_id,
+                        playlist_id,
+                        created_date,
+                        created_by_id
+                    )
+                VALUES (?, ?, ?, now(), ?);
+            ";
+
+            foreach($playlist->songs as $song) {
+                $stmt2 = $this->dbConnection->prepare($sql2);
+                $playlistSongId = GUID();
+                $stmt2->bind_param("ssss",
+                    $playlistSongId,
+                    $song->id,
+                    $playlistId,
+                    $administrator->id
+                );
+                $stmt2->execute();
+            }
+            // $stmt->store_result();
+            $this->dbConnection->commit();
             return $playlistId;
         } catch (mysqli_sql_exception $e) {
-           $mysqliErrorMessage = $e->getMessage();
-           if (strpos($mysqliErrorMessage, 'title') !== false) {
+            $this->dbConnection->rollback();
+            $mysqliErrorMessage = $e->getMessage();
+            if (strpos($mysqliErrorMessage, 'title') !== false) {
                 throw new DuplicateTitleException(
                     sprintf(TITLE_TAKEN_MESSAGE, $playlist->title), TITLE_TAKEN_CODE);
             } else {
                 error_log($e->getMessage());
                 throw $e;
             }
+        } finally {
+            $this->dbConnection->autocommit(TRUE);
         }
     }
 
@@ -166,6 +195,7 @@ class PlaylistData
 
     public function delete($id)
     {
+
         // if playlist is in an album, throw an exception
         $this->removeAllSongsFromPlaylist($id);
 

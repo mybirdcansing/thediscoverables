@@ -33,6 +33,7 @@
 <!-- <script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/knockout/3.5.0/knockout-min.js'></script> -->
 <script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/knockout/3.2.0/knockout-debug.js'></script>
 <script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/knockout.mapping/2.4.1/knockout.mapping.min.js'></script>
+<script type='text/javascript' src='scripts/ConnectorBase.js'></script>
 <script type='text/javascript' src='scripts/UserConnector.js'></script>
 <script type='text/javascript'>
 	$(function() {

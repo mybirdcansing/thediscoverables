@@ -159,26 +159,26 @@ class SongController {
         return $errorMessages;
     }
 
-    private function _okResponse($json = null)
+    private function _okResponse($json = '{}')
     {
         $response['status_code_header'] = 'HTTP/1.1 200 OK';
-        $response['body'] = $json ? json_encode($json) : "{}";
+        $response['body'] = json_encode($json);
         return $response;
     }
 
-    private function _conflictResponse($json = null)
+    private function _conflictResponse($json = '{}')
     {
         $response['problem_header'] = true;
         $response['status_code_header'] = 'HTTP/1.1 409 Conflict';
-        $response['body'] = $json ? json_encode($json) : null;
+        $response['body'] = json_encode($json);
         return $response;
     }
 
-    private function _unprocessableEntityResponse($json = null)
+    private function _unprocessableEntityResponse($json = '{}')
     {
         $response['problem_header'] = true;
         $response['status_code_header'] = 'HTTP/1.1 422 Unprocessable Entity';
-        $response['body'] = $json ? json_encode($json) : null;
+        $response['body'] = json_encode($json);
         return $response;
     }
 
@@ -199,6 +199,7 @@ class SongController {
 
     private function _isInputStrValid($str) {
         // invalid chars are ' \ ` | ; @ " < > \
-        return preg_match('/[\'\/`\|;@"\<\>\\\]/', $str);
+        return preg_match('/[\/`\|;@"\<\>\\\]/', $str);
+        // return preg_match('/[\'\/`\|;@"\<\>\\\]/', $str);
     }
 }

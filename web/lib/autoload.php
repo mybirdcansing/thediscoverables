@@ -6,7 +6,6 @@
         $directorys = array(
             'connecters/',
             'objects/',
-            'handlers/user/',
             '.'
         );
         

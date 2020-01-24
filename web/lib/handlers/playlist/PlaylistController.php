@@ -13,7 +13,6 @@ class PlaylistController {
 
     public function __construct($dbConnection, $action, $playlistId, $songId, $administrator)
     {
-
         $this->songData = new SongData($dbConnection);
         $this->playlistData = new PlaylistData($dbConnection);
         $this->action = $action;
@@ -84,7 +83,6 @@ class PlaylistController {
     private function _createPlaylist()
     {
         $playlist = Playlist::fromJson(file_get_contents('php://input'));
-
         $validationIssues = $this->_validationIssues($playlist);
         if ((bool)$validationIssues) {
             return $this->_unprocessableEntityResponse([
@@ -99,6 +97,7 @@ class PlaylistController {
                 "playlistCreated" => true, 
                 "playlistId" => $playlistId
             ]);
+
         } catch (DuplicateTitleException $e) {
             return $this->_conflictResponse([
                 "playlistCreated" => false,
@@ -201,26 +200,26 @@ class PlaylistController {
         return $errorMessages;
     }
 
-    private function _okResponse($json = null)
+    private function _okResponse($json = '{}')
     {
         $response['status_code_header'] = 'HTTP/1.1 200 OK';
-        $response['body'] = $json ? json_encode($json) : null;
+        $response['body'] = json_encode($json);
         return $response;
     }
 
-    private function _conflictResponse($json = null)
+    private function _conflictResponse($json = '{}')
     {
         $response['problem_header'] = true;
         $response['status_code_header'] = 'HTTP/1.1 409 Conflict';
-        $response['body'] = $json ? json_encode($json) : null;
+        $response['body'] = json_encode($json);
         return $response;
     }
 
-    private function _unprocessableEntityResponse($json = null)
+    private function _unprocessableEntityResponse($json = '{}')
     {
         $response['problem_header'] = true;
         $response['status_code_header'] = 'HTTP/1.1 422 Unprocessable Entity';
-        $response['body'] = $json ? json_encode($json) : null;
+        $response['body'] = json_encode($json);
         return $response;
     }
 

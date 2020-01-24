@@ -41,18 +41,17 @@ p.formTitle {
 	margin-bottom: 10px;
 }
 
-form label, input {
+form label.for-text-input, input[type=text]  {
 	display: block;
 	width: 150px;
 	float: left;
 	margin-bottom: 10px;
 	font-size: 11pt;
+	text-align: right
 }
 
 
-form label {
-	text-align: right;
-}
+
 
 label {
 	width: 75px;

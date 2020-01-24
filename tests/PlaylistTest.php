@@ -9,7 +9,7 @@ use GuzzleHttp\Cookie\CookieJar;
 final class PlaylistTest extends TestBase
 {
 
-    public function testCreateSong()
+    public function testCreatePlaylist_1()
     {
         $playlist = $this->fleshedOutPlaylist();
         $createdPlaylist = $this->createPlaylist($playlist);
@@ -21,7 +21,7 @@ final class PlaylistTest extends TestBase
         }
     }
 
-    public function testUpdateSong()
+    public function testUpdatePlaylist()
     {
         $modifiedPlaylist = $this->createPlaylist($this->fleshedOutPlaylist());
         $modifiedPlaylist->title = GUID();
@@ -36,7 +36,7 @@ final class PlaylistTest extends TestBase
         }
     }
 
-    public function testCreateSongWithDupeTitle()
+    public function testCreatePlaylistWithDupeTitle()
     {
         $playlist = $this->fleshedOutPlaylist();
         $playlist = $this->createPlaylist($playlist);
@@ -45,7 +45,7 @@ final class PlaylistTest extends TestBase
         $this->deletePlaylist($playlist->id);
     }
 
-    public function testCreateSongWithLongTitle()
+    public function testCreatePlaylistWithLongTitle()
     {
         // create with long title
         $playlist = $this->fleshedOutPlaylist();
@@ -53,14 +53,14 @@ final class PlaylistTest extends TestBase
         $this->createPlaylistWithErrors($playlist, [TITLE_LONG_CODE => TITLE_LONG_MESSAGE], 422);
     }
 
-    public function testCreateSongWithBlankTitle()
+    public function testCreatePlaylistWithBlankTitle()
     {
         $playlist = $this->fleshedOutPlaylist();
         $playlist->title = '';
         $this->createPlaylistWithErrors($playlist, [TITLE_BLANK_CODE => TITLE_BLANK_MESSAGE], 422);
     }
 
-    public function testAddSongToPlaylist()
+    public function testAddPlaylistToPlaylist()
     {
         $playlist = $this->createPlaylist($this->fleshedOutPlaylist());
         $song1 = $this->createSong($this->fleshedOutSong());
@@ -86,7 +86,7 @@ final class PlaylistTest extends TestBase
         $this->deleteSong($song2->id);
     }
 
-    public function testRemoveSongFromPlaylist()
+    public function testRemovePlaylistFromPlaylist()
     {
         $playlist = $this->createPlaylist($this->fleshedOutPlaylist());
         $song1 = $this->createSong($this->fleshedOutSong());

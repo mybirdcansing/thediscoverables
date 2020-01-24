@@ -178,13 +178,13 @@ class TestBase extends TestCase
 
     public function createPlaylist($playlist)
     {
+
         $client = $this->getHandlerClient();
         $response = $client->post($this->playlistHandlerPath, [
             'json' => $playlist->expose(),
             'cookies' => $this->cookieJar
         ]);
         $json = json_decode($response->getBody()->getContents());
-        
         $this->assertTrue($json->playlistCreated, '`playlistCreated` should be true');
         $this->assertEquals(201, $response->getStatusCode());
         return $this->getPlaylist($json->playlistId);

@@ -160,6 +160,7 @@ class PlaylistData
 
     public function update(Playlist $playlist, User $administrator)
     {
+        error_log("playlist: " . json_encode($playlist));
         $sql = "
             UPDATE playlist
                 SET
@@ -171,15 +172,44 @@ class PlaylistData
         ";
 
         try {
-            $stmt = $this->dbConnection->prepare($sql);
-            $stmt->bind_param("ssss",
+            $this->dbConnection->autocommit(FALSE);
+            $stmt1 = $this->dbConnection->prepare($sql);
+            $stmt1->bind_param("ssss",
                 $playlist->title,
                 $playlist->description,
                 $administrator->id,
                 $playlist->id
             );
-            $stmt->execute();
-            $stmt->store_result();
+            $stmt1->execute();
+            $sql2 = "DELETE FROM playlist_song WHERE playlist_id = ?;";
+            $stmt2 = $this->dbConnection->prepare($sql2);
+            $stmt2->bind_param("s", $playlist->id);
+            $stmt2->execute();
+            $sql3 = "
+                INSERT INTO 
+                    playlist_song (
+                        playlist_song_id,
+                        song_id,
+                        playlist_id,
+                        created_date,
+                        created_by_id
+                    )
+                VALUES (?, ?, ?, now(), ?);
+            ";
+            if (isset($playlist->songs)) {
+                foreach($playlist->songs as $song) {
+                    $stmt3 = $this->dbConnection->prepare($sql3);
+                    $playlistSongId = GUID();
+                    $stmt3->bind_param("ssss",
+                        $playlistSongId,
+                        $song->id,
+                        $playlist->id,
+                        $administrator->id
+                    );
+                    $stmt3->execute();
+                }
+            }
+            $this->dbConnection->commit();
             return $playlist->id;
         } catch (mysqli_sql_exception $e) {
            $mysqliErrorMessage = $e->getMessage();
@@ -190,6 +220,8 @@ class PlaylistData
                 error_log($e->getMessage());
                 throw $e;
             }
+        } finally {
+            $this->dbConnection->autocommit(TRUE);
         }
     }
 

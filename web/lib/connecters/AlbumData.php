@@ -67,6 +67,7 @@ class AlbumData
 
     public function insert(Album $album, User $administrator)
     {
+
         $sql = "
 			INSERT INTO 
 				album (

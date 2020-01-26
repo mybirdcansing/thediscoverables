@@ -142,7 +142,6 @@ class AlbumController {
     private function _validationIssues($album)
     {
         $errorMessages = [];
-        
         if (!isset($album->title) || $album->title == '') {
             $errorMessages[TITLE_BLANK_CODE] = TITLE_BLANK_MESSAGE;
         } else {
@@ -152,6 +151,9 @@ class AlbumController {
             if ($this->_isInputStrValid($album->title)) {
                 $errorMessages[TITLE_INVALID_CODE] = TITLE_INVALID_MESSAGE;
             }
+        }
+        if (!isset($album->playlist)) {
+            $errorMessages[PLAYLIST_BLANK_CODE] = PLAYLIST_BLANK_MESSAGE;
         }
         return $errorMessages;
     }

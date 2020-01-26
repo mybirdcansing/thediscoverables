@@ -76,6 +76,8 @@ define("UPDATE_PASSWORD_ACTION", "UPDATE_PASSWORD");
 define("ADD_TO_PLAYLIST_ACTION", "ADD_TO_PLAYLIST_ACTION");
 define("REMOVE_FROM_PLAYLIST_ACTION", "REMOVE_FROM_PLAYLIST_ACTION");
 
+define("PLAYLIST_BLANK_CODE", 1025);
+define("PLAYLIST_BLANK_MESSAGE", "Please select a playlist.");
 
 // global methods
 function GUID()

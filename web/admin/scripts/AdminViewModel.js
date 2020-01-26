@@ -68,6 +68,7 @@ class AdminViewModel {
 		this.userConnector.getAll(successCallback, failedCallback);
 	}
 
+
 	openCreateUser = () => {
 		this.currentPage('create-user');
 	}
@@ -366,20 +367,28 @@ class AdminViewModel {
 	}
 
 	// Playlist methods
+
 	openPlaylists = () => {
 		this.loadSongs();
+		this.loadPlaylists(() => {this.currentPage('playlists');});
+	}
+
+
+	loadPlaylists = (callback) => {
 		let successCallback = (data, textStatus, jqXHR) => {
 			this.playlists.removeAll();
+
 			data.forEach(playlist => {
-				this.playlists.push(ko.mapping.fromJS(playlist));
+			  this.playlists.push(ko.mapping.fromJS(playlist));
 			});
-			this.currentPage('playlists');
+			if (callback) callback();
         };
         let failedCallback = (data, textStatus, errorThrown) => {
 			console.log('request failed! ' + textStatus);
 	    };
 		this.playlistConnector.getAll(successCallback, failedCallback);
 	}
+
 
 	openCreatePlaylist = () => {
 		this.currentPage('create-playlist');
@@ -388,9 +397,7 @@ class AdminViewModel {
 	cancelPlaylistForm = () => {
 		this.currentPage('playlists');
 	}
-
-	createPlaylist = (formElement) => {
-		let input = {};
+	_addFormDataToPlaylistInput = (input, formElement) => {
 		$(formElement).serializeArray().map((x) => {
 			if (x.name == 'songs') {
 				if (!input.hasOwnProperty('songs')) {
@@ -401,6 +408,11 @@ class AdminViewModel {
 				input[x.name] = x.value;
 			}
 		});
+	}
+
+	createPlaylist = (formElement) => {
+		let input = {};
+		this._addFormDataToPlaylistInput(input, formElement);
 
 		let successCallback = (data, textStatus, jqXHR) => {
 			this.openPlaylists();
@@ -414,17 +426,6 @@ class AdminViewModel {
 		this.playlistConnector.create(input, successCallback, failedCallback);
 	}
 
-	songInEditPlaylist = (id) => {
-		let checked = false;
-		 this.playlistToUpdate().songs().forEach((pls) => {
-			if (id == pls.id()) {
-				checked = true;
-				return;
-			}
-		});
-		return checked;
-	}
-
 	openEditPlaylist = (playlist) => {
 		let successCallback = (playlist, textStatus, jqXHR) => {
 			this.playlistToUpdate(ko.mapping.fromJS(playlist));
@@ -436,7 +437,10 @@ class AdminViewModel {
 		this.playlistConnector.get(playlist.id(), successCallback, failedCallback);
 	}
 
-	updatePlaylist = () => {
+	updatePlaylist = (formElement) => {
+		let input = {};
+		this._addFormDataToPlaylistInput(input, formElement);
+
 		let successCallback = (data, textStatus, jqXHR) => {
 			this.openPlaylists();
         };
@@ -446,7 +450,7 @@ class AdminViewModel {
 			}
 			console.log('request failed! ' + textStatus);
 	    };
-		this.playlistConnector.update(ko.mapping.toJS(this.playlistToUpdate()), successCallback, failedCallback);
+		this.playlistConnector.update(input, successCallback, failedCallback);
 	}
 
 	deletePlaylist = (playlist) => {
@@ -473,6 +477,131 @@ class AdminViewModel {
 		        	action: () => {
 						this.playlistConnector.deleteThing(
 							ko.mapping.toJS(playlist), successCallback, failedCallback);
+					},
+					keys: ['enter']
+		        },
+		        cancel: {
+		        	action: () => {},
+		        	keys: ['esc']
+		        }
+		    }
+		});
+	}
+
+	// Albums
+
+
+
+
+	openAlbums = () => {
+		let successCallback = (albums, textStatus, jqXHR) => {
+			this.albums.removeAll();
+			albums.forEach(album => {
+				this.albums.push(ko.mapping.fromJS(album));
+			});
+			this.loadPlaylists();
+			this.currentPage('albums');
+        };
+        let failedCallback = (data, textStatus, errorThrown) => {
+			console.log('request failed! ' + textStatus);
+	    };
+		this.albumConnector.getAll(successCallback, failedCallback);
+	}
+
+
+	openCreateAlbum = () => {
+		this.currentPage('create-album');
+	}
+
+	cancelAlbumForm = () => {
+		this.currentPage('albums');
+	}
+
+	createAlbum = (formElement) => {
+		let input = {};
+		$(formElement).serializeArray().map((x) => {
+			if (x.name == 'playlistId') {
+				let playlistId = x.value;
+				input.playlist = ko.mapping.toJS(this.playlists().find(pl => pl.id() == playlistId));
+			} else {
+				input[x.name] = x.value;
+			}
+		});
+
+		let successCallback = (data, textStatus, jqXHR) => {
+			this.openAlbums();
+        };
+        let failedCallback = (data, textStatus, errorThrown) => {
+        	if (data.errorMessages) {
+				this.validationErrors(Object.values(data.errorMessages).reverse());
+			}
+			console.log('request failed! ' + textStatus);
+	    };
+		this.albumConnector.create(input, successCallback, failedCallback);
+	}
+
+	openEditAlbum = (album) => {
+		let successCallback = (album) => {
+			this.albumToUpdate(ko.mapping.fromJS(album));
+			this.currentPage('edit-album');
+        };
+        let failedCallback = (data, textStatus, errorThrown) => {
+			console.log('request failed! ' + textStatus);
+	    };
+		this.albumConnector.get(album.id(), successCallback, failedCallback);
+	}
+
+	isAlbumPlaylist = (album, playlist) => {
+		return album.playlist.id() == playlist.id();
+	}
+
+	updateAlbum = (formElement) => {
+		let input = {};
+		$(formElement).serializeArray().map((x) => { 
+			if (x.name == 'playlistId') {
+				let playlistId = x.value;
+				input.playlist = ko.mapping.toJS(this.playlists().find(pl => pl.id() == playlistId));
+			} else {
+				input[x.name] = x.value;
+			}
+		});
+
+		let successCallback = (data, textStatus, jqXHR) => {
+			this.openAlbums();
+        };
+        let failedCallback = (data, textStatus, errorThrown) => {
+        	if (data.errorMessages) {
+				this.validationErrors(Object.values(data.errorMessages).reverse());
+			}
+			console.log('request failed! ' + textStatus);
+	    };
+		this.albumConnector.update(input, successCallback, failedCallback);
+	}
+
+	deleteAlbum = (album) => {
+		let successCallback = (data, textStatus, jqXHR) => {
+			this.openAlbums();
+        };
+
+        let failedCallback = (data, textStatus, errorThrown) => {
+			console.log('request failed! ' + textStatus);
+	    };
+
+		$.confirm({
+		    title: 'Delete album?',
+		    content: 'Are you sure you want to delete "' + album.title() + '"?',
+		    boxWidth: '500px',
+			useBootstrap: false,
+			draggable: true,
+			dragWindowBorder: false,
+			backgroundDismiss: true,
+			animation: 'none',
+		    buttons: {
+		        confirm: {
+		        	btnClass: 'btn-blue',
+		        	action: () => {
+						this.albumConnector.deleteThing(
+							ko.mapping.toJS(album), successCallback, failedCallback);
 					},
 					keys: ['enter']
 		        },

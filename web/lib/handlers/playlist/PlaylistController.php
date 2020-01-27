@@ -143,6 +143,7 @@ class PlaylistController {
 
     private function _deletePlaylist()
     {
+        error_log("playlistId; " . $this->playlistId);
         $result = $this->playlistData->find($this->playlistId);
         if (!$result) {
             return $this->_notFoundResponse();

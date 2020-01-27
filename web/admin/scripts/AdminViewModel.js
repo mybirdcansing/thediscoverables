@@ -510,7 +510,27 @@ class AdminViewModel {
 
 
 	openCreateAlbum = () => {
-		this.currentPage('create-album');
+		if (this.playlists().length < 1) {
+			$.alert({
+				title: 'Sorry!',
+				content: 'Please make a playlist before you make an Album',
+				boxWidth: '500px',
+				useBootstrap: false,
+				animation: 'none',
+				escapeKey: 'esc',
+				backgroundDismiss: true,
+				autoClose: 'Okay|2000',
+				buttons: {
+			        Okay: {
+			        	action: () => { },
+			        	keys: ['enter']
+			        }
+			    }
+			});
+        } else {
+			this.currentPage('create-album');
+        }
+		
 	}
 
 	cancelAlbumForm = () => {

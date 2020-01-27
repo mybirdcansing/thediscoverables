@@ -68,15 +68,19 @@ class PlaylistData
             FROM song s
             JOIN playlist_song pls ON 
                 s.song_id = pls.song_id
-            WHERE pls.playlist_id =  '" . $id . "';
+            WHERE pls.playlist_id = ?;
         ";
-
         $playlist->songs = [];
         try {
-            $stmt2 = $this->dbConnection->query($sql);
-            // $stmt2->bind_param("s", $id);
-            while ($row = $stmt2->fetch_assoc()) {
-                $playlist->songs[] = $this->rowToSong($row);
+            $stmt = $this->dbConnection->prepare($sql);
+            $stmt->bind_param("s", $id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if ($result->num_rows > 0) {
+                $songData = new SongData($this->dbConnection);
+                while ($row = $result->fetch_assoc()) {
+                    $playlist->songs[] = $songData->rowToSong($row);
+                }
             }
         } catch (\mysqli_sql_exception $e) {
             error_log($e->getMessage());
@@ -140,7 +144,6 @@ class PlaylistData
                 );
                 $stmt2->execute();
             }
-            // $stmt->store_result();
             $this->dbConnection->commit();
             return $playlistId;
         } catch (mysqli_sql_exception $e) {
@@ -160,7 +163,7 @@ class PlaylistData
 
     public function update(Playlist $playlist, User $administrator)
     {
-        error_log("playlist: " . json_encode($playlist));
+
         $sql = "
             UPDATE playlist
                 SET
@@ -212,6 +215,7 @@ class PlaylistData
             $this->dbConnection->commit();
             return $playlist->id;
         } catch (mysqli_sql_exception $e) {
+           $this->dbConnection->rollback();
            $mysqliErrorMessage = $e->getMessage();
            if (strpos($mysqliErrorMessage, 'title') !== false) {
                 throw new DuplicateTitleException(
@@ -227,23 +231,29 @@ class PlaylistData
 
     public function delete($id)
     {
-
-        // if playlist is in an album, throw an exception
-        $this->removeAllSongsFromPlaylist($id);
-
-        $sql = "DELETE FROM playlist WHERE playlist_id = ?;";
-
         try {
-            $stmt = $this->dbConnection->prepare($sql);
-            $stmt->bind_param("s", $id);
-            $stmt->execute();
-            $stmt->store_result();
-            $rowsEffected = $stmt->num_rows;
-            return $rowsEffected;
-        } catch (\mysqli_sql_exception $e) {
+            $this->dbConnection->autocommit(FALSE);
+
+            $sql = "DELETE FROM playlist_song WHERE playlist_id = ?;";
+            $stmt1 = $this->dbConnection->prepare($sql);
+            $stmt1->bind_param("s", $id);
+            $stmt1->execute();
+
+            $sql2 = "DELETE FROM playlist WHERE playlist_id = ?;";
+            $stmt2 = $this->dbConnection->prepare($sql2);
+            $stmt2->bind_param("s", $id);
+            $stmt2->execute();
+
+            $this->dbConnection->commit();
+
+            return true;
+        } catch (mysqli_sql_exception $e) {
+            $this->dbConnection->rollback();
             error_log($e->getMessage());
             throw $e;
-        }    
+        } finally {
+            $this->dbConnection->autocommit(TRUE);
+        }
     }
 
     public function addToPlaylist($playlistId, $songId, User $administrator)
@@ -296,23 +306,6 @@ class PlaylistData
         }
     }
 
-    public function removeAllSongsFromPlaylist($playlistId)
-    {
-        $sql = "DELETE FROM playlist_song WHERE playlist_id = ?;";
-        $rowsEffected = 0;
-        try {
-            $stmt = $this->dbConnection->prepare($sql);
-            $stmt->bind_param("s", $playlistId);
-            $stmt->execute();
-            $stmt->store_result();
-            $rowsEffected = $stmt->num_rows;
-            return $rowsEffected;
-        } catch (\mysqli_sql_exception $e) {
-            error_log($e->getMessage());
-            throw $e;
-        }
-    }
-
 	private function _rowToPlaylist($row)
     {
 	    $playlist = new Playlist();
@@ -322,13 +315,4 @@ class PlaylistData
 	    return $playlist;
 	}
 
-    public function rowToSong($row)
-    {
-        $song = new Song();
-        $song->id = $row["song_id"];
-        $song->title = $row["title"];
-        $song->description = $row["description"];
-        $song->filename = $row["filename"];
-        return $song;
-    }
 }

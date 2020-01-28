@@ -79,6 +79,11 @@ define("REMOVE_FROM_PLAYLIST_ACTION", "REMOVE_FROM_PLAYLIST_ACTION");
 define("PLAYLIST_BLANK_CODE", 1025);
 define("PLAYLIST_BLANK_MESSAGE", "Please select a playlist.");
 
+define("MP3_ONLY_CODE", 1026);
+define("MP3_ONLY_MESSAGE", "Only mp3s allowed.");
+define("FILE_BLANK_CODE", 1020);
+define("FILE_BLANK_MESSAGE", "Please upload a song.");
+
 // global methods
 function GUID()
 {

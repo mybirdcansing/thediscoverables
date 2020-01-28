@@ -8,6 +8,7 @@ class Song extends JsonConvertible {
     public $title;
     public $filename;
     public $description;
+    public $fileInput;
 
     function __construct() {
     }

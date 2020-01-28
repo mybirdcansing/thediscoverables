@@ -70,17 +70,49 @@ class SongController {
         return $this->_okResponse($song->expose());
     }
 
+    private function _handleUpload($song)
+    {
+        // Decode base64 data
+        list($type, $data) = explode(';', $song->fileInput);
+        list(, $data) = explode(',', $data);
+        $fileData = base64_decode($data);
+
+        // Get file mime type
+        $finfo = finfo_open();
+        $fileMimeType = finfo_buffer($finfo, $fileData, FILEINFO_MIME_TYPE);
+
+        // Validate type of file
+        if($fileMimeType == 'audio/mpeg') {
+            //overwrites file with the same name (this is intentional)
+            file_put_contents('../../../audio/' . $song->filename, $fileData);
+        }
+        else {
+            throw new BadMimeTypeException();
+        }
+    }
+
     private function _createSong()
     {
         $song = Song::fromJson(file_get_contents('php://input'));
+
         $validationIssues = $this->_validationIssues($song);
-        
+
         if ((bool)$validationIssues) {
             return $this->_unprocessableEntityResponse([
                 "songCreated" => false,
                 "errorMessages" => $validationIssues
             ]);
         }
+
+        try {
+            $this->_handleUpload($song);
+        } catch (BadMimeTypeException $e) {
+            return $this->_unprocessableEntityResponse([
+                "songCreated" => false,
+                "errorMessages" => [MP3_ONLY_CODE => MP3_ONLY_MESSAGE]
+            ]);
+        }
+
         try {
             $songId = $this->songData->insert($song, $this->administrator);
             $response['status_code_header'] = 'HTTP/1.1 201 Created';
@@ -111,6 +143,17 @@ class SongController {
         $existingSong = $this->songData->find($song->id);
         if (!$existingSong) {
             return $this->_notFoundResponse();
+        }
+
+        if (isset($song->fileData)) {        
+            try {
+                $this->_handleUpload($song);
+            } catch (BadMimeTypeException $e) {
+                return $this->_unprocessableEntityResponse([
+                    "songCreated" => false,
+                    "errorMessages" => [MP3_ONLY_CODE => MP3_ONLY_MESSAGE]
+                ]);
+            }
         }
 
         try {
@@ -156,6 +199,9 @@ class SongController {
                 $errorMessages[TITLE_INVALID_CODE] = TITLE_INVALID_MESSAGE;
             }
         }
+        if (!isset($song->filename) || $song->filename == '') {
+            $errorMessages[FILE_BLANK_CODE] = FILE_BLANK_MESSAGE;
+        } 
         return $errorMessages;
     }
 

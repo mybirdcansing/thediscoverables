@@ -12,7 +12,8 @@ header("Access-Control-Allow-Methods: OPTIONS,GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
-if(!AuthCookie::isValid()) {
+$requestMethod = $_SERVER["REQUEST_METHOD"];
+if(!$requestMethod == 'GET' && !AuthCookie::isValid()) {
     header("'HTTP/1.1 403 Forbidden'");
 	echo json_encode(
         array("authorized" => false, "message" => "You do not have permission to be here.")
@@ -42,7 +43,7 @@ if (isset($uri[5]) && $uri[5] != '') {
 
 $action = null;
 
-switch ($_SERVER["REQUEST_METHOD"]) {
+switch ($requestMethod) {
     case 'GET':
          $action = GET_ACTION;
         break;

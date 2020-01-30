@@ -1,7 +1,6 @@
 <?php
 require_once __dir__ . '/../messages.php';
 
-
 class DataAccess {
 
     private $dbConnection = null;

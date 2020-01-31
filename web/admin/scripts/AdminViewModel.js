@@ -16,10 +16,11 @@ class AdminViewModel {
 		this.playlists = ko.observableArray();
 		this.albums = ko.observableArray();
 		this.userToUpdate = ko.observable();
-		this.songToUpdate = ko.observable();
 		this.playlistToUpdate = ko.observable();
 		this.albumToUpdate = ko.observable();
 		this.validationErrors = ko.observableArray([]);
+		this.songToUpdate;
+		this.songToCreate;
   	}
 
 	pageToDisplay = (model) => {
@@ -291,8 +292,7 @@ class AdminViewModel {
 	}
 
 	createSong = (formElement) => {
-		let input = {};
-		$(formElement).serializeArray().map((x) => {input[x.name] = x.value;});
+		debugger;
 		let successCallback = (data, textStatus, jqXHR) => {
 			this.openSongs();
         };
@@ -302,7 +302,8 @@ class AdminViewModel {
 			}
 			console.log('request failed! ' + textStatus);
 	    };
-		this.songConnector.create(input, successCallback, failedCallback);
+	    let song = ko.mapping.toJS(this.songToCreate);
+		this.songConnector.create(song, successCallback, failedCallback);
 	}
 
 	updateSong = () => {
@@ -315,15 +316,16 @@ class AdminViewModel {
 			}
 			console.log('request failed! ' + textStatus);
 	    };
-		this.songConnector.update(ko.mapping.toJS(this.songToUpdate()), successCallback, failedCallback);
+		this.songConnector.update(ko.mapping.toJS(this.songToUpdate), successCallback, failedCallback);
 	}
 
 	openCreateSong = () => {
+		this.songToCreate = new SongViewModel();
 		this.currentPage('create-song');
 	}
 
 	openEditSong = (song) => {
-		this.songToUpdate(song);
+		this.songToUpdate = new SongViewModel(song);
 		this.currentPage('edit-song');
 	}
 
@@ -388,7 +390,6 @@ class AdminViewModel {
 	    };
 		this.playlistConnector.getAll(successCallback, failedCallback);
 	}
-
 
 	openCreatePlaylist = () => {
 		this.currentPage('create-playlist');
@@ -633,3 +634,5 @@ class AdminViewModel {
 		});
 	}
 }
+
+

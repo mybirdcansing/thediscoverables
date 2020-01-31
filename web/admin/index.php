@@ -240,23 +240,7 @@ if (AuthCookie::isValid()) {
 	</script>
 
 	<script type="text/html" id="create-song-template">
-		<form data-bind="submit: $parent.createSong">
-			<ul data-bind="foreach: $parent.validationErrors" class="loginErrors">
-				<li data-bind='text:$data'></li>
-			</ul>
-			<label class="for-text-input" for="title">Title</label>
-			<input name="title" /><br>
-			<label class="for-text-input" for="description">Description</label>
-			<input name="description" /><br>
-			<label class="for-text-input" for="filename">Filename</label>
-			<input name="filename" /><br>
-			<input type="submit" name="submit" value="submit" class="button" />
-			<input type="button" data-bind="click:$parent.cancelSongForm" name="cancel" value="cancel" class="button" /> 
-		</form>
-	</script>
-
-	<script type="text/html" id="edit-song-template">
-		<form data-bind="submit: $parent.updateSong, with: $parent.songToUpdate">
+		<form data-bind="submit:createSong, with:songToCreate">
 			<ul data-bind="foreach: $parent.validationErrors" class="loginErrors">
 				<li data-bind='text:$data'></li>
 			</ul>
@@ -264,8 +248,26 @@ if (AuthCookie::isValid()) {
 			<input name="title" data-bind="value: title" /><br>
 			<label class="for-text-input" for="description">Description</label>
 			<input name="description" data-bind="value: description" /><br>
-			<label class="for-text-input" for="filename">Filename</label>
-			<input name="filename" data-bind="value: filename" /><br>
+			<label class="for-text-input" for="fileInput">Upload</label>
+			<input type="file" data-bind="file: {data: fileInput, name: filename, reader: reader}"><br>
+			
+			<input type="submit" name="submit" value="submit" class="button" />
+			<input type="button" data-bind="click:$parent.cancelSongForm" name="cancel" value="cancel" class="button" /> 
+		</form>
+	</script>
+
+	<script type="text/html" id="edit-song-template">
+		<form data-bind="submit:updateSong, with:songToUpdate">
+			<ul data-bind="foreach: $parent.validationErrors" class="loginErrors">
+				<li data-bind='text:$data'></li>
+			</ul>
+			<input type="hidden" name="id" data-bind="value: id" /><br>
+			<label class="for-text-input" for="title">Title</label>
+			<input name="title" data-bind="value: title" /><br>
+			<label class="for-text-input" for="description">Description</label>
+			<input name="description" data-bind="value: description" /><br>
+			<label class="for-text-input" for="fileInput">Upload</label>
+			<input type="file" data-bind="file: {data: fileInput, name: filename, reader: reader}"><br>
 			<input type="submit" name="submit" value="submit" class="button" />
 			<input type="button" data-bind="click:$parent.cancelSongForm" name="cancel" value="cancel" class="button" /> 
 		</form>
@@ -313,7 +315,7 @@ if (AuthCookie::isValid()) {
 	</script>
 
 	<script type="text/html" id="create-playlist-template">
-		<form data-bind="submit: createPlaylist">
+		<form data-bind="submit:createPlaylist">
 			<ul data-bind="foreach: $root.validationErrors" class="loginErrors">
 				<li data-bind='text:$data'></li>
 			</ul>
@@ -473,7 +475,9 @@ if (AuthCookie::isValid()) {
 <script type='text/javascript' src='scripts/SongConnector.js'></script>
 <script type='text/javascript' src='scripts/PlaylistConnector.js'></script>
 <script type='text/javascript' src='scripts/AlbumConnector.js'></script>
+<script type='text/javascript' src='scripts/SongViewModel.js'></script>
 <script type='text/javascript' src='scripts/AdminViewModel.js'></script>
+<script type='text/javascript' src='scripts/bindings/knockout-file-bind.js'></script>
 <script type='text/javascript'>
 	$(function() {
 		var model = new AdminViewModel(<?php echo "$administrator, $blankAdministrator, $isAuthenticated" ?>);

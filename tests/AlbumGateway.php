@@ -15,62 +15,38 @@ class AlbumGateway extends GatewayBase
         return Album::fromJson($response->getBody()->getContents());
     }
 
-    public function createAlbum($album)
+    public function createAlbum($album, $expectedStatusCode = 201)
     {
         $response = $this->httpClient->post($this->handlerPath, [
             'json' => $album->expose(),
             'cookies' => $this->cookieJar
         ]);
-        $json = json_decode($response->getBody()->getContents());
-        $this->assertTrue($json->albumCreated, '`albumCreated` should be true');
-        $album->id = $json->albumId;
         try {
-            $this->assertEquals(201, $response->getStatusCode());
-            $album = $this->getAlbum($json->albumId);
-            return $album;
+            $this->assertEquals($expectedStatusCode, $response->getStatusCode());
+            $json = json_decode($response->getBody()->getContents());
+            $this->assertEquals($json->albumCreated, $expectedStatusCode == 201);
+            if ($json->albumCreated) {
+                $album->id = $json->albumId;
+            }
+            return $json;
         } catch (Exception $e) {
-            $this->deleteAlbum($album);
+            if (isset($album->id)) {
+                $this->deleteAlbum($album);
+            }
             throw $e;
         }
     }
 
-    public function createAlbumWithErrors($album, $expectedErrors, $expectedStatusCode)
-    {
-        $response = $this->httpClient->post($this->handlerPath, [
-            'json' => $album->expose(),
-            'cookies' => $this->cookieJar
-        ]);
-        $json = json_decode($response->getBody()->getContents());
-        try {
-            $this->assertEquals($expectedStatusCode, $response->getStatusCode());
-            $this->assertTrue(isset($json->albumCreated));
-            $this->assertFalse($json->albumCreated, 'The created flag was not set to false.');
-            $this->assertTrue(isset($json->errorMessages));
-            $ems = (array)$json->errorMessages;
-            foreach ($expectedErrors as $expectedErrorCode => $expectedErrorMessage) {
-                $this->assertArrayHasKey($expectedErrorCode, $ems);
-                $this->assertEquals($expectedErrorMessage, $ems[$expectedErrorCode]
-                );
-            }
-        } finally {
-            // cleanup the database
-            if ($json->albumCreated) {
-                $this->deletealbum($json->albumId);
-            }
-        }
-    }
-
-    public function updateAlbum($album)
+    public function updateAlbum($album, $expectedStatusCode = 200)
     {
         $response = $this->httpClient->post($this->handlerPath . $album->id, [
             'json' => $album->expose(),
             'cookies' => $this->cookieJar
         ]);
+        $this->assertEquals($response->getStatusCode(), $expectedStatusCode);
         $json = json_decode($response->getBody()->getContents());
-        $this->assertTrue($json->albumUpdated, '`albumUpdated` should be true');
-        $this->assertEquals(200, $response->getStatusCode());
-        $album = $this->getAlbum($json->albumId);
-        return $album;
+        $this->assertEquals($json->albumUpdated, $expectedStatusCode == 200);
+        return $json;
     }
 
     public function deleteAlbum($album)

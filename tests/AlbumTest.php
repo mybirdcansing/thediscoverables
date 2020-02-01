@@ -8,7 +8,8 @@ final class AlbumTest extends TestBase
     public function testCreateAlbum()
     {
         $album = $this->fleshedOutAlbum();
-        $createdAlbum = $this->getAlbumGateway()->createAlbum($album);
+        $json = $this->getAlbumGateway()->createAlbum($album);
+        $createdAlbum = $this->getAlbumGateway()->getAlbum($json->albumId);
         try {
             $this->assertEquals($album->title, $createdAlbum->title);
             $this->assertEquals($album->playlist->id, $createdAlbum->playlist->id);
@@ -21,10 +22,13 @@ final class AlbumTest extends TestBase
 
     public function testUpdateAlbum()
     {
-        $modifiedAlbum = $this->getAlbumGateway()->createAlbum($this->fleshedOutAlbum());
+        $json = $this->getAlbumGateway()->createAlbum($this->fleshedOutAlbum());
+        $modifiedAlbum = $this->getAlbumGateway()->getAlbum($json->albumId);
+        
         $modifiedAlbum->title = GUID();
         $modifiedAlbum->description = 'pizza is good';
-        $updatedAlbum = $this->getAlbumGateway()->updateAlbum($modifiedAlbum);
+        $json = $this->getAlbumGateway()->updateAlbum($modifiedAlbum);
+        $updatedAlbum = $this->getAlbumGateway()->getAlbum($json->albumId);
         try {
             $this->assertEquals($modifiedAlbum->title, $updatedAlbum->title);
             $this->assertEquals($modifiedAlbum->description, $updatedAlbum->description);
@@ -36,11 +40,16 @@ final class AlbumTest extends TestBase
 
     public function testCreateAlbumWithDupeTitle()
     {
-        $album1 = $this->getAlbumGateway()->createAlbum($this->fleshedOutAlbum());
-        $expectedErrors = [TITLE_TAKEN_CODE => sprintf(TITLE_TAKEN_MESSAGE, $album1->title)];
+        $json = $this->getAlbumGateway()->createAlbum($this->fleshedOutAlbum());
+        $album1 = $this->getAlbumGateway()->getAlbum($json->albumId);
+
         $album2 = $this->fleshedOutAlbum();
         $album2->title = $album1->title;
-        $this->getAlbumGateway()->createAlbumWithErrors($album2, $expectedErrors, 409);
+        $json = $this->getAlbumGateway()->createAlbum($album2, 409);
+
+        $this->validateErrorMessages($json, 
+            [TITLE_TAKEN_CODE => sprintf(TITLE_TAKEN_MESSAGE, $album1->title)]);
+
         $this->getPlaylistGateway()->deletePlaylist($album2->playlist->id);
         $this->getAlbumGateway()->deleteAlbum($album1);
         $this->getPlaylistGateway()->deletePlaylist($album1->playlist->id);
@@ -50,7 +59,8 @@ final class AlbumTest extends TestBase
     {
         $album = $this->fleshedOutAlbum();
         $album->title = '123456789012345678901234567890123456789012345678901234567890123456123456789012345678901234567890123456789012345678901234567890123456123456789012345678901234567890123456789012345678901234567890123456123456789012345678901234567890123456789012345678901234567890123456123456789012345678901234567890123456789012345678901234567890123456123456789012345678901234567890123456789012345678901234567890123456';
-        $this->getAlbumGateway()->createAlbumWithErrors($album, [TITLE_LONG_CODE => TITLE_LONG_MESSAGE], 422);
+        $json = $this->getAlbumGateway()->createAlbum($album, 422);
+        $this->validateErrorMessages($json, [TITLE_LONG_CODE => TITLE_LONG_MESSAGE]);
         $this->getPlaylistGateway()->deletePlaylist($album->playlist->id);
     }
 
@@ -58,7 +68,8 @@ final class AlbumTest extends TestBase
     {
         $album = $this->fleshedOutAlbum();
         $album->title = '';
-        $this->getAlbumGateway()->createAlbumWithErrors($album, [TITLE_BLANK_CODE => TITLE_BLANK_MESSAGE], 422);
+        $json = $this->getAlbumGateway()->createAlbum($album, 422);
+        $this->validateErrorMessages($json, [TITLE_BLANK_CODE => TITLE_BLANK_MESSAGE]);
         $this->getPlaylistGateway()->deletePlaylist($album->playlist->id);
     }
 }

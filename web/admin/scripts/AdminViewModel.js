@@ -292,7 +292,6 @@ class AdminViewModel {
 	}
 
 	createSong = (formElement) => {
-		debugger;
 		let successCallback = (data, textStatus, jqXHR) => {
 			this.openSongs();
         };
@@ -460,6 +459,25 @@ class AdminViewModel {
         };
 
         let failedCallback = (data, textStatus, errorThrown) => {
+        	
+        	if (data.errorMessages) {
+				
+				$.alert({
+					title: 'Problem!',
+					content: Object.values(data.errorMessages).reverse().join(','),
+					boxWidth: '500px',
+					useBootstrap: false,
+					animation: 'none',
+					backgroundDismiss: true,
+					escapeKey: 'esc',
+					buttons: {
+				        OK: {
+				        	action: () => { },
+				        	keys: ['enter']
+				        }
+				    }
+				});
+			}
 			console.log('request failed! ' + textStatus);
 	    };
 

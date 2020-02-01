@@ -147,7 +147,15 @@ class PlaylistController {
         if (!$result) {
             return $this->_notFoundResponse();
         }
-        $this->playlistData->delete($this->playlistId);
+        try {
+            $this->playlistData->delete($this->playlistId);
+        } catch (DeletePlaylistInAlbumException $e) {
+            return $this->_conflictResponse([
+                "playlistDeleted" => false, 
+                "playlistId" => $this->playlistId,
+                "errorMessages" => array(DELETE_PLAYLIST_IN_ALBUM_CODE => DELETE_PLAYLIST_IN_ALBUM_MESSAGE)
+            ]);
+        }
         return $this->_okResponse();
     }
 

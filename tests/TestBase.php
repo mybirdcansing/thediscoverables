@@ -34,6 +34,17 @@ class TestBase extends TestCase
         return $json;
     }
 
+    function validateErrorMessages($json, $expectedErrorMessages)
+    {
+        $this->assertTrue(isset($json->errorMessages));
+        $actualErrorMessages = (array)$json->errorMessages;
+        foreach ($expectedErrorMessages as $expectedErrorCode => $expectedErrorMessage) {
+            $this->assertArrayHasKey($expectedErrorCode, $actualErrorMessages);
+            $this->assertEquals($expectedErrorMessage, $actualErrorMessages[$expectedErrorCode]
+            );
+        }
+    }
+
     // factory methods
     function getHandlerClient() 
     {

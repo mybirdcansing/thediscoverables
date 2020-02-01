@@ -62,8 +62,12 @@ define("TITLE_TAKEN_MESSAGE", "The title (%s) is taken. Please use another.");
 define("PLAYLIST_NOT_FOUND_CODE", 1023);
 define("PLAYLIST_NOT_FOUND_MESSAGE", "Playlist not found.");
 
+
 define("SONG_NOT_FOUND_CODE", 1024);
 define("SONG_NOT_FOUND_MESSAGE", "Song not found.");
+
+define("DELETE_PLAYLIST_IN_ALBUM_CODE", 1025);
+define("DELETE_PLAYLIST_IN_ALBUM_MESSAGE", "This playlist is used in an album, so it can't be deleted.");
 
 define("ACTIVE_USER_STATUS_ID", 1);
 define("INACTIVE_USER_STATUS_ID", 2);

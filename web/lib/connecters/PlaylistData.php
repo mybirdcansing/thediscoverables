@@ -2,7 +2,9 @@
 require_once __dir__ . '/../objects/Playlist.php';
 require_once __dir__ . '/../objects/Song.php';
 require_once __dir__ . '/../objects/User.php';
+require_once __dir__ . '/SongData.php';
 require_once __dir__ . '/../objects/DuplicateTitleException.php';
+require_once __dir__ . '/../objects/DeletePlaylistInAlbumException.php';
 
 class PlaylistData
 { 
@@ -163,7 +165,6 @@ class PlaylistData
 
     public function update(Playlist $playlist, User $administrator)
     {
-
         $sql = "
             UPDATE playlist
                 SET
@@ -249,8 +250,12 @@ class PlaylistData
             return true;
         } catch (mysqli_sql_exception $e) {
             $this->dbConnection->rollback();
-            error_log($e->getMessage());
-            throw $e;
+            if ($e->getCode() == 1451) {
+                throw new DeletePlaylistInAlbumException($e->getMessage());
+            } else {
+                error_log($e->getMessage());
+                throw $e;
+            }
         } finally {
             $this->dbConnection->autocommit(TRUE);
         }

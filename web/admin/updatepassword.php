@@ -8,7 +8,7 @@
 	<p>
 	The Discoverables Administration
 	</p>
-	<div id='page' data-bind="template: { name: pageToDisplay, data: $data}"></div>
+	<div id='page' data-bind="template: { name: templateName, data: $data}"></div>
 
 	<script type="text/html" id="enter-new-password-template">
 		<form data-bind="submit: $parent.updatePassword" class="password-reset">
@@ -45,7 +45,7 @@
 		this.validationErrors = ko.observableArray([]);
 		this.userConnector = new UserConnector();
 
-		this.pageToDisplay = function(model) {
+		this.templateName = function(model) {
 			return model.currentPage() + '-template';
 		};
 

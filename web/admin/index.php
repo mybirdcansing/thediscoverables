@@ -3,7 +3,7 @@ require_once __DIR__ . '/../lib/objects/AuthCookie.php';
 require_once __dir__ . '/../lib/connecters/DataAccess.php';
 require_once __dir__ . '/../lib/connecters/UserData.php';
 
-$blankAdministrator = json_encode(new User());
+$blankUser = json_encode(new User());
 if (AuthCookie::isValid()) {
 	$isAuthenticated = 'true';
 	$dataConnection = (new DataAccess())->getConnection();
@@ -11,18 +11,16 @@ if (AuthCookie::isValid()) {
 	$administrator = json_encode($userData->getByUsername(AuthCookie::getUsername()));
 } else {
 	$isAuthenticated = 'false';
-	$administrator = $blankAdministrator;
+	$administrator = $blankUser;
 }
 
 ?>
 <!DOCTYPE html>
 <html>
 <head>
-	<title>The Discoverables Administration</title>
+	<title>The Discoverables Admin</title>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.css">
-	
-	<link rel="stylesheet" href="styles.css">
-
+	<link rel="stylesheet" href="/admin/styles.css">
 </head>
 <body>
 	<p>
@@ -35,34 +33,34 @@ if (AuthCookie::isValid()) {
 		</div>
 		<div>MENUE</div>
 		<div>
-			<button data-bind='click: openSongs'>
+			<button data-bind="click: goToPage.bind($root, 'songs')">
 				Songs
 			</button>
 		</div>
 		<div>
-			<button data-bind='click: openPlaylists'>
+			<button data-bind="click: goToPage.bind($root, 'playlists')">
 				Playlists
 			</button>
 		</div>
 		<div>
-			<button data-bind='click: openAlbums'>
+			<button data-bind="click:  goToPage.bind($root, 'albums')">
 				Albums
 			</button>
 		</div>
 		<div>
-			<button data-bind='click: openUsers'>
+			<button data-bind="click: goToPage.bind($root, 'users')">
 				Users
 			</button>
 		</div>
 		<br/>
 		<div>
-			<button data-bind='click: logout'>
+			<button data-bind="click: logout">
 				Logout
 			</button>
 		</div>
 	</div>
 
-	<div id='page' data-bind="template: { name: pageToDisplay, data: $data}"></div>
+	<div id='page' data-bind="template: {name: templateName, data: $data}"></div>
 	
 	<script type="text/html" id="blank-template">[blank]</script>
 
@@ -70,28 +68,28 @@ if (AuthCookie::isValid()) {
 
 	<script type="text/html" id="login-template">
 		<form data-bind="submit: login">
-			<ul data-bind="foreach: loginErrors" class="loginErrors">
+			<ul data-bind="foreach: validationErrors" class="loginErrors">
 				<li data-bind='text:$data'></li>
 			</ul>
 			<label class="for-text-input" for="username">Username</label>
-			<input name="username"><br>
+			<input name="username" autocomplete="username" ><br>
 			<label class="for-text-input" for="password">Password</label>
-			<input type="password" name="password"><br>
+			<input type="password" name="password" autocomplete="current-password" ><br>
 			<input type="submit" name="submit" value="submit" class="button" />
 		</form>
 		<p><a href="javascript://" data-bind='click:openPasswordResetForm'>Trouble siging in?</a></p>
 	</script>
 
-	<script type="text/html" id="password-recovery-template">
+	<script type="text/html" id="passwordrecovery-template">
 		<form data-bind="submit: requestPasswordReset">
 			<p>Enter your username or email to reset your password</p>
-			<ul data-bind="foreach: loginErrors" class="loginErrors">
+			<ul data-bind="foreach: validationErrors" class="loginErrors">
 				<li data-bind='text:$data'></li>
 			</ul>
 			<label class="for-text-input" for="username">Username</label>
-			<input name="username"><br>
+			<input name="username" autocomplete="username"><br>
 			<label class="for-text-input" for="email">Email</label>
-			<input name="email"><br>
+			<input name="email" autocomplete="email"><br>
 			<input type="submit" name="submit" value="submit" class="button" />
 			<input type="button" data-bind="click:cancelPasswordResetRequest" name="cancel" value="cancel" class="button" /> 
 		</form>
@@ -99,7 +97,7 @@ if (AuthCookie::isValid()) {
 
 	<script type="text/html" id="users-template">
 		<div style="text-align: left">
-			<button data-bind="click:openCreateUser" class="button">New User</button>
+			<button data-bind="click:goToPage.bind($root, 'createuser')" class="button">New User</button>
 		</div>
 		<table>
 		    <thead class='userCells'>
@@ -126,7 +124,7 @@ if (AuthCookie::isValid()) {
 		            </td>
 		            <td>
 		            	<span class="link" 
-		            		data-bind="click: $root.openEditUser.bind($parent)">
+		            		data-bind='click: $root.goToPage.bind($root, "user", id())'>
 							<svg width="20" height="20" viewBox="0 0 24 24" class="NSy2Hd editButton">
 								<path fill="none" d="M0 0h24v24H0V0z"></path>
 								<path d="M14.06 9.02l.92.92L5.92 19H5v-.92l9.06-9.06M17.66 3c-.25 0-.51.1-.7.29l-1.83 1.83 3.75 3.75 1.83-1.83c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.2-.2-.45-.29-.71-.29zm-3.6 3.19L3 17.25V21h3.75L17.81 9.94l-3.75-3.75z"></path>
@@ -158,30 +156,30 @@ if (AuthCookie::isValid()) {
 		</table>
 	</script>
 
-	<script type="text/html" id="create-user-template">
-		<form data-bind="submit: $parent.createUser">
+	<script type="text/html" id="createuser-template">
+		<form data-bind="submit: createUser, with: userToUpdate" autocomplete="off">
 			<ul data-bind="foreach: $parent.validationErrors" class="loginErrors">
 				<li data-bind='text:$data'></li>
 			</ul>
 			<label class="for-text-input" for="firstName">First Name</label>
-			<input name="firstName" /><br>
+			<input name="firstName" placeholder="First Name" data-bind="value: firstName"/><br>
 			<label class="for-text-input" for="lastName">Last Name</label>
-			<input name="lastName" /><br>
+			<input name="lastName" placeholder="Last Name" data-bind="value: lastName" /><br>
 			<label class="for-text-input" for="username">Username</label>
-			<input name="username" /><br>
+			<input name="username" placeholder="Username" autocomplete="username" data-bind="value: username"/><br>
 			<label class="for-text-input" for="email">Email</label>
-			<input name="email" /><br>
+			<input name="email" placeholder="Email" autocomplete="email" data-bind="value: email" /><br>
 			<label class="for-text-input" for="password">Password</label>
-			<input name="password" type="password" /><br>
+			<input name="password" type="password" placeholder="Password" autocomplete="new-password"  data-bind="value: password" /><br>
 			<label class="for-text-input" for="confirmPassword">Confirm Password</label>
-			<input name="confirmPassword" type="password" /><br>
+			<input name="confirmPassword" type="password" placeholder="Confirm Password" autocomplete="new-password" data-bind="value: confirmPassword" /><br>
 			<input type="submit" name="submit" value="submit" class="button" />
-			<input type="button" data-bind="click:$parent.cancelUserForm" name="cancel" value="cancel" class="button" /> 
+			<input type="button" data-bind="click:$root.goToPage.bind($root, 'users')" name="cancel" value="cancel" class="button" /> 
 		</form>
 	</script>
 
-	<script type="text/html" id="edit-user-template">
-		<form data-bind="submit: $parent.updateUser, with: $parent.userToUpdate">
+	<script type="text/html" id="user-template">
+		<form data-bind="submit: updateUser, with: userToUpdate">
 			<ul data-bind="foreach: $parent.validationErrors" class="loginErrors">
 				<li data-bind='text:$data'></li>
 			</ul>
@@ -194,7 +192,7 @@ if (AuthCookie::isValid()) {
 			<label class="for-text-input" for="email">Email</label>
 			<input name="email" data-bind="value: email" /><br>
 			<input type="submit" name="submit" value="submit" class="button" />
-			<input type="button" data-bind="click:$parent.cancelUserForm" name="cancel" value="cancel" class="button" /> 
+			<input type="button" data-bind="click:$root.goToPage.bind($root, 'users')" name="cancel" value="cancel" class="button" /> 
 		</form>
 	</script>
 
@@ -202,7 +200,7 @@ if (AuthCookie::isValid()) {
 	
 	<script type="text/html" id="songs-template">
 		<div style="text-align: left">
-			<button data-bind="click:openCreateSong" class="button">New Song</button>
+			<button data-bind="click:goToPage.bind($root, 'createsong')" class="button">New Song</button>
 		</div>
 		<table>
 		    <thead class='userCells'>
@@ -219,7 +217,7 @@ if (AuthCookie::isValid()) {
 		            </td>
 		            <td>
 		            	<span class="link" 
-		            		data-bind="click: $root.openEditSong.bind($parent)">
+		            		data-bind="click: $root.goToPage.bind($parent, 'song', id())">
 							<svg width="20" height="20" viewBox="0 0 24 24" class="NSy2Hd editButton">
 								<path fill="none" d="M0 0h24v24H0V0z"></path>
 								<path d="M14.06 9.02l.92.92L5.92 19H5v-.92l9.06-9.06M17.66 3c-.25 0-.51.1-.7.29l-1.83 1.83 3.75 3.75 1.83-1.83c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.2-.2-.45-.29-.71-.29zm-3.6 3.19L3 17.25V21h3.75L17.81 9.94l-3.75-3.75z"></path>
@@ -239,8 +237,8 @@ if (AuthCookie::isValid()) {
 		</table>
 	</script>
 
-	<script type="text/html" id="create-song-template">
-		<form data-bind="submit:createSong, with:songToCreate">
+	<script type="text/html" id="createsong-template">
+		<form data-bind="submit:createSong, with:songToUpdate">
 			<ul data-bind="foreach: $parent.validationErrors" class="loginErrors">
 				<li data-bind='text:$data'></li>
 			</ul>
@@ -252,11 +250,11 @@ if (AuthCookie::isValid()) {
 			<input type="file" data-bind="file: {data: fileInput, name: filename, reader: reader}"><br>
 			
 			<input type="submit" name="submit" value="submit" class="button" />
-			<input type="button" data-bind="click:$parent.cancelSongForm" name="cancel" value="cancel" class="button" /> 
+			<input type="button" data-bind="click:$root.goToPage.bind($root, 'songs')" name="cancel" value="cancel" class="button" /> 
 		</form>
 	</script>
 
-	<script type="text/html" id="edit-song-template">
+	<script type="text/html" id="song-template">
 		<form data-bind="submit:updateSong, with:songToUpdate">
 			<ul data-bind="foreach: $parent.validationErrors" class="loginErrors">
 				<li data-bind='text:$data'></li>
@@ -269,7 +267,7 @@ if (AuthCookie::isValid()) {
 			<label class="for-text-input" for="fileInput">Upload</label>
 			<input type="file" data-bind="file: {data: fileInput, name: filename, reader: reader}"><br>
 			<input type="submit" name="submit" value="submit" class="button" />
-			<input type="button" data-bind="click:$parent.cancelSongForm" name="cancel" value="cancel" class="button" /> 
+			<input type="button" data-bind="click:$root.goToPage.bind($root, 'songs')" name="cancel" value="cancel" class="button" /> 
 		</form>
 	</script>
 
@@ -277,7 +275,7 @@ if (AuthCookie::isValid()) {
 	
 	<script type="text/html" id="playlists-template">
 		<div style="text-align: left">
-			<button data-bind="click:openCreatePlaylist" class="button">New Playlist</button>
+			<button data-bind="click:goToPage.bind($root, 'createplaylist')" class="button">New Playlist</button>
 		</div>
 		<table>
 		    <thead class='userCells'>
@@ -294,7 +292,7 @@ if (AuthCookie::isValid()) {
 		            </td>
 		            <td>
 		            	<span class="link" 
-		            		data-bind="click: $root.openEditPlaylist.bind($parent)">
+		            		data-bind="click: $root.goToPage.bind($root, 'playlist', id())">
 							<svg width="20" height="20" viewBox="0 0 24 24" class="NSy2Hd editButton">
 								<path fill="none" d="M0 0h24v24H0V0z"></path>
 								<path d="M14.06 9.02l.92.92L5.92 19H5v-.92l9.06-9.06M17.66 3c-.25 0-.51.1-.7.29l-1.83 1.83 3.75 3.75 1.83-1.83c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.2-.2-.45-.29-.71-.29zm-3.6 3.19L3 17.25V21h3.75L17.81 9.94l-3.75-3.75z"></path>
@@ -314,28 +312,35 @@ if (AuthCookie::isValid()) {
 		</table>
 	</script>
 
-	<script type="text/html" id="create-playlist-template">
-		<form data-bind="submit:createPlaylist">
+	<script type="text/html" id="createplaylist-template">
+		<form data-bind="submit:createPlaylist, with: $root.playlistToUpdate">
 			<ul data-bind="foreach: $root.validationErrors" class="loginErrors">
 				<li data-bind='text:$data'></li>
 			</ul>
 			<label class="for-text-input" for="title">Title</label>
-			<input name="title" /><br />
+			<input name="title" data-bind="value: title" /><br />
 			<label class="for-text-input" for="description">Description</label>
-			<input name="description" /><br />
+			<input name="description" data-bind="value: description" /><br />
 			<label class="for-text-input" for="songs">Songs</label><br />
-			<div data-bind="foreach: songs" style="text-align: left;margin-left: 160px;">
+			<div data-bind="foreach: $root.songs" style="text-align: left;margin-left: 160px;">
 			    <div>
-			        <input type="checkbox" name="songs" data-bind="checkedValue: id, attr: { id: id }">
+			        <input 
+			        	type="checkbox" 
+			        	name="songs" 
+			        	data-bind="
+		        			checkedValue: id, 
+		        			attr: { id: id }, 
+			        		click:$root.togglePlaylistSongAssociation.bind($root, $data)
+			        		">
 			        <label data-bind="text: title, attr: { for: id }"></label>
 			    </div>
 			</div><br>
 			<input type="submit" name="submit" value="submit" class="button" />
-			<input type="button" data-bind="click:$root.cancelPlaylistForm" name="cancel" value="cancel" class="button" /> 
+			<input type="button" data-bind="click:$root.goToPage.bind($root, 'playlists')" name="cancel" value="cancel" class="button" /> 
 		</form>
 	</script>
 
-	<script type="text/html" id="edit-playlist-template">
+	<script type="text/html" id="playlist-template">
 		<form data-bind="submit: $root.updatePlaylist, with: $root.playlistToUpdate">
 			<ul data-bind="foreach: $root.validationErrors" class="loginErrors">
 				<li data-bind='text:$data'></li>
@@ -357,13 +362,14 @@ if (AuthCookie::isValid()) {
 			        		attr: { 
 			        			id: id,
 			        			checked:$parent.songs().find(pls => id() == pls.id())
-			        		}
+			        		},
+			        		click:$root.togglePlaylistSongAssociation.bind($root, $parent, $data)
 			        		">
 			        <label data-bind="text: title, attr: { for: id }"></label>
 			    </div>
 			</div><br>
 			<input type="submit" name="submit" value="submit" class="button" />
-			<input type="button" data-bind="click:$parent.cancelPlaylistForm" name="cancel" value="cancel" class="button" /> 
+			<input type="button" data-bind="click:$root.goToPage.bind($root, 'playlists')" name="cancel" value="cancel" class="button" /> 
 		</form>
 	</script>
 
@@ -372,7 +378,7 @@ if (AuthCookie::isValid()) {
 	
 	<script type="text/html" id="albums-template">
 		<div style="text-align: left">
-			<button data-bind="click:openCreateAlbum" class="button">New Album</button>
+			<button data-bind="click: goToPage.bind($parent, 'createalbum')" class="button">New Album</button>
 		</div>
 		<table>
 		    <thead class='userCells'>
@@ -389,7 +395,7 @@ if (AuthCookie::isValid()) {
 		            </td>
 		            <td>
 		            	<span class="link" 
-		            		data-bind="click: $root.openEditAlbum.bind($parent)">
+		            		data-bind="click: $root.goToPage.bind($parent, 'album', id())">
 							<svg width="20" height="20" viewBox="0 0 24 24" class="NSy2Hd editButton">
 								<path fill="none" d="M0 0h24v24H0V0z"></path>
 								<path d="M14.06 9.02l.92.92L5.92 19H5v-.92l9.06-9.06M17.66 3c-.25 0-.51.1-.7.29l-1.83 1.83 3.75 3.75 1.83-1.83c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.2-.2-.45-.29-.71-.29zm-3.6 3.19L3 17.25V21h3.75L17.81 9.94l-3.75-3.75z"></path>
@@ -409,7 +415,7 @@ if (AuthCookie::isValid()) {
 		</table>
 	</script>
 
-	<script type="text/html" id="create-album-template">
+	<script type="text/html" id="createalbum-template">
 		<form data-bind="submit: createAlbum">
 			<ul data-bind="foreach: $root.validationErrors" class="loginErrors">
 				<li data-bind='text:$data'></li>
@@ -430,7 +436,7 @@ if (AuthCookie::isValid()) {
 		</form>
 	</script>
 
-	<script type="text/html" id="edit-album-template">
+	<script type="text/html" id="album-template">
 		<form data-bind="submit: $root.updateAlbum, with: albumToUpdate">
 			<ul data-bind="foreach: $root.validationErrors" class="loginErrors">
 				<li data-bind='text:$data'></li>
@@ -470,18 +476,21 @@ if (AuthCookie::isValid()) {
 <script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/knockout/3.2.0/knockout-debug.js'></script>
 <script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/knockout.mapping/2.4.1/knockout.mapping.min.js'></script>
 <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
-<script type='text/javascript' src='scripts/ConnectorBase.js'></script>
-<script type='text/javascript' src='scripts/UserConnector.js'></script>
-<script type='text/javascript' src='scripts/SongConnector.js'></script>
-<script type='text/javascript' src='scripts/PlaylistConnector.js'></script>
-<script type='text/javascript' src='scripts/AlbumConnector.js'></script>
-<script type='text/javascript' src='scripts/SongViewModel.js'></script>
-<script type='text/javascript' src='scripts/AdminViewModel.js'></script>
-<script type='text/javascript' src='scripts/bindings/knockout-file-bind.js'></script>
+<script type='text/javascript' src='/admin/scripts/bindings/knockout-file-bind.js'></script>
+<script type='text/javascript' src='/admin/scripts/Router.js'></script>
+<script type='text/javascript' src='/admin/scripts/ConnectorBase.js'></script>
+<script type='text/javascript' src='/admin/scripts/UserConnector.js'></script>
+<script type='text/javascript' src='/admin/scripts/SongConnector.js'></script>
+<script type='text/javascript' src='/admin/scripts/PlaylistConnector.js'></script>
+<script type='text/javascript' src='/admin/scripts/AlbumConnector.js'></script>
+<script type='text/javascript' src='/admin/scripts/SongViewModel.js'></script>
+<script type='text/javascript' src='/admin/scripts/UserViewModel.js'></script>
+<script type='text/javascript' src='/admin/scripts/AdminViewModel.js'></script>
 <script type='text/javascript'>
 	$(function() {
-		var model = new AdminViewModel(<?php echo "$administrator, $blankAdministrator, $isAuthenticated" ?>);
-		ko.applyBindings(model, document.body);
+		ko.applyBindings(
+			new AdminViewModel(<?php echo "$administrator, $isAuthenticated" ?>),
+			document.body);
 	});
 </script>
 </html>

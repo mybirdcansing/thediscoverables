@@ -1,12 +1,13 @@
 
 class SongViewModel 
 {
-	constructor(songModel) {
-		this.id = ko.observable(songModel ? songModel.id() : '');
-		this.title = ko.observable(songModel ? songModel.title() : '');
-		this.description = ko.observable(songModel ? songModel.description() : '');
-	    this.filename = ko.observable(songModel ? songModel.filename() : '');
+	constructor() {
+		this.id = ko.observable();
+		this.title = ko.observable();
+		this.description = ko.observable();
+	    this.filename = ko.observable();
 	    this.fileInput = ko.observable();
 		this.reader = new FileReader();
 	}
+
 }

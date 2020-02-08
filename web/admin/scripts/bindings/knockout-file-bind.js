@@ -27,6 +27,7 @@
 
     ko.bindingHandlers['file'] = {
       init: function(element, valueAccessor, allBindings) {
+        // debugger;
         var fileContents, fileName, allowed, prohibited, reader;
     
         if ((typeof valueAccessor()) === "function") {

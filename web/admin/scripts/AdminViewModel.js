@@ -1,93 +1,118 @@
 "use strict"
 class AdminViewModel {
 
-	constructor(administrator, blankAdministrator, isAuthenticated) {
-		this.blankAdministrator = blankAdministrator;
+	constructor(administrator, isAuthenticated) {
 		this.isAuthenticated = ko.observable(isAuthenticated);
 		this.administrator = ko.mapping.fromJS(administrator);
-		this.loginErrors = ko.observableArray([]);
+		
 		this.userConnector = new UserConnector();
 		this.songConnector = new SongConnector();
 		this.playlistConnector = new PlaylistConnector();
 		this.albumConnector = new AlbumConnector();
-		this.currentPage = ko.observable(isAuthenticated ? 'blank' : 'login');
-		this.users = ko.observableArray();
+
 		this.songs = ko.observableArray();
 		this.playlists = ko.observableArray();
 		this.albums = ko.observableArray();
-		this.userToUpdate = ko.observable();
-		this.playlistToUpdate = ko.observable();
-		this.albumToUpdate = ko.observable();
-		this.validationErrors = ko.observableArray([]);
+		this.users = ko.observableArray();
+
 		this.songToUpdate;
-		this.songToCreate;
+		this.playlistToUpdate;
+		this.albumToUpdate;
+		this.userToUpdate;
+
+		this.validationErrors = ko.observableArray([]);
+
+		this.currentPage = ko.observable(isAuthenticated ? 'blank' : 'login');
+		window.onpopstate = this.handlePopState;
   	}
 
-	pageToDisplay = (model) => {
-		this.validationErrors = ko.observableArray([]);
+  	handlePopState = (event) => {
+  		const pathPieces = event.path[0].location.pathname.split('/');
+  		const pageName = (pathPieces.length > 1) ? pathPieces[2] : 'blank';
+		const page = Router.getPage(pageName);
+		if (page.maintainPageState) {
+			this[page.viewMethod](event.state);
+			this.currentPage(page.name);
+		} else if (page.modelMethod) {
+			this[page.modelMethod]((model) => {
+				this[page.viewMethod](model);
+				this.currentPage(page.name);	
+			});
+		} else {
+			this.currentPage(page.name);
+		}
+  	};
+
+  	goToPage = function (pageName, id) {
+  		// knockout puts the model in with the arguments automatically
+  		// this makes the id work as expected
+  		if (typeof id !== 'string') id = null;
+  		
+  		const page = Router.getPage(pageName);
+
+  		this[page.modelMethod]((model) => {
+			document.title = 'The Discoverables: ' + page.title;
+  			this[page.viewMethod](model);
+  			const path = [Router.prefix, page.name, id].filter(val => val).join('/');
+  			history.pushState(model, page.title, path);
+  			this.currentPage(page.name);
+  		}, id);
+  	};
+
+	templateName = (model) => {
+		// clear the validation errors when changing pages
+		this.validationErrors.removeAll();// = ko.observableArray([]);
 		return model.currentPage() + '-template';
-	}
+	};
 
-	// Authentication methods
-	login = (formElement) => {
-		let input = {};
-		$(formElement).serializeArray().map((x) => {input[x.name] = x.value;});
-		this.userConnector.authenticate(input, 
-			(data, textStatus, jqXHR) => {
-				this.loginErrors([]);
-            	this.isAuthenticated(data.authenticated);
-				ko.mapping.fromJS(data.user, this.administrator);
-				this.openSongs();
-            }, 
-            (data, textStatus, errorThrown) => {
-            	this.isAuthenticated(false);
-            	this.loginErrors(Object.values(data.errorMessages).reverse());
-		    });
-	}
+	// page routing methods
 
-	logout = () => {
-		let done = (data, textStatus, jqXHR) => {
-        	this.isAuthenticated(false);
-        	ko.mapping.fromJS(this.blankAdministrator, this.administrator);
-        	this.currentPage('login');
-        };
-		this.userConnector.logout(done, done);
-	}
+	// Users
+	loadUsers = (callback) => {
+		this.userConnector.getAll(callback);
+	};
+
+	putUsersInViewModel = (data) => {
+		this.users.removeAll();
+		data.forEach(user => {
+			this.users.push(ko.mapping.fromJS(user));
+		});
+	};
+
+	loadUser = (callback, id) => {
+		// todo: go to the service
+		let user = (id) 
+			? ko.mapping.toJS(this.users().find(u => u.id() == id))
+			: null;
+		callback(user);
+	};
+
+	putUserInViewModel = (data) => {
+		if (data) {
+			this.userToUpdate = ko.mapping.fromJS(data);
+		} else {
+			this.userToUpdate = new UserViewModel();
+		}new UserViewModel()
+	};
 
 	// User methods
-	openUsers = () => {
-		let successCallback = (users, textStatus, jqXHR) => {
-			this.users.removeAll();
-			users.forEach(user => {
-				this.users.push(ko.mapping.fromJS(user));
-			});
-			this.currentPage('users');
-        };
-        let failedCallback = (data, textStatus, errorThrown) => {
-			console.log('request failed! ' + textStatus);
-	    };
-		this.userConnector.getAll(successCallback, failedCallback);
-	}
 
+	createUser = (formElement) => {
+		this.userConnector.create(
+			ko.mapping.toJS(this.userToUpdate), 
+			this.goToPage(this, 'users'),
+			this.validationErrorsCallback
+		);
+	};
 
-	openCreateUser = () => {
-		this.currentPage('create-user');
-	}
-
-	openEditUser = (user) => {
-		this.userToUpdate(user);
-		this.currentPage('edit-user');
-	}
+	updateUser = () => {
+		this.userConnector.update(
+			 ko.mapping.toJS(this.userToUpdate), 
+			 this.goToPage(this, 'users'),
+			 this.validationErrorsCallback);
+	};
 
 	deleteUser = (user) => {
-		let successCallback = (data, textStatus, jqXHR) => {
-			this.openUsers();
-        };
-
-        let failedCallback = (data, textStatus, errorThrown) => {
-			console.log('request failed! ' + textStatus);
-	    };
-
 		$.confirm({
 		    title: 'Delete user?',
 		    content: 'Are you sure you want to delete ' + user.firstName() + " " + user.lastName() + "'s account?",
@@ -102,61 +127,21 @@ class AdminViewModel {
 		        	btnClass: 'btn-blue',
 		        	action: () => {
 		        		user.statusId = 2; //INACTIVE_USER_STATUS_ID
-						this.userConnector.update(
-							ko.mapping.toJS(user), 
-							successCallback, 
-							failedCallback);
+						this.userConnector.update(ko.mapping.toJS(user), this.goToPage(this, 'users'));
 					},
 					keys: ['enter']
 		        },
 		        cancel: {
-		        	action: () => { },
 		        	keys: ['esc']
 		        }
 		    }
 		});
-	}
+	};
 
-	createUser = (formElement) => {
-		let input = {};
-		$(formElement).serializeArray().map((x) => {input[x.name] = x.value;});
-		if (input.password != input.confirmPassword) {
-			this.validationErrors(["Passwords do not match. Please correct."]);
-			return;
-		}
 
-		let successCallback = (data, textStatus, jqXHR) => {
-			this.openUsers();
-        };
-        let failedCallback = (data, textStatus, errorThrown) => {
-        	if (data.errorMessages) {
-				this.validationErrors(Object.values(data.errorMessages).reverse());
-			}
-			console.log('request failed! ' + textStatus);
-	    };
-		this.userConnector.create(input, successCallback, failedCallback);
-	}
-
-	updateUser = () => {
-		let successCallback = (data, textStatus, jqXHR) => {
-			this.openUsers();
-        };
-        let failedCallback = (data, textStatus, errorThrown) => {
-        	if (data.errorMessages) {
-				this.validationErrors(Object.values(data.errorMessages).reverse());
-			}
-			console.log('request failed! ' + textStatus);
-	    };
-		this.userConnector.update(
-			 ko.mapping.toJS(this.userToUpdate()), successCallback, failedCallback);
-	}
-
-	cancelUserForm = () => {
-		this.currentPage('users');
-	}
-
+	//password methods
 	sendPasswordReset = (user) => {
-		let successCallback = (data, textStatus, jqXHR) => {
+		let successCallback = () => {
 			$.alert({
 				title: 'Done!',
 				content: 'Email sent!',
@@ -174,9 +159,6 @@ class AdminViewModel {
 			    }
 			});
         };
-        let failedCallback = (data, textStatus, errorThrown) => {
-			console.log('request failed! ' + textStatus);
-	    };
 
 		$.confirm({
 		    title: 'Request password reset?',
@@ -193,24 +175,23 @@ class AdminViewModel {
 		        	action: () => {
 						this.userConnector.requestPasswordReset(
 							ko.mapping.toJS(user), 
-							successCallback, 
-							failedCallback);
+							successCallback);
 					},
 					keys: ['enter']
 		        },
 		        cancel: {
-		        	action: () => { },
 		        	keys: ['esc']
 		        }
 		    }
 		});
-	}
+	};
 
 	requestPasswordReset = (formElement) => {
+		//todo: use view model instead of form element
 		let input = {};
 		$(formElement).serializeArray().map((x) => { input[x.name] = x.value; });
 		
-		let processingAltert = $.alert({
+		const processingAltert = $.alert({
 				title: 'Processed',
 				content: 'Your request is being processed.',
 				boxWidth: '500px',
@@ -227,10 +208,10 @@ class AdminViewModel {
 			}
 		}, 300);
 
-		let successCallback = (data, textStatus, jqXHR) => {
+		const successCallback = (data, textStatus, jqXHR) => {
 			hasValidationIssues = false;
 			if (processingAltert.isOpen()) processingAltert.close();
-			this.loginErrors([]);
+			this.validationErrors([]);
 			$.alert({
 				title: 'Done!',
 				content: 'An email was sent to <b>' + data.user.email + '</b>. Follow the directions in that eamil to reset your password.',
@@ -248,99 +229,75 @@ class AdminViewModel {
 			        }
 			    }
 			});
-
         };
-        let failedCallback = (data, textStatus, errorThrown) => {
+
+        const failedCallback = (data) => {
         	hasValidationIssues = true;
         	if (processingAltert.isOpen()) processingAltert.close();
-        	this.loginErrors(Object.values(data.errorMessages).reverse());
+        	this.validationErrors(Object.values(data.errorMessages).reverse());
 	    };
 
 		this.userConnector.requestPasswordReset(
 				input, 
 				successCallback, 
 				failedCallback);
-	}
+	};
 
 	openPasswordResetForm = () => {
-		this.currentPage("password-recovery");
-	}
+		this.currentPage("passwordrecovery");
+	};
 
 	cancelPasswordResetRequest = () => {
 		this.currentPage("login");
-	}
+	};
 
-	// Songs methods
-	openSongs = () => {
-		this.loadSongs(() => {this.currentPage('songs');});
-	}
-
-	// Songs methods
+	// Song actions
 	loadSongs = (callback) => {
-		let successCallback = (data, textStatus, jqXHR) => {
-			this.songs.removeAll();
+		this.songConnector.getAll(callback);
+	};
 
-			data.forEach(song => {
-			  this.songs.push(ko.mapping.fromJS(song));
-			});
-			if (callback) callback();
-        };
-        let failedCallback = (data, textStatus, errorThrown) => {
-			console.log('request failed! ' + textStatus);
-	    };
-		this.songConnector.getAll(successCallback, failedCallback);
-	}
+	putSongsInViewModel = (data) => {
+		this.songs.removeAll();
+		data.forEach(song => {
+		  this.songs.push(ko.mapping.fromJS(song));
+		});
+	};
+	
+	loadSong = (callback, id) => {
+		if (id) {
+			this.songConnector.get(id, callback);
+		} else {
+			callback(null)
+		}
+	};
 
-	createSong = (formElement) => {
-		let successCallback = (data, textStatus, jqXHR) => {
-			this.openSongs();
-        };
-        let failedCallback = (data, textStatus, errorThrown) => {
-        	if (data.errorMessages) {
-				this.validationErrors(Object.values(data.errorMessages).reverse());
-			}
-			console.log('request failed! ' + textStatus);
-	    };
-	    let song = ko.mapping.toJS(this.songToCreate);
-		this.songConnector.create(song, successCallback, failedCallback);
-	}
+	putSongInViewModel = (data) => {
+		if (data) {
+			this.songToUpdate = ko.mapping.fromJS(data);
+			// todo: see if there's a way to avoid setting reader here
+			this.songToUpdate.reader = new FileReader();
+		} else {
+			this.songToUpdate = new SongViewModel();
+		}
+	};
+
+	createSong = () => {
+		this.songConnector.create(
+			ko.mapping.toJS(this.songToUpdate),
+			this.goToPage(this, 'songs'),
+			this.validationErrorsCallback
+		);
+	};
 
 	updateSong = () => {
-		let successCallback = (data, textStatus, jqXHR) => {
-			this.openSongs();
-        };
-        let failedCallback = (data, textStatus, errorThrown) => {
-        	if (data.errorMessages) {
-				this.validationErrors(Object.values(data.errorMessages).reverse());
-			}
-			console.log('request failed! ' + textStatus);
-	    };
-		this.songConnector.update(ko.mapping.toJS(this.songToUpdate), successCallback, failedCallback);
-	}
-
-	openCreateSong = () => {
-		this.songToCreate = new SongViewModel();
-		this.currentPage('create-song');
-	}
-
-	openEditSong = (song) => {
-		this.songToUpdate = new SongViewModel(song);
-		this.currentPage('edit-song');
-	}
-
-	cancelSongForm = () => {
-		this.currentPage('songs');
-	}
+		this.songConnector.update(
+			ko.mapping.toJS(this.songToUpdate),
+			this.goToPage(this, 'songs'),
+			this.validationErrorsCallback
+		);
+	};
 
 	deleteSong = (song) => {
-		let successCallback = (data, textStatus, jqXHR) => {
-			this.openSongs();
-        };
-
-        let failedCallback = (data, textStatus, errorThrown) => {
-			console.log('request failed! ' + textStatus);
-	    };
-
 		$.confirm({
 		    title: 'Delete song?',
 		    content: 'Are you sure you want to delete "' + song.title() + '"?',
@@ -355,113 +312,122 @@ class AdminViewModel {
 		        	btnClass: 'btn-blue',
 		        	action: () => {
 						this.songConnector.deleteThing(
-							ko.mapping.toJS(song), successCallback, failedCallback);
+							ko.mapping.toJS(song), this.goToPage(this, 'songs'));
 					},
 					keys: ['enter']
 		        },
 		        cancel: {
-		        	action: () => { },
 		        	keys: ['esc']
 		        }
 		    }
 		});
-	}
+	};
+
+	loadPlaylists = (callback) => {
+		this.playlistConnector.getAll(callback);
+	};
+
+	putPlaylistsInViewModel = (data) => {
+		this.playlists.removeAll();
+		data.forEach(playlist => this.playlists.push(ko.mapping.fromJS(playlist)));
+	};
+	
+	loadPlaylist = (callback, id) => {
+		// make sure the songs are loaded before getting the playlists
+		if (this.songs().length === 0) {
+			this.loadSongs(this.putSongsInViewModel);
+		}
+		if (id) {
+			this.playlistConnector.get(id, callback);
+		} else {
+			callback({id: null, title: null, description: null, songs: []});
+		}
+	};
+
+	putPlaylistInViewModel = (data) => {
+		this.playlistToUpdate = ko.mapping.fromJS(data);
+	};
+
+
+	loadAlbums = (callback) => {
+		this.albumConnector.getAll(callback);
+	};
+
+	putAlbumsInViewModel = (data) => {
+		this.albums.removeAll();
+		data.forEach(album => this.albums.push(ko.mapping.fromJS(album)));
+	};
+	
+	loadAlbum = (callback, id) => {
+		// make sure the playlists are loaded before getting the albums
+		if (this.playlists().length === 0) {
+			this.loadPlaylists(this.putPlaylistsInViewModel);
+		}
+		if (id) {
+			this.albumConnector.get(id, callback);
+		} else {
+			callback({id: null, title: null, description: null, playlist: null});
+		}
+	};
+
+	putAlbumInViewModel = (data) => {
+		this.albumToUpdate = ko.mapping.fromJS(data);
+	};
+
+	cancelAlbumForm = () => {
+		this.goToPage('albums');
+	};
+
+
+	// Authentication methods
+	login = (formElement) => {
+		let input = {};
+		$(formElement).serializeArray().map((x) => {input[x.name] = x.value;});
+		this.userConnector.authenticate(input, 
+			(data, textStatus, jqXHR) => {
+            	this.isAuthenticated(data.authenticated);
+				ko.mapping.fromJS(data.user, this.administrator);
+				this.goToPage('songs');
+            }, 
+            (data, textStatus, errorThrown) => {
+            	this.isAuthenticated(false);
+            	this.validationErrors(Object.values(data.errorMessages).reverse());
+		    });
+	};
+
+	logout = () => {
+		let done = (data, textStatus, jqXHR) => {
+        	this.isAuthenticated(false);
+        	this.administrator = new UserViewModel();
+        	this.currentPage('login');
+        };
+		this.userConnector.logout(done, done);
+	};
+
 
 	// Playlist methods
 
-	openPlaylists = () => {
-		this.loadSongs();
-		this.loadPlaylists(() => {this.currentPage('playlists');});
-	}
-
-
-	loadPlaylists = (callback) => {
-		let successCallback = (data, textStatus, jqXHR) => {
-			this.playlists.removeAll();
-
-			data.forEach(playlist => {
-			  this.playlists.push(ko.mapping.fromJS(playlist));
-			});
-			if (callback) callback();
-        };
-        let failedCallback = (data, textStatus, errorThrown) => {
-			console.log('request failed! ' + textStatus);
-	    };
-		this.playlistConnector.getAll(successCallback, failedCallback);
-	}
-
-	openCreatePlaylist = () => {
-		this.currentPage('create-playlist');
-	}
-
-	cancelPlaylistForm = () => {
-		this.currentPage('playlists');
-	}
-	_addFormDataToPlaylistInput = (input, formElement) => {
-		$(formElement).serializeArray().map((x) => {
-			if (x.name == 'songs') {
-				if (!input.hasOwnProperty('songs')) {
-					input.songs = [];
-				}
-				input.songs[input.songs.length] = ko.mapping.toJS(this.songs().find(song => song.id = x.value));
-			} else {
-				input[x.name] = x.value;
-			}
-		});
-	}
-
 	createPlaylist = (formElement) => {
-		let input = {};
-		this._addFormDataToPlaylistInput(input, formElement);
-
-		let successCallback = (data, textStatus, jqXHR) => {
-			this.openPlaylists();
-        };
-        let failedCallback = (data, textStatus, errorThrown) => {
-        	if (data.errorMessages) {
-				this.validationErrors(Object.values(data.errorMessages).reverse());
-			}
-			console.log('request failed! ' + textStatus);
-	    };
-		this.playlistConnector.create(input, successCallback, failedCallback);
-	}
-
-	openEditPlaylist = (playlist) => {
-		let successCallback = (playlist, textStatus, jqXHR) => {
-			this.playlistToUpdate(ko.mapping.fromJS(playlist));
-			this.currentPage('edit-playlist');
-        };
-        let failedCallback = (data, textStatus, errorThrown) => {
-			console.log('request failed! ' + textStatus);
-	    };
-		this.playlistConnector.get(playlist.id(), successCallback, failedCallback);
-	}
+		this.playlistConnector.create(
+			ko.mapping.toJS(this.playlistToUpdate),
+			this.goToPage.bind(this, 'playlists'),
+			this.validationErrorsCallback
+		);
+	};
 
 	updatePlaylist = (formElement) => {
-		let input = {};
-		this._addFormDataToPlaylistInput(input, formElement);
-
-		let successCallback = (data, textStatus, jqXHR) => {
-			this.openPlaylists();
-        };
-        let failedCallback = (data, textStatus, errorThrown) => {
-        	if (data.errorMessages) {
-				this.validationErrors(Object.values(data.errorMessages).reverse());
-			}
-			console.log('request failed! ' + textStatus);
-	    };
-		this.playlistConnector.update(input, successCallback, failedCallback);
-	}
+		this.playlistConnector.update(
+			ko.mapping.toJS(this.playlistToUpdate),
+			this.goToPage.bind(this, 'playlists'), 
+			this.validationErrorsCallback
+		);
+	};
 
 	deletePlaylist = (playlist) => {
-		let successCallback = (data, textStatus, jqXHR) => {
-			this.openPlaylists();
-        };
+		let successCallback = this.goToPage.bind(this, 'playlists');
 
         let failedCallback = (data, textStatus, errorThrown) => {
-        	
         	if (data.errorMessages) {
-				
 				$.alert({
 					title: 'Problem!',
 					content: Object.values(data.errorMessages).reverse().join(','),
@@ -500,63 +466,27 @@ class AdminViewModel {
 					keys: ['enter']
 		        },
 		        cancel: {
-		        	action: () => {},
 		        	keys: ['esc']
 		        }
 		    }
 		});
-	}
+	};
+
+	// playlist helper
+    togglePlaylistSongAssociation = function(playlist, song) {
+    	const searchMethod = item => item.id() == song.id();
+    	if (playlist.songs().find(searchMethod)) {
+    		playlist.songs.remove(searchMethod);
+    	} else {
+    		playlist.songs.push(song);
+    	}
+        return true;
+    };
 
 	// Albums
 
-
-
-
-	openAlbums = () => {
-		let successCallback = (albums, textStatus, jqXHR) => {
-			this.albums.removeAll();
-			albums.forEach(album => {
-				this.albums.push(ko.mapping.fromJS(album));
-			});
-			this.loadPlaylists();
-			this.currentPage('albums');
-        };
-        let failedCallback = (data, textStatus, errorThrown) => {
-			console.log('request failed! ' + textStatus);
-	    };
-		this.albumConnector.getAll(successCallback, failedCallback);
-	}
-
-
-	openCreateAlbum = () => {
-		if (this.playlists().length < 1) {
-			$.alert({
-				title: 'Sorry!',
-				content: 'Please make a playlist before you make an Album',
-				boxWidth: '500px',
-				useBootstrap: false,
-				animation: 'none',
-				escapeKey: 'esc',
-				backgroundDismiss: true,
-				autoClose: 'Okay|2000',
-				buttons: {
-			        Okay: {
-			        	action: () => { },
-			        	keys: ['enter']
-			        }
-			    }
-			});
-        } else {
-			this.currentPage('create-album');
-        }
-		
-	}
-
-	cancelAlbumForm = () => {
-		this.currentPage('albums');
-	}
-
 	createAlbum = (formElement) => {
+		//todo: use view model instead of form element
 		let input = {};
 		$(formElement).serializeArray().map((x) => {
 			if (x.name == 'playlistId') {
@@ -567,34 +497,15 @@ class AdminViewModel {
 			}
 		});
 
-		let successCallback = (data, textStatus, jqXHR) => {
-			this.openAlbums();
-        };
-        let failedCallback = (data, textStatus, errorThrown) => {
-        	if (data.errorMessages) {
-				this.validationErrors(Object.values(data.errorMessages).reverse());
-			}
-			console.log('request failed! ' + textStatus);
-	    };
-		this.albumConnector.create(input, successCallback, failedCallback);
-	}
-
-	openEditAlbum = (album) => {
-		let successCallback = (album) => {
-			this.albumToUpdate(ko.mapping.fromJS(album));
-			this.currentPage('edit-album');
-        };
-        let failedCallback = (data, textStatus, errorThrown) => {
-			console.log('request failed! ' + textStatus);
-	    };
-		this.albumConnector.get(album.id(), successCallback, failedCallback);
-	}
-
-	isAlbumPlaylist = (album, playlist) => {
-		return album.playlist.id() == playlist.id();
-	}
+		this.albumConnector.create(
+			input, 
+			this.goToPage.bind(this, 'albums'),
+			this.validationErrorsCallback
+		);
+	};
 
 	updateAlbum = (formElement) => {
+		//todo: use view model instead of form element
 		let input = {};
 		$(formElement).serializeArray().map((x) => { 
 			if (x.name == 'playlistId') {
@@ -605,27 +516,14 @@ class AdminViewModel {
 			}
 		});
 
-		let successCallback = (data, textStatus, jqXHR) => {
-			this.openAlbums();
-        };
-        let failedCallback = (data, textStatus, errorThrown) => {
-        	if (data.errorMessages) {
-				this.validationErrors(Object.values(data.errorMessages).reverse());
-			}
-			console.log('request failed! ' + textStatus);
-	    };
-		this.albumConnector.update(input, successCallback, failedCallback);
-	}
+		this.albumConnector.update(
+			input, 
+			this.goToPage.bind(this, 'albums'),
+			this.validationErrorsCallback
+		);
+	};
 
 	deleteAlbum = (album) => {
-		let successCallback = (data, textStatus, jqXHR) => {
-			this.openAlbums();
-        };
-
-        let failedCallback = (data, textStatus, errorThrown) => {
-			console.log('request failed! ' + textStatus);
-	    };
-
 		$.confirm({
 		    title: 'Delete album?',
 		    content: 'Are you sure you want to delete "' + album.title() + '"?',
@@ -640,17 +538,27 @@ class AdminViewModel {
 		        	btnClass: 'btn-blue',
 		        	action: () => {
 						this.albumConnector.deleteThing(
-							ko.mapping.toJS(album), successCallback, failedCallback);
+							ko.mapping.toJS(album), this.goToPage.bind($this, 'albums'));
 					},
 					keys: ['enter']
 		        },
 		        cancel: {
-		        	action: () => {},
 		        	keys: ['esc']
 		        }
 		    }
 		});
-	}
+	};
+
+	// album helper
+	isAlbumPlaylist = (album, playlist) => {
+		return album.playlist.id() == playlist.id();
+	};
+
+	validationErrorsCallback = (data) => {
+    	if (data.errorMessages) {
+			this.validationErrors(Object.values(data.errorMessages).reverse());
+		}
+    };
 }
 
 

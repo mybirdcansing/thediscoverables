@@ -3,7 +3,7 @@ class AdminViewModel {
 
 	constructor(administrator, isAuthenticated) {
 		this.isAuthenticated = ko.observable(isAuthenticated);
-		this.administrator = ko.mapping.fromJS(administrator);
+		this.administrator = ko.mapping.fromJS(new UserViewModel(), administrator);
 		
 		this.userConnector = new UserConnector();
 		this.songConnector = new SongConnector();
@@ -26,12 +26,16 @@ class AdminViewModel {
 		window.onpopstate = this.handlePopState;
   	}
 
+
+	// page routing methods
   	handlePopState = (event) => {
-  		const pathPieces = event.path[0].location.pathname.split('/');
+  		const path = event.path[0].location.pathname;
+  		const pathPieces = path.split('/');
   		const pageName = (pathPieces.length > 1) ? pathPieces[2] : 'blank';
 		const page = Router.getPage(pageName);
 		if (page.maintainPageState) {
-			this[page.viewMethod](event.state);
+			let viewModel = this[page.viewMethod](event.state);
+	  		this.maintainHistoryState(viewModel, page.title, path);
 			this.currentPage(page.name);
 		} else if (page.modelMethod) {
 			this[page.modelMethod]((model) => {
@@ -48,26 +52,60 @@ class AdminViewModel {
   		// this makes the id work as expected
   		if (typeof id !== 'string') id = null;
   		
+  		// clear the validation errors when changing pages
+		this.validationErrors.removeAll();
+
   		const page = Router.getPage(pageName);
 
   		this[page.modelMethod]((model) => {
 			document.title = 'The Discoverables: ' + page.title;
-  			this[page.viewMethod](model);
+  			const viewModel = this[page.viewMethod](model);
   			const path = [Router.prefix, page.name, id].filter(val => val).join('/');
   			history.pushState(model, page.title, path);
+  			if (page.maintainPageState) {
+	  			this.maintainHistoryState(viewModel, page.title, path);
+  			}
   			this.currentPage(page.name);
   		}, id);
   	};
 
-	templateName = (model) => {
-		// clear the validation errors when changing pages
-		this.validationErrors.removeAll();// = ko.observableArray([]);
+  	maintainHistoryState = (viewModel, title, path) => {
+  		ko.computed(() => {
+		    return ko.mapping.toJS(viewModel);
+		}).subscribe((state) => {
+			history.replaceState(state, title, path);
+		});
+	};
+
+	templateName = (model, context) => {
 		return model.currentPage() + '-template';
 	};
 
-	// page routing methods
+	// Authentication methods
+	login = () => {
+		this.userConnector.authenticate(ko.toJS(this.administrator), 
+			(data, textStatus, jqXHR) => {
+            	this.isAuthenticated(data.authenticated);
+				ko.mapping.fromJS(data.user, this.administrator);
+				this.goToPage('songs');
+            }, 
+            (data, textStatus, errorThrown) => {
+            	this.isAuthenticated(false);
+            	this.validationErrors(Object.values(data.errorMessages).reverse());
+		    });
+	};
 
-	// Users
+	logout = () => {
+		let done = (data, textStatus, jqXHR) => {
+        	this.isAuthenticated(false);
+        	this.administrator = new UserViewModel();
+        	this.currentPage('login');
+        };
+		this.userConnector.logout(done, done);
+	};
+
+
+	// Users methods
 	loadUsers = (callback) => {
 		this.userConnector.getAll(callback);
 	};
@@ -77,14 +115,15 @@ class AdminViewModel {
 		data.forEach(user => {
 			this.users.push(ko.mapping.fromJS(user));
 		});
+		return this.users;
 	};
 
 	loadUser = (callback, id) => {
-		// todo: go to the service
-		let user = (id) 
-			? ko.mapping.toJS(this.users().find(u => u.id() == id))
-			: null;
-		callback(user);
+		if (id) {
+			this.userConnector.get(id, callback);
+		} else {
+			callback(null);
+		}
 	};
 
 	putUserInViewModel = (data) => {
@@ -92,15 +131,14 @@ class AdminViewModel {
 			this.userToUpdate = ko.mapping.fromJS(data);
 		} else {
 			this.userToUpdate = new UserViewModel();
-		}new UserViewModel()
+		}
+		return this.userToUpdate;
 	};
 
-	// User methods
-
-	createUser = (formElement) => {
+	createUser = () => {
 		this.userConnector.create(
 			ko.mapping.toJS(this.userToUpdate), 
-			this.goToPage(this, 'users'),
+			this.goToPage.bind(this, 'users'),
 			this.validationErrorsCallback
 		);
 	};
@@ -108,7 +146,7 @@ class AdminViewModel {
 	updateUser = () => {
 		this.userConnector.update(
 			 ko.mapping.toJS(this.userToUpdate), 
-			 this.goToPage(this, 'users'),
+			 this.goToPage.bind(this, 'users'),
 			 this.validationErrorsCallback);
 	};
 
@@ -127,7 +165,7 @@ class AdminViewModel {
 		        	btnClass: 'btn-blue',
 		        	action: () => {
 		        		user.statusId = 2; //INACTIVE_USER_STATUS_ID
-						this.userConnector.update(ko.mapping.toJS(user), this.goToPage(this, 'users'));
+						this.userConnector.update(ko.mapping.toJS(user), this.goToPage.bind(this, 'users'));
 					},
 					keys: ['enter']
 		        },
@@ -141,7 +179,7 @@ class AdminViewModel {
 
 	//password methods
 	sendPasswordReset = (user) => {
-		let successCallback = () => {
+		const successCallback = () => {
 			$.alert({
 				title: 'Done!',
 				content: 'Email sent!',
@@ -186,10 +224,7 @@ class AdminViewModel {
 		});
 	};
 
-	requestPasswordReset = (formElement) => {
-		//todo: use view model instead of form element
-		let input = {};
-		$(formElement).serializeArray().map((x) => { input[x.name] = x.value; });
+	requestPasswordReset = () => {
 		
 		const processingAltert = $.alert({
 				title: 'Processed',
@@ -202,9 +237,9 @@ class AdminViewModel {
 			});
 
 		let hasValidationIssues = false;
-		setTimeout(() => {
-			if(!hasValidationIssues) {
-				if (processingAltert.isClosed()) processingAltert.open();
+		setTimeout(function() {
+			if(!hasValidationIssues && processingAltert.isClosed()) {
+				processingAltert.open();
 			}
 		}, 300);
 
@@ -233,17 +268,20 @@ class AdminViewModel {
 
         const failedCallback = (data) => {
         	hasValidationIssues = true;
-        	if (processingAltert.isOpen()) processingAltert.close();
+        	if (processingAltert.isOpen()) {
+        		processingAltert.close();
+        	}
         	this.validationErrors(Object.values(data.errorMessages).reverse());
 	    };
 
 		this.userConnector.requestPasswordReset(
-				input, 
+				ko.toJS(this.administrator), 
 				successCallback, 
 				failedCallback);
 	};
 
 	openPasswordResetForm = () => {
+		this.administrator = new UserViewModel();
 		this.currentPage("passwordrecovery");
 	};
 
@@ -251,7 +289,7 @@ class AdminViewModel {
 		this.currentPage("login");
 	};
 
-	// Song actions
+	// Song methods
 	loadSongs = (callback) => {
 		this.songConnector.getAll(callback);
 	};
@@ -261,6 +299,7 @@ class AdminViewModel {
 		data.forEach(song => {
 		  this.songs.push(ko.mapping.fromJS(song));
 		});
+		return this.songs;
 	};
 	
 	loadSong = (callback, id) => {
@@ -279,12 +318,13 @@ class AdminViewModel {
 		} else {
 			this.songToUpdate = new SongViewModel();
 		}
+		return this.songToUpdate;
 	};
 
 	createSong = () => {
 		this.songConnector.create(
 			ko.mapping.toJS(this.songToUpdate),
-			this.goToPage(this, 'songs'),
+			this.goToPage.bind(this, 'songs'),
 			this.validationErrorsCallback
 		);
 	};
@@ -292,7 +332,7 @@ class AdminViewModel {
 	updateSong = () => {
 		this.songConnector.update(
 			ko.mapping.toJS(this.songToUpdate),
-			this.goToPage(this, 'songs'),
+			this.goToPage.bind(this, 'songs'),
 			this.validationErrorsCallback
 		);
 	};
@@ -312,7 +352,7 @@ class AdminViewModel {
 		        	btnClass: 'btn-blue',
 		        	action: () => {
 						this.songConnector.deleteThing(
-							ko.mapping.toJS(song), this.goToPage(this, 'songs'));
+							ko.mapping.toJS(song), this.goToPage.bind(this, 'songs'));
 					},
 					keys: ['enter']
 		        },
@@ -323,6 +363,7 @@ class AdminViewModel {
 		});
 	};
 
+	// playlist methods
 	loadPlaylists = (callback) => {
 		this.playlistConnector.getAll(callback);
 	};
@@ -330,6 +371,7 @@ class AdminViewModel {
 	putPlaylistsInViewModel = (data) => {
 		this.playlists.removeAll();
 		data.forEach(playlist => this.playlists.push(ko.mapping.fromJS(playlist)));
+		return this.playlists;
 	};
 	
 	loadPlaylist = (callback, id) => {
@@ -346,68 +388,10 @@ class AdminViewModel {
 
 	putPlaylistInViewModel = (data) => {
 		this.playlistToUpdate = ko.mapping.fromJS(data);
+		return this.playlistToUpdate;
 	};
 
-
-	loadAlbums = (callback) => {
-		this.albumConnector.getAll(callback);
-	};
-
-	putAlbumsInViewModel = (data) => {
-		this.albums.removeAll();
-		data.forEach(album => this.albums.push(ko.mapping.fromJS(album)));
-	};
-	
-	loadAlbum = (callback, id) => {
-		// make sure the playlists are loaded before getting the albums
-		if (this.playlists().length === 0) {
-			this.loadPlaylists(this.putPlaylistsInViewModel);
-		}
-		if (id) {
-			this.albumConnector.get(id, callback);
-		} else {
-			callback({id: null, title: null, description: null, playlist: null});
-		}
-	};
-
-	putAlbumInViewModel = (data) => {
-		this.albumToUpdate = ko.mapping.fromJS(data);
-	};
-
-	cancelAlbumForm = () => {
-		this.goToPage('albums');
-	};
-
-
-	// Authentication methods
-	login = (formElement) => {
-		let input = {};
-		$(formElement).serializeArray().map((x) => {input[x.name] = x.value;});
-		this.userConnector.authenticate(input, 
-			(data, textStatus, jqXHR) => {
-            	this.isAuthenticated(data.authenticated);
-				ko.mapping.fromJS(data.user, this.administrator);
-				this.goToPage('songs');
-            }, 
-            (data, textStatus, errorThrown) => {
-            	this.isAuthenticated(false);
-            	this.validationErrors(Object.values(data.errorMessages).reverse());
-		    });
-	};
-
-	logout = () => {
-		let done = (data, textStatus, jqXHR) => {
-        	this.isAuthenticated(false);
-        	this.administrator = new UserViewModel();
-        	this.currentPage('login');
-        };
-		this.userConnector.logout(done, done);
-	};
-
-
-	// Playlist methods
-
-	createPlaylist = (formElement) => {
+	createPlaylist = () => {
 		this.playlistConnector.create(
 			ko.mapping.toJS(this.playlistToUpdate),
 			this.goToPage.bind(this, 'playlists'),
@@ -415,7 +399,7 @@ class AdminViewModel {
 		);
 	};
 
-	updatePlaylist = (formElement) => {
+	updatePlaylist = () => {
 		this.playlistConnector.update(
 			ko.mapping.toJS(this.playlistToUpdate),
 			this.goToPage.bind(this, 'playlists'), 
@@ -474,50 +458,59 @@ class AdminViewModel {
 
 	// playlist helper
     togglePlaylistSongAssociation = function(playlist, song) {
-    	const searchMethod = item => item.id() == song.id();
-    	if (playlist.songs().find(searchMethod)) {
-    		playlist.songs.remove(searchMethod);
-    	} else {
+    	// try to remove the song from the playlist
+    	if (playlist.songs.remove(s => s.id() == song.id()).length === 0) {
+    		// add the song if it wasn't in the playlist
     		playlist.songs.push(song);
     	}
         return true;
     };
 
-	// Albums
+    // album methods
+	loadAlbums = (callback) => {
+		this.albumConnector.getAll(callback);
+	};
 
-	createAlbum = (formElement) => {
-		//todo: use view model instead of form element
-		let input = {};
-		$(formElement).serializeArray().map((x) => {
-			if (x.name == 'playlistId') {
-				let playlistId = x.value;
-				input.playlist = ko.mapping.toJS(this.playlists().find(pl => pl.id() == playlistId));
-			} else {
-				input[x.name] = x.value;
-			}
-		});
+	putAlbumsInViewModel = (data) => {
+		this.albums.removeAll();
+		data.forEach(album => this.albums.push(ko.mapping.fromJS(album)));
+		return this.albums;
+	};
+	
+	loadAlbum = (callback, id) => {
+		// make sure the playlists are loaded before getting the albums
+		if (this.playlists().length === 0) {
+			this.loadPlaylists(this.putPlaylistsInViewModel);
+		}
+		if (id) {
+			this.albumConnector.get(id, callback);
+		} else {
+			callback({id: null, title: null, description: null, playlist: null});
+		}
+	};
 
+	putAlbumInViewModel = (data) => {
+		this.albumToUpdate = ko.mapping.fromJS(data);
+		return this.albumToUpdate;
+	};
+
+	setPlaylistAlbumAssociation = (album, playlist) => {
+		debugger
+		album.playlist(playlist);
+		return true;
+	};
+
+	createAlbum = () => {
 		this.albumConnector.create(
-			input, 
+			ko.mapping.toJS(this.albumToUpdate), 
 			this.goToPage.bind(this, 'albums'),
 			this.validationErrorsCallback
 		);
 	};
 
-	updateAlbum = (formElement) => {
-		//todo: use view model instead of form element
-		let input = {};
-		$(formElement).serializeArray().map((x) => { 
-			if (x.name == 'playlistId') {
-				let playlistId = x.value;
-				input.playlist = ko.mapping.toJS(this.playlists().find(pl => pl.id() == playlistId));
-			} else {
-				input[x.name] = x.value;
-			}
-		});
-
+	updateAlbum = () => {
 		this.albumConnector.update(
-			input, 
+			ko.mapping.toJS(this.albumToUpdate), 
 			this.goToPage.bind(this, 'albums'),
 			this.validationErrorsCallback
 		);
@@ -554,6 +547,7 @@ class AdminViewModel {
 		return album.playlist.id() == playlist.id();
 	};
 
+	// base helper methods
 	validationErrorsCallback = (data) => {
     	if (data.errorMessages) {
 			this.validationErrors(Object.values(data.errorMessages).reverse());

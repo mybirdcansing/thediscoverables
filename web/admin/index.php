@@ -67,31 +67,31 @@ if (AuthCookie::isValid()) {
 	<!-- Users -->
 
 	<script type="text/html" id="login-template">
-		<form data-bind="submit: login">
-			<ul data-bind="foreach: validationErrors" class="loginErrors">
+		<form data-bind="submit: login, with:administrator">
+			<ul data-bind="foreach: $root.validationErrors" class="loginErrors">
 				<li data-bind='text:$data'></li>
 			</ul>
 			<label class="for-text-input" for="username">Username</label>
-			<input name="username" autocomplete="username" ><br>
+			<input name="username" autocomplete="username" data-bind="value:username"><br>
 			<label class="for-text-input" for="password">Password</label>
-			<input type="password" name="password" autocomplete="current-password" ><br>
+			<input type="password" name="password" autocomplete="current-password" data-bind="value:password"><br>
 			<input type="submit" name="submit" value="submit" class="button" />
 		</form>
 		<p><a href="javascript://" data-bind='click:openPasswordResetForm'>Trouble siging in?</a></p>
 	</script>
 
 	<script type="text/html" id="passwordrecovery-template">
-		<form data-bind="submit: requestPasswordReset">
+		<form data-bind="submit: requestPasswordReset, with:administrator">
 			<p>Enter your username or email to reset your password</p>
-			<ul data-bind="foreach: validationErrors" class="loginErrors">
+			<ul data-bind="foreach: $root.validationErrors" class="loginErrors">
 				<li data-bind='text:$data'></li>
 			</ul>
 			<label class="for-text-input" for="username">Username</label>
-			<input name="username" autocomplete="username"><br>
+			<input name="username" autocomplete="username" data-bind="value:username"><br>
 			<label class="for-text-input" for="email">Email</label>
-			<input name="email" autocomplete="email"><br>
+			<input name="email" autocomplete="email" data-bind="value:email"><br>
 			<input type="submit" name="submit" value="submit" class="button" />
-			<input type="button" data-bind="click:cancelPasswordResetRequest" name="cancel" value="cancel" class="button" /> 
+			<input type="button" data-bind="click:$root.cancelPasswordResetRequest" name="cancel" value="cancel" class="button" /> 
 		</form>
 	</script>
 
@@ -416,23 +416,26 @@ if (AuthCookie::isValid()) {
 	</script>
 
 	<script type="text/html" id="createalbum-template">
-		<form data-bind="submit: createAlbum">
+		<form data-bind="submit: createAlbum, with: albumToUpdate">
 			<ul data-bind="foreach: $root.validationErrors" class="loginErrors">
 				<li data-bind='text:$data'></li>
 			</ul>
 			<label class="for-text-input" for="title">Title</label>
-			<input name="title" /><br />
+			<input name="title" data-bind="value: title" /><br />
 			<label class="for-text-input" for="description">Description</label>
-			<input name="description" /><br />
+			<input name="description"  data-bind="value: description" /><br />
 			<label class="for-text-input">Playlist</label><br />
 			<div data-bind="foreach: $root.playlists" style="text-align: left;margin-left: 160px;">
 			    <div>
 			        <input type="radio" name="playlistId" data-bind="checkedValue: id, attr: { id: id }">
-			        <label data-bind="text: title, attr: { for: id }"></label>
+			        <label data-bind="
+			        	text: title,
+			        	attr: { for: id },
+	        			click: $root.setPlaylistAlbumAssociation.bind($root, $parent, $data)"></label>
 			    </div>
 			</div><br>
 			<input type="submit" name="submit" value="submit" class="button" />
-			<input type="button" data-bind="click:$root.cancelAlbumForm" name="cancel" value="cancel" class="button" /> 
+			<input type="button" data-bind="click:$root.goToPage.bind($root, 'albums')" name="cancel" value="cancel" class="button" /> 
 		</form>
 	</script>
 
@@ -457,7 +460,8 @@ if (AuthCookie::isValid()) {
 			        		checkedValue: id, 
 			        		attr: { 
 			        			id: id,
-			        			checked:$root.isAlbumPlaylist($parent, $data)
+			        			checked:$root.isAlbumPlaylist($parent, $data),
+			        			click: $root.setPlaylistAlbumAssociation.bind($root, $parent, $data)
 			        		}
 			        		">
 			        <label data-bind="text: title, attr: { for: id }"></label>
@@ -465,7 +469,7 @@ if (AuthCookie::isValid()) {
 			</div><br>
 
 			<input type="submit" name="submit" value="submit" class="button" />
-			<input type="button" data-bind="click:$parent.cancelAlbumForm" name="cancel" value="cancel" class="button" /> 
+			<input type="button" data-bind="click:$root.goToPage.bind($root, 'albums')" name="cancel" value="cancel" class="button" /> 
 		</form>
 	</script>
 </body>

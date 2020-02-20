@@ -2,14 +2,14 @@
 require_once __dir__ . '/../messages.php';
 require_once __dir__ . '/Configuration.php';
 
-class AuthCookie 
+class AuthCookie
 {
     public static function setCookie($username) {
         $settings = ((new Configuration())->getSettings())->security;
         $loginCookie = $username . ',' . md5($username . $settings->SECRET_WORD);
 
         // $params = [
-        //     'expires' => time() + (3600 * 24 * 30), 
+        //     'expires' => time() + (3600 * 24 * 30),
         //     'path' => rawurlencode('/'),
         //     'samesite' => rawurlencode('None')
         // ];
@@ -30,14 +30,14 @@ class AuthCookie
         $settings = ((new Configuration())->getSettings())->security;
         if (!isset($_COOKIE[$settings->LOGIN_COOKIE_NAME])) return 0;
         $cookie = $_COOKIE[$settings->LOGIN_COOKIE_NAME];
-        return substr($cookie, 0, strrpos($cookie, ',')); 
+        return substr($cookie, 0, strrpos($cookie, ','));
     }
 
     public static function isValid() {
         $settings = ((new Configuration())->getSettings())->security;
         if (!isset($_COOKIE[$settings->LOGIN_COOKIE_NAME])) return 0;
         $cookie = $_COOKIE[$settings->LOGIN_COOKIE_NAME];
-        list($c_username, $cookie_hash) = explode(',', $cookie); 
+        list($c_username, $cookie_hash) = explode(',', $cookie);
         return (md5($c_username . $settings->SECRET_WORD) == $cookie_hash);
     }
 }

@@ -9,6 +9,7 @@ require_once __DIR__ . '/../../messages.php';
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: OPTIONS,GET,POST,PUT,DELETE");
+header("Access-Control-Allow-Headers: Origin");
 header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
@@ -44,6 +45,9 @@ if (isset($uri[5]) && $uri[5] != '') {
 $action = null;
 
 switch ($requestMethod) {
+    case 'OPTIONS':
+        exit;
+        break;
     case 'GET':
          $action = GET_ACTION;
         break;

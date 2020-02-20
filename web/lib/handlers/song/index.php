@@ -9,6 +9,7 @@ require_once __dir__ . '/SongController.php';
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: OPTIONS,GET,POST,PUT,DELETE");
+header("Access-Control-Allow-Headers: Origin");
 header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
@@ -16,7 +17,7 @@ $requestMethod = $_SERVER["REQUEST_METHOD"];
 if(!$requestMethod == 'GET' && !AuthCookie::isValid()) {
     header("'HTTP/1.1 403 Forbidden'");
 	echo json_encode(
-        array("authorized" => false, "message" => "You do not have permission to be here.")
+        array("authorized" => false, "message" => "You do not have permission")
     );
     exit();
 }
@@ -40,10 +41,16 @@ $requestAction = null;
 if (isset($uri[5]) && $uri[5] != '') {
 	$requestAction = $uri[5];
 }
-
-
+$headers = getallheaders();  
+if (array_key_exists('X-HTTP-Method-Override', $headers)) {
+    $requestMethod = strtoupper($headers['X-HTTP-Method-Override']);
+    // error_log('X-HTTP-Method-Override:' . $message);
+}
 $action = null;
 switch ($requestMethod) {
+    case 'OPTIONS':
+     exit;
+     break;
     case 'GET':
          $action = GET_ACTION;
         break;
@@ -57,10 +64,12 @@ switch ($requestMethod) {
         }
         break;
     case 'PUT':
+        $action = UPDATE_ACTION;
         // may not work on hosting services, so
         // use the hack in POST
         break;
     case 'DELETE':
+        $action = DELETE_ACTION;
         // may not work on hosting services, so 
         // use the flag hack in POST
         break;

@@ -1,0 +1,23 @@
+{
+  "name": "thediscoverables",
+  "version": "1.0.0",
+  "description": "The Discoverables Website",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mybirdcansing/thediscoverables.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mybirdcansing/thediscoverables/issues"
+  },
+  "homepage": "https://github.com/mybirdcansing/thediscoverables#readme"
+}

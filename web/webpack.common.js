@@ -1,22 +1,27 @@
 const path = require("path");
 const webpack = require("webpack");
+const VueLoaderPlugin = require('vue-loader/lib/plugin')
 
 module.exports = {
     entry: {
-        main: "./src/index.js",
+        main: "./src/main.js",
         vendor: "./src/vendor.js"
     },
     plugins: [
         new webpack.ProvidePlugin({
             $: "jquery",
             jQuery: "jquery",
-            ko: "knockout"
-        })
+            ko: "knockout",
+            Vue: ['vue/dist/vue.esm.js', 'default'],
+
+        }),
+        new VueLoaderPlugin()
     ],
     output: {
         filename: "[name].[contentHash].bundle.js",
-        path: path.resolve(__dirname, "dist")
+        path: path.resolve(__dirname, "dist"),
     },
+    devtool: 'source-map',
     module: {
         rules: [
             {
@@ -35,23 +40,14 @@ module.exports = {
                 use: ["html-loader"]
             },
             {
-                test: /\.(svg|png|jpe?g|gif)$/,
-                use: {
-                    loader: "file-loader",
-                    options: {
-                        name: "[name].[hash].[ext]",
-                        outputPath:  (url, resourcePath, context) => {
-                            const relativePath = path.relative(context, resourcePath);
-                            if (/admin-assets/.test(relativePath)) {
-                                return `admin/imgs/${url}`;
-                            }
-                            return `imgs/${url}`;
-                        },
-                        publicPath: 'imgs',
-                        esModule: false,
-                    }
-                }
+                test: /\.vue$/,
+                loader: 'vue-loader'
             }
         ]
+    },
+    resolve: {
+        alias: {
+            'vue$': 'vue/dist/vue.esm.js'
+        }
     }
 };

@@ -32,10 +32,10 @@ if ($uri[3] !== 'playlist') {
     exit();
 }
 
-// the user id is, of course, optional and must be a uuid:
+// the playlist id is optional and must be a uuid:
 $playlistId = null;
 if (isset($uri[4]) && $uri[4] != '') {
-    $playlistId = $uri[4];  
+    $playlistId = $uri[4];
 }
 
 $requestAction = null;
@@ -54,7 +54,11 @@ switch ($requestMethod) {
         exit;
         break;
     case 'GET':
-         $action = GET_ACTION;
+         if ($requestAction == 'playlistsongs') {
+             $action = GET_PLAYLIST_SONGS_ACTION;
+         } else {
+             $action = GET_ACTION;
+         }
         break;
     case 'POST':
     	if ($requestAction == 'delete') {
@@ -74,7 +78,7 @@ switch ($requestMethod) {
         // use the hack in POST
         break;
     case 'DELETE':
-        // may not work on hosting services, so 
+        // may not work on hosting services, so
         // use the flag hack in POST
         break;
     default:

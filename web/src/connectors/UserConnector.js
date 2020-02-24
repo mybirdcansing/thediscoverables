@@ -73,10 +73,8 @@ export class UserConnector extends ConnectorBase {
     };
 
     resetPassword(data, callback, errorCallback) {
-        // 00000000-0000-0000-0000-000000000000 is just a blank guid to allow the path format
-        // to be correct for the server. This should be changed
         $.ajax({
-            url: this.handlerUrl + '00000000-0000-0000-0000-000000000000/password',
+            url: this.handlerUrl + 'action/password',
             type: 'POST',
             dataType: 'json',
             contentType: 'application/json',

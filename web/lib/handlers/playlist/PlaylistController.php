@@ -46,7 +46,10 @@ class PlaylistController {
                 break;
             case REMOVE_FROM_PLAYLIST_ACTION:
                 $response = $this->_removeFromPlaylist();
-                break;   
+                break;
+            case GET_PLAYLIST_SONGS_ACTION:
+                $response = $this->_getPlaylistSongs();
+                break;
             default:
                 $response = $this->_notFoundResponse();
                 break;
@@ -65,10 +68,9 @@ class PlaylistController {
     private function _getAllPlaylists()
     {
         $result = $this->playlistData->findAll();
-        return $this->_okResponse(array_map(function($val) { 
-            return $val->expose(); 
+        return $this->_okResponse(array_map(function($val) {
+            return $val->expose();
         }, $result));
-        return $response;
     }
 
     private function _getPlaylist()
@@ -78,6 +80,13 @@ class PlaylistController {
             return $this->_notFoundResponse();
         }
         return $this->_okResponse($playlist->expose());
+    }
+
+    private function _getPlaylistSongs() {
+        $result = $this->playlistData->getPlaylistSongs();
+        return $this->_okResponse(array_map(function($val) {
+            return get_object_vars($val);
+        }, $result));
     }
 
     private function _createPlaylist()
@@ -94,7 +103,7 @@ class PlaylistController {
             $playlistId = $this->playlistData->insert($playlist, $this->administrator);
             $response['status_code_header'] = 'HTTP/1.1 201 Created';
             $response['body'] = json_encode([
-                "playlistCreated" => true, 
+                "playlistCreated" => true,
                 "playlistId" => $playlistId
             ]);
 
@@ -117,7 +126,7 @@ class PlaylistController {
                 "errorMessages" => $validationIssues
             ]);
         }
-        
+
         $existingPlaylist = $this->playlistData->find($playlist->id);
         if (!$existingPlaylist) {
             return $this->_notFoundResponse();
@@ -127,12 +136,12 @@ class PlaylistController {
             $this->playlistData->update($playlist, $this->administrator);
 
             return $this->_okResponse([
-                "playlistUpdated" => true, 
+                "playlistUpdated" => true,
                 "playlistId" => $playlist->id
             ]);
         } catch (DuplicateTitleException $e) {
             return $this->_conflictResponse([
-                "playlistUpdated" => false, 
+                "playlistUpdated" => false,
                 "playlistId" => $playlist->id,
                 "errorMessages" => array($e->getCode() => $e->getMessage())
             ]);
@@ -151,7 +160,7 @@ class PlaylistController {
             $this->playlistData->delete($this->playlistId);
         } catch (DeletePlaylistInAlbumException $e) {
             return $this->_conflictResponse([
-                "playlistDeleted" => false, 
+                "playlistDeleted" => false,
                 "playlistId" => $this->playlistId,
                 "errorMessages" => array(DELETE_PLAYLIST_IN_ALBUM_CODE => DELETE_PLAYLIST_IN_ALBUM_MESSAGE)
             ]);
@@ -182,7 +191,7 @@ class PlaylistController {
         }
         $playlist = $this->playlistData->find($this->playlistId);
         if (!$playlist) {
-            return $this->_notFoundResponse(null, 
+            return $this->_notFoundResponse(null,
                 [PLAYLIST_NOT_FOUND_CODE => PLAYLIST_NOT_FOUND_MESSAGE]);
         }
         $this->playlistData->removeFromPlaylist($this->playlistId, $this->songId);
@@ -194,7 +203,7 @@ class PlaylistController {
     private function _validationIssues($playlist)
     {
         $errorMessages = [];
-        
+
         if (!isset($playlist->title) || $playlist->title == '') {
             $errorMessages[TITLE_BLANK_CODE] = TITLE_BLANK_MESSAGE;
         } else {

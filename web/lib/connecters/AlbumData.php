@@ -5,10 +5,10 @@ require_once __dir__ . '/PlaylistData.php';
 require_once __dir__ . '/../objects/DuplicateTitleException.php';
 
 class AlbumData
-{ 
+{
 	private $dbConnection = null;
 
-    function __construct($dbConnection) 
+    function __construct($dbConnection)
     {
         $this->dbConnection = $dbConnection;
     }
@@ -16,12 +16,12 @@ class AlbumData
 	public function findAll()
     {
         $sql = "
-            SELECT 
+            SELECT
 				album_id,
 				title,
 				description,
                 playlist_id
-		  	FROM 
+		  	FROM
 		  		album;";
 
         try {
@@ -40,12 +40,12 @@ class AlbumData
     public function find($id)
     {
         $sql = "
-            SELECT 
+            SELECT
                 album_id,
                 title,
                 description,
                 playlist_id
-		  	FROM 
+		  	FROM
 		  		album
 		  	WHERE album_id = ?;
         ";
@@ -62,18 +62,18 @@ class AlbumData
 		    return $album;
 		} else {
 			return 0;
-		}   
+		}
     }
 
     public function insert(Album $album, User $administrator)
     {
 
         $sql = "
-			INSERT INTO 
+			INSERT INTO
 				album (
                     album_id,
                     title,
-                    description, 
+                    description,
                     playlist_id,
                     modified_date,
                     modified_by_id,
@@ -115,7 +115,7 @@ class AlbumData
             UPDATE album
                 SET
                     title = ?,
-                    description = ?, 
+                    description = ?,
                     playlist_id = ?,
                     modified_date = now(),
                     modified_by_id = ?
@@ -169,7 +169,7 @@ class AlbumData
 	    $album->id = $row["album_id"];
 	    $album->title = $row["title"];
 	    $album->description = $row["description"];
-	    // $album->playlist  = $row["playlist_id"];
+	    $album->playlistId  = $row["playlist_id"];
 	    return $album;
 	}
 

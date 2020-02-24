@@ -42,7 +42,7 @@ class AdminViewModel {
 	  	const regex = /(?<=\/admin\/)(.*)(?=\/?)/gmi;
 			// const str = `http://localhost/admin/playlist/250F1F3C-70BD-4452-A2C6-C84B9BFDE581`;
 			let m = regex.exec(path);
-			debugger;
+			// debugger;
 			while ((m = regex.exec(path)) !== null) {
 			    // This is necessary to avoid infinite loops with zero-width matches
 			    if (m.index === regex.lastIndex) {
@@ -96,7 +96,8 @@ class AdminViewModel {
   		ko.computed(() => {
 		    return ko.mapping.toJS(viewModel);
 		}).subscribe((state) => {
-			history.replaceState(state, title, path);
+            if (state.reader) state.reader = null;
+			window.history.replaceState(state, title, path);
 		});
 	};
 

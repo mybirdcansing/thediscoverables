@@ -57,10 +57,9 @@ class UserController {
     private function _getAllUsers()
     {
         $result = $this->userData->findAll();
-        return $this->_okResponse(array_map(function($val) { 
-            return $val->expose(); 
+        return $this->_okResponse(array_map(function($val) {
+            return $val->expose();
         }, $result));
-        return $response;
     }
 
     private function _getUser()
@@ -76,7 +75,7 @@ class UserController {
     {
         $user = User::fromJson(file_get_contents('php://input'));
         $validationIssues = $this->_validationIssues($user, true);
-        
+
         if ((bool)$validationIssues) {
             return $this->_unprocessableEntityResponse([
                 "userCreated" => false,
@@ -87,7 +86,7 @@ class UserController {
             $userId = $this->userData->insert($user, $this->administrator);
             $response['status_code_header'] = 'HTTP/1.1 201 Created';
             $response['body'] = json_encode([
-                "userCreated" => true, 
+                "userCreated" => true,
                 "userId" => $userId
             ]);
         } catch (DuplicateUsernameException | DuplicateEmailException $e) {
@@ -109,7 +108,7 @@ class UserController {
                 "errorMessages" => $validationIssues
             ]);
         }
-        
+
         $existingUser = $this->userData->find($user->id);
         if (!$existingUser) {
             return $this->_notFoundResponse();
@@ -119,12 +118,12 @@ class UserController {
             $this->userData->update($user, $this->administrator);
 
             return $this->_okResponse([
-                "userUpdated" => true, 
+                "userUpdated" => true,
                 "userId" => $user->id
             ]);
         } catch (DuplicateUsernameException | DuplicateEmailException $e) {
             return $this->_conflictResponse([
-                "userUpdated" => false, 
+                "userUpdated" => false,
                 "userId" => $user->id,
                 "errorMessages" => array($e->getCode() => $e->getMessage())
             ]);
@@ -150,7 +149,7 @@ class UserController {
         $tokenData = $this->userData->getPasswordResetTokenInfo($token);
         if (!$tokenData) {
             return $this->_notFoundResponse([
-                "userPasswordUpdated" => false, 
+                "userPasswordUpdated" => false,
                 "errorMessages" => [
                     PASSWORD_TOKEN_NOT_FOUND_CODE => PASSWORD_TOKEN_NOT_FOUND_MESSAGE
                 ]
@@ -167,7 +166,7 @@ class UserController {
         $this->userData->markPasswordTokenUsed($token);
 
         return $this->_okResponse([
-            "userPasswordUpdated" => true, 
+            "userPasswordUpdated" => true,
             "userId" => $tokenData->userId
         ]);
 
@@ -181,7 +180,7 @@ class UserController {
             return $this->_notFoundResponse();
         }
         $deleted = $this->userData->delete($this->userId);
-        
+
         return $this->_okResponse();
     }
 
@@ -233,7 +232,7 @@ class UserController {
                 $errorMessages[USERNAME_INVALID_CODE] = USERNAME_INVALID_MESSAGE;
             }
         }
-        
+
         if (strlen($user->firstName) > 64) {
             $errorMessages[FIRSTNAME_LONG_CODE] = FIRSTNAME_LONG_MESSAGE;
         }

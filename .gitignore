@@ -36,5 +36,8 @@ config.json
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# App files
 node_modules
 dist
+index.html

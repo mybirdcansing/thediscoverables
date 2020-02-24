@@ -6,8 +6,9 @@ class Album extends JsonConvertible {
 
     public $id;
     public $title;
-    public $playlist;
     public $description;
+    public $playlistId;
+    public $playlist;
 
     function __construct() {
     }

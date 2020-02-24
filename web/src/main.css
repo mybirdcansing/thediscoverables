@@ -8,3 +8,7 @@ body {
 h2 {
 	font-size: 18pt;
 }
+
+.router-link-active {
+  color: red;
+}

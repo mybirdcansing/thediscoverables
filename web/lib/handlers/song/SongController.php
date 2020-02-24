@@ -20,7 +20,7 @@ class SongController {
     public function processRequest()
     {
 
-        
+
         switch ($this->action) {
             case GET_ACTION:
                 if ($this->songId) {
@@ -56,10 +56,9 @@ class SongController {
     private function _getAllSongs()
     {
         $result = $this->songData->findAll();
-        return $this->_okResponse(array_map(function($val) { 
-            return $val->expose(); 
+        return $this->_okResponse(array_map(function($val) {
+            return $val->expose();
         }, $result));
-        return $response;
     }
 
     private function _getSong()
@@ -118,7 +117,7 @@ class SongController {
             $songId = $this->songData->insert($song, $this->administrator);
             $response['status_code_header'] = 'HTTP/1.1 201 Created';
             $response['body'] = json_encode([
-                "songCreated" => true, 
+                "songCreated" => true,
                 "songId" => $songId
             ]);
         } catch (DuplicateTitleException $e) {
@@ -140,13 +139,13 @@ class SongController {
                 "errorMessages" => $validationIssues
             ]);
         }
-        
+
         $existingSong = $this->songData->find($song->id);
         if (!$existingSong) {
             return $this->_notFoundResponse();
         }
 
-        if (isset($song->fileData)) {        
+        if (isset($song->fileData)) {
             try {
                 $this->_handleUpload($song);
             } catch (BadMimeTypeException $e) {
@@ -161,12 +160,12 @@ class SongController {
             $this->songData->update($song, $this->administrator);
 
             return $this->_okResponse([
-                "songUpdated" => true, 
+                "songUpdated" => true,
                 "songId" => $song->id
             ]);
         } catch (DuplicateTitleException $e) {
             return $this->_conflictResponse([
-                "songUpdated" => false, 
+                "songUpdated" => false,
                 "songId" => $song->id,
                 "errorMessages" => array($e->getCode() => $e->getMessage())
             ]);
@@ -182,14 +181,14 @@ class SongController {
             return $this->_notFoundResponse();
         }
         $deleted = $this->songData->delete($this->songId);
-        
+
         return $this->_okResponse();
     }
 
     private function _validationIssues($song)
     {
         $errorMessages = [];
-        
+
         if (!isset($song->title) || $song->title == '') {
             $errorMessages[TITLE_BLANK_CODE] = TITLE_BLANK_MESSAGE;
         } else {
@@ -202,7 +201,7 @@ class SongController {
         }
         if (!isset($song->filename) || $song->filename == '') {
             $errorMessages[FILE_BLANK_CODE] = FILE_BLANK_MESSAGE;
-        } 
+        }
         return $errorMessages;
     }
 

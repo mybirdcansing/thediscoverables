@@ -7,10 +7,10 @@ require_once __dir__ . '/../objects/DuplicateTitleException.php';
 require_once __dir__ . '/../objects/DeletePlaylistInAlbumException.php';
 
 class PlaylistData
-{ 
+{
 	private $dbConnection = null;
 
-    function __construct($dbConnection) 
+    function __construct($dbConnection)
     {
         $this->dbConnection = $dbConnection;
     }
@@ -18,11 +18,11 @@ class PlaylistData
 	public function findAll()
     {
         $sql = "
-            SELECT 
+            SELECT
 				playlist_id,
 				title,
 				description
-		  	FROM 
+		  	FROM
 		  		playlist;";
 
         try {
@@ -38,64 +38,83 @@ class PlaylistData
         }
     }
 
+    public function getPlaylistSongs() {
+        $sql = "
+            SELECT
+                playlist_id,
+                song_id
+            FROM
+                playlist_song;
+        ";
+
+        try {
+			$stmt = $this->dbConnection->query($sql);
+            $playlistSongs = [];
+			while ($row = $stmt->fetch_assoc()) {
+                $playlistSong = new stdClass();
+                $playlistSong->playlistId = $row["playlist_id"];
+                $playlistSong->songId = $row["song_id"];
+			    $playlistSongs[] = $playlistSong;
+			}
+            return $playlistSongs;
+        } catch (\mysqli_sql_exception $e) {
+            error_log($e->getMessage());
+            throw $e;
+        }
+    }
+
     public function find($id)
     {
         $sql = "
-            SELECT 
-                playlist_id,
-                title,
-                description
-		  	FROM 
-		  		playlist
-		  	WHERE playlist_id = ?; 
-        ";
-
-		$stmt = $this->dbConnection->prepare($sql);
-		$stmt->bind_param("s", $id);
-		$stmt->execute();
-		$result = $stmt->get_result();
-		if ($result->num_rows == 1) {
-		    $row = $result->fetch_assoc();
-		    $playlist = $this->_rowToPlaylist($row);
-		} else {
-			return 0;
-		}
-
-        $sql = "
-            SELECT 
+            SELECT
+            	pl.playlist_id,
+                pl.title AS playlist_title,
+                pl.description AS playlist_description,
                 s.song_id,
-                s.title,
-                s.description,
-                s.filename
-            FROM song s
-            JOIN playlist_song pls ON 
-                s.song_id = pls.song_id
-            WHERE pls.playlist_id = ?;
+                s.title AS song_title,
+                s.description AS song_description,
+                s.filename AS song_filename
+            FROM
+            	playlist pl
+            JOIN playlist_song pls ON
+            	pls.playlist_id = pl.playlist_id
+            JOIN song s ON
+            	s.song_id = pls.song_id
+            WHERE pl.playlist_id = ?;
         ";
-        $playlist->songs = [];
+        $playlist = null;
         try {
             $stmt = $this->dbConnection->prepare($sql);
             $stmt->bind_param("s", $id);
             $stmt->execute();
             $result = $stmt->get_result();
             if ($result->num_rows > 0) {
-                $songData = new SongData($this->dbConnection);
                 while ($row = $result->fetch_assoc()) {
-                    $playlist->songs[] = $songData->rowToSong($row);
+                    if ($playlist == null) {
+                        $playlist = new Playlist();
+                	    $playlist->id = $row["playlist_id"];
+                	    $playlist->title = $row["playlist_title"];
+                	    $playlist->description = $row["playlist_description"];
+                    }
+                    $song = new Song();
+            	    $song->id = $row["song_id"];
+            	    $song->title = $row["song_title"];
+            	    $song->description = $row["song_description"];
+            	    $song->filename = $row["song_filename"];
+                    $playlist->songs[] = $song;
                 }
             }
         } catch (\mysqli_sql_exception $e) {
             error_log($e->getMessage());
             throw $e;
         }
-	    return $playlist;
+        return $playlist;
     }
 
     public function insert(Playlist $playlist, User $administrator)
     {
-
         $sql1 = "
-			INSERT INTO 
+			INSERT INTO
 				playlist (
                     playlist_id,
                     title,
@@ -124,7 +143,7 @@ class PlaylistData
             $stmt1->execute();
 
             $sql2 = "
-                INSERT INTO 
+                INSERT INTO
                     playlist_song (
                         playlist_song_id,
                         song_id,
@@ -169,7 +188,7 @@ class PlaylistData
             UPDATE playlist
                 SET
                     title = ?,
-                    description = ?, 
+                    description = ?,
                     modified_date = now(),
                     modified_by_id = ?
                 WHERE playlist_id = ?;
@@ -190,7 +209,7 @@ class PlaylistData
             $stmt2->bind_param("s", $playlist->id);
             $stmt2->execute();
             $sql3 = "
-                INSERT INTO 
+                INSERT INTO
                     playlist_song (
                         playlist_song_id,
                         song_id,
@@ -264,7 +283,7 @@ class PlaylistData
     public function addToPlaylist($playlistId, $songId, User $administrator)
     {
         $sql = "
-            INSERT INTO 
+            INSERT INTO
                 playlist_song (
                     playlist_song_id,
                     song_id,

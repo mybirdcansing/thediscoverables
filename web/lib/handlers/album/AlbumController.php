@@ -55,10 +55,9 @@ class AlbumController {
     private function _getAllAlbums()
     {
         $result = $this->albumData->findAll();
-        return $this->_okResponse(array_map(function($val) { 
-            return $val->expose(); 
+        return $this->_okResponse(array_map(function($val) {
+            return $val->expose();
         }, $result));
-        return $response;
     }
 
     private function _getAlbum()
@@ -84,7 +83,7 @@ class AlbumController {
             $albumId = $this->albumData->insert($album, $this->administrator);
             $response['status_code_header'] = 'HTTP/1.1 201 Created';
             $response['body'] = json_encode([
-                "albumCreated" => true, 
+                "albumCreated" => true,
                 "albumId" => $albumId
             ]);
         } catch (DuplicateTitleException $e) {
@@ -106,7 +105,7 @@ class AlbumController {
                 "errorMessages" => $validationIssues
             ]);
         }
-        
+
         $existingAlbum = $this->albumData->find($album->id);
         if (!$existingAlbum) {
             return $this->_notFoundResponse();
@@ -115,12 +114,12 @@ class AlbumController {
         try {
             $this->albumData->update($album, $this->administrator);
             return $this->_okResponse([
-                "albumUpdated" => true, 
+                "albumUpdated" => true,
                 "albumId" => $album->id
             ]);
         } catch (DuplicateTitleException $e) {
             return $this->_conflictResponse([
-                "albumUpdated" => false, 
+                "albumUpdated" => false,
                 "albumId" => $album->id,
                 "errorMessages" => array($e->getCode() => $e->getMessage())
             ]);

@@ -1,4 +1,4 @@
-import Api from '../api';
+import Api from './api';
 import { ConnectorBase } from "./ConnectorBase";
 
 export class PlaylistConnector extends ConnectorBase {
@@ -8,7 +8,7 @@ export class PlaylistConnector extends ConnectorBase {
 
     getPlaylistSongs(successCallback, errorCallback) {
 		if (!errorCallback) errorCallback = this.errorCallback;
-        Api().get(this.handler + + 'action/playlistsongs').then(function (response) {
+        Api().get(this.handler + 'action/playlistsongs').then(function (response) {
             successCallback(response.data);
         }).catch(function (error) {
             errorCallback(error.response);

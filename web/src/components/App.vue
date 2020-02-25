@@ -36,17 +36,17 @@
 
         },
         created: async function() {
-            let songs;
-            try {
-                songs = await this.initSongs();
-            } catch(e) {
-                console.log('in async function', e);
-            }
-            this.songs = songs;
-
-            // this.initSongs().then((songs) => {
-            //     this.songs = songs;
-            // }).catch(()=>{});
+            // let songs;
+            // try {
+            //     songs = await this.initSongs();
+            // } catch(e) {
+            //     console.log('in async function', e);
+            // }
+            // this.songs = songs;
+            
+            this.initSongs().then((songs) => {
+                this.songs = songs;
+            }).catch(()=>{});
         },
         computed: { }
     }

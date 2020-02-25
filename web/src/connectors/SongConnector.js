@@ -1,6 +1,6 @@
-import { ConnectorBase } from "./ConnectorBase";
+import { RestConnectorBase } from "./RestConnectorBase";
 
-export class SongConnector extends ConnectorBase {
+export class SongConnector extends RestConnectorBase {
 	constructor() {
     	super('song');
   	}

@@ -1,7 +1,6 @@
-import { ConnectorBase } from "./ConnectorBase";
+import { RestConnectorBase } from "./RestConnectorBase";
 
-// Use this to conect to the server for user related requests
-export class UserConnector extends ConnectorBase {
+export class UserConnector extends RestConnectorBase {
     constructor() {
         super('user');
     }

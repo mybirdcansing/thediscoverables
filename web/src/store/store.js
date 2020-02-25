@@ -55,7 +55,9 @@ export const store = new Vuex.Store({
     },
     mutations: {
         setSongs(state, songs) {
-            state.songs = songs;
+            let  songsObj = {};
+            songs.forEach(song => songsObj[song.id] = song);
+            state.songs = songsObj;
         }
     },
     actions: {
@@ -65,13 +67,16 @@ export const store = new Vuex.Store({
             });
         },
         initSongs({commit, state}) {
-            return new Promise((resolve, reject) => {
-                    songConnector.getAll().then((data) => {
-                        commit('setSongs', data);
-                        resolve(state.songs);
-                    }).catch((error) => {
-                        reject(error);
-                    });
+            return new Promise(
+                (resolve, reject) => {
+                    songConnector.getAll()
+                        .then((data) => {
+                            commit('setSongs', data);
+                            resolve(state.songs);
+                        }).catch((error) => {
+                            // debugger;
+                            reject(error);
+                        });
                 }
             );
         }

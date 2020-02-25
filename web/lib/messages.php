@@ -88,6 +88,9 @@ define("MP3_ONLY_MESSAGE", "Only mp3s allowed.");
 define("FILE_BLANK_CODE", 1020);
 define("FILE_BLANK_MESSAGE", "Please upload a song.");
 
+define("CATALOG_NOT_FOUND_CODE", 1021);
+define("CATALOG_NOT_FOUND_MESSAGE", "Try using the GET request method");
+
 // global methods
 function GUID()
 {

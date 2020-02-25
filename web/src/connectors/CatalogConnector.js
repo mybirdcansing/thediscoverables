@@ -1,43 +1,13 @@
 import Api from './api';
 
-export class ConnectorBase {
-	constructor(handler) {
-	 	this.handlerBase = `/lib/handlers`;
- 		this.handlerUrl = `${this.handlerBase}/${handler}/`;
-        this.handler = handler;
+export class CatalogConnector {
+	constructor() {
+        this.handler = 'catalog';
   	}
 
-	get(id) {
-        return this.#get(this.handler + id);
-	}
-
-	getAll() {
-        return this.#get(this.handler);
-	}
-
-	create(obj) {
-        return this.#post(obj, this.handler);
-	}
-
-	update(obj) {
-        return this.#post(obj, this.handler + obj.id);
-	}
-
-    deleteThing(obj) {
-        return this.#post(obj, this.handler + obj.id + '/delete');
-	}
-
-    #get(url) {
+    get(url) {
         return new Promise((resolve, reject) => {
-            Api().get(url)
-                .then(response => resolve(response.data))
-                .catch(error => this.#rejector(reject, error));
-        });
-    }
-
-    #post(obj, url) {
-        return new Promise((resolve, reject) => {
-            Api().post(url, { data: obj })
+            Api().get(this.handler)
                 .then(response => resolve(response.data))
                 .catch(error => this.#rejector(reject, error));
         });

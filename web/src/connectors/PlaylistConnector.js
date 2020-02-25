@@ -1,17 +1,7 @@
-import Api from './api';
-import { ConnectorBase } from "./ConnectorBase";
+import { RestConnectorBase } from "./RestConnectorBase";
 
-export class PlaylistConnector extends ConnectorBase {
+export class PlaylistConnector extends RestConnectorBase {
 	constructor() {
     	super('playlist');
   	}
-
-    getPlaylistSongs(successCallback, errorCallback) {
-		if (!errorCallback) errorCallback = this.errorCallback;
-        Api().get(this.handler + 'action/playlistsongs').then(function (response) {
-            successCallback(response.data);
-        }).catch(function (error) {
-            errorCallback(error.response);
-        });
-	};
 }

@@ -1,51 +1,25 @@
-import Api from './api';
+import axios from 'axios';
 
 export class ConnectorBase {
 	constructor(handler) {
-	 	this.handlerBase = `/lib/handlers`;
- 		this.handlerUrl = `${this.handlerBase}/${handler}/`;
+        this.handlerBase = `/lib/handlers`;
+        this.handlerUrl = `${this.handlerBase}/${handler}/`;
         this.handler = handler;
-  	}
-
-	get(id) {
-        return this.#get(this.handler + id);
-	}
-
-	getAll() {
-        return this.#get(this.handler);
-	}
-
-	create(obj) {
-        return this.#post(obj, this.handler);
-	}
-
-	update(obj) {
-        return this.#post(obj, this.handler + obj.id);
-	}
-
-    deleteThing(obj) {
-        return this.#post(obj, this.handler + obj.id + '/delete');
-	}
-
-    #get(url) {
-        return new Promise((resolve, reject) => {
-            Api().get(url)
-                .then(response => resolve(response.data))
-                .catch(error => this.#rejector(reject, error));
+    }
+      
+    client() {
+        return axios.create({
+            baseURL: '/lib/handlers',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json'
+            }
         });
     }
 
-    #post(obj, url) {
-        return new Promise((resolve, reject) => {
-            Api().post(url, { data: obj })
-                .then(response => resolve(response.data))
-                .catch(error => this.#rejector(reject, error));
-        });
-    }
-
-    #rejector(reject, error) {
+    rejector(reject, error) {
         if (process.env.NODE_ENV === "development") {
-            this.#logToConsole(error);
+            this.logToConsole(error);
         }
         if (error.response) {
             reject(error.response.data);
@@ -54,7 +28,7 @@ export class ConnectorBase {
         }
     }
 
-    #logToConsole(error) {
+    logToConsole(error) {
         if (error.response) {
           // The request was made and the server responded with a status code
           // that falls out of the range of 2xx

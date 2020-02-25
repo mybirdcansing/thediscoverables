@@ -1,4 +1,5 @@
 "use strict"
+import regeneratorRuntime from "regenerator-runtime";
 import "./main.css";
 
 import {router} from './router';

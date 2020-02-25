@@ -22,9 +22,7 @@
             Navbar
         },
         data() {
-            return {
-                users: []
-            }
+            return {}
         },
         methods: {
             ...mapActions([

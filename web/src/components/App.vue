@@ -4,7 +4,7 @@
         <br />
         <router-view></router-view>
         <br />
-        <accordion v-for="song in songs" :key="song.id" :item="song" />
+        <accordion v-for="song in allSongs" :key="song.id" :item="song" />
         <br />
 
     </div>
@@ -13,7 +13,7 @@
 <script>
     import Accordion from './layout/Accordion.vue';
     import Navbar from './layout/Navbar.vue';
-    import { mapActions } from 'vuex';
+    import { mapActions, mapGetters } from 'vuex';
 
     export default {
         name: "App",
@@ -21,34 +21,31 @@
             Accordion,
             Navbar
         },
-        data(){
+        data() {
             return {
-                songs: []
+                users: []
             }
         },
         methods: {
             ...mapActions([
-                  'initSongs', // map `this.increment()` to `this.$store.dispatch('increment')`
-                  'initStore'
-              ])
+                  'fetchCatalog'
+            ]),
+            ...mapActions('manage', [
+                'fetchUsers'
+            ])
         },
         computed: {
+            ...mapGetters({
+                allSongs: 'songSet',
+            })
+        },
+        mounted: function() {
 
         },
-        created: async function() {
-            // let songs;
-            // try {
-            //     songs = await this.initSongs();
-            // } catch(e) {
-            //     console.log('in async function', e);
-            // }
-            // this.songs = songs;
-            
-            this.initSongs().then((songs) => {
-                this.songs = songs;
-            }).catch(()=>{});
-        },
-        computed: { }
+        created: function() {
+            this.fetchCatalog();
+            this.fetchUsers();
+        }
     }
 </script>
 

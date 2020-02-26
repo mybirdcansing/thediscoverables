@@ -46,5 +46,4 @@ export class ConnectorBase {
         }
         console.log(error.config);
     }
-
 }

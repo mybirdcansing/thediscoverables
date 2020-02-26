@@ -7,14 +7,12 @@ const state = {
 }
 
 const getters = {
-    users: (state) => state.users,
-    userList: (state) => state.userList,
     userSet: (state) => state.userList.map(id => state.users[id]),
     getUserById: (state) => (id) => state.users.find(user => user.id === id),
 }
 
 const actions = {
-    async fetchUsers({commit, state}) {
+    async fetchUsers({commit}) {
         try {
             commit('setUsers', await userConnector.getAll());
         } catch (e) {
@@ -24,14 +22,14 @@ const actions = {
 }
 
 const mutations = {
-    setUsers(state, users) {
+    setUsers(state, userData) {
         let userList = [];
-        let usersObj = {};
-        users.forEach(function(user) {
-            usersObj[user.id] = user;
+        let users = {};
+        userData.forEach(function(user) {
+            users[user.id] = user;
             userList.push(user.id);
         });
-        state.users = usersObj;
+        state.users = users;
         state.userList = userList;
     }
 }

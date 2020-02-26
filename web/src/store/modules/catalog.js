@@ -11,16 +11,10 @@ const state = {
 }
 
 const getters = {
-    songs: (state) => state.songs,
-    songList: (state) => state.songList,
     songSet: (state) => state.songList.map(id => state.songs[id]),
     getSongById: (state) => (id) => state.songs.find(song => song.id === id),
-    playlists: (state) => state.playlists,
-    playlistList: (state) => state.playlistList,
     playlistSet: (state) => state.playlistList.map(id => state.playlists[id]),
     getPlaylistById: (state) => (id) => state.playlists.find(playlist => playlist.id === id),
-    albums: (state) => state.albums,
-    albumList: (state) => state.albumList,
     albumSet: (state) => state.albumList.map(id => state.albums[id]),
     getAlbumById: (state) => (id) => state.albums.find(album => album.id === id),
 }
@@ -42,7 +36,6 @@ const mutations = {
         });
     },
 }
-
 
 export default {
     state,

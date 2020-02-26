@@ -6,26 +6,26 @@ export class RestConnectorBase extends ConnectorBase {
   	}
 
 	get(id) {
-        return this.#get(this.handler + id);
+        return this._get(this.handler + id);
 	}
 
 	getAll() {
-        return this.#get(this.handler);
+        return this._get(this.handler);
 	}
 
 	create(obj) {
-        return this.#post(obj, this.handler);
+        return this._post(obj, this.handler);
 	}
 
 	update(obj) {
-        return this.#post(obj, this.handler + obj.id);
+        return this._post(obj, this.handler + obj.id);
 	}
 
     delete(obj) {
-        return this.#post(obj, this.handler + obj.id + '/delete');
+        return this._post(obj, this.handler + obj.id + '/delete');
 	}
 
-    #get(url) {
+    _get(url) {
         return new Promise((resolve, reject) => {
             this.client().get(url)
                 .then(response => resolve(response.data))
@@ -33,7 +33,7 @@ export class RestConnectorBase extends ConnectorBase {
         });
     }
 
-    #post(obj, url) {
+    _post(obj, url) {
         return new Promise((resolve, reject) => {
             this.client().post(url, { data: obj })
                 .then(response => resolve(response.data))

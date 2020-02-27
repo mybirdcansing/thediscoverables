@@ -24,22 +24,4 @@ export class RestConnectorBase extends ConnectorBase {
     delete(obj) {
         return this._post(obj, this.handler + obj.id + '/delete');
 	}
-
-    _get(url) {
-        return new Promise((resolve, reject) => {
-            this.client().get(url)
-                .then(response => resolve(response.data))
-                .catch(error => this.rejector(reject, error));
-        });
-    }
-
-    _post(obj, url) {
-        return new Promise((resolve, reject) => {
-            this.client().post(url, { data: obj })
-                .then(response => resolve(response.data))
-                .catch(error => this.rejector(reject, error));
-        });
-    }
-
-
 }

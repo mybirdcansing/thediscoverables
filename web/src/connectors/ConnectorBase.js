@@ -17,6 +17,22 @@ export class ConnectorBase {
         });
     }
 
+    _get(url) {
+        return new Promise((resolve, reject) => {
+            this.client().get(url)
+                .then(response => resolve(response.data))
+                .catch(error => this.rejector(reject, error));
+        });
+    }
+
+    _post(obj, url) {
+        return new Promise((resolve, reject) => {
+            this.client().post(url, { data: obj })
+                .then(response => resolve(response.data))
+                .catch(error => this.rejector(reject, error));
+        });
+    }
+
     rejector(reject, error) {
         if (process.env.NODE_ENV === "development") {
             this.logToConsole(error);

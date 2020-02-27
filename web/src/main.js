@@ -7,6 +7,8 @@ import {store} from './store/store';
 import App from './components/App.vue';
 
 
+
+
 new Vue({
     router,
     store,

@@ -10,10 +10,17 @@ header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
 $input = json_decode(file_get_contents('php://input'));
-$username = $input->username;
-$password = $input->password;
+
+if (isset($input->data)) {
+	$username = $input->data->username;
+	$password = $input->data->password;
+} else {
+	$username = $input->username;
+	$password = $input->password;
+}
 
 if (isset($username) && isset($password)) {
+	error_log(json_encode($input));
 	$dbConnection = (new DataAccess())->getConnection();
 	$userData = new UserData($dbConnection);
 

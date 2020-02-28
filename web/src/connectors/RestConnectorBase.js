@@ -6,7 +6,7 @@ export class RestConnectorBase extends ConnectorBase {
   	}
 
 	get(id) {
-        return this._get(this.handler + id);
+        return this._get(this.handler + '/' + id);
 	}
 
 	getAll() {
@@ -18,10 +18,10 @@ export class RestConnectorBase extends ConnectorBase {
 	}
 
 	update(obj) {
-        return this._post(obj, this.handler + obj.id);
+        return this._post(obj, this.handler + '/' + obj.id);
 	}
 
-    delete(obj) {
-        return this._post(obj, this.handler + obj.id + '/delete');
+    delete(id) {
+        return this._post({}, this.handler + '/' + id + '/delete');
 	}
 }

@@ -1,6 +1,6 @@
 "use strict"
 import regeneratorRuntime from "regenerator-runtime";
-import "./main.css";
+import "./manage.css";
 
 import {router} from './router';
 import {store} from './store/store';

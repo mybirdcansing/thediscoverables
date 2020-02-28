@@ -7,7 +7,7 @@
 </template>
 
 <script>
-    import Navbar from './layout/Navbar.vue';
+    import Navbar from './Navbar.vue';
     export default {
         name: "Music",
         components: {

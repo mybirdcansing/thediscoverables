@@ -1,35 +1,35 @@
 <template>
     <div>
-        <h2>thediscoverables.com login</h2>
-        <div class="wrapper fadeInDown">
-            <div id="formContent">
-            <!-- Tabs Titles -->
+      <h2>thediscoverables.com login</h2>
+      <div class="wrapper fadeInDown">
+          <div id="formContent">
+          <!-- Tabs Titles -->
 
-            <!-- Icon -->
-            <div class="fadeIn first">
-                <img src="../../assets/images/edit-button.svg" id="icon" alt="Login Icon" />
-            </div>
+          <!-- Icon -->
+          <div class="fadeIn first">
+              <img src="../../assets/images/edit-button.svg" id="icon" alt="Login Icon" />
+          </div>
 
-            <!-- Login Form -->
-            <form @submit="login">
-                <p v-if="errors.length">
-                    <b>Please correct the following error(s):</b>
-                    <ul>
-                        <li v-for="value in errors">{{ value }}</li>
-                    </ul>
-                </p>
-                <input v-model="username" type="text" class="fadeIn second" name="login" placeholder="login">
-                <input v-model="password" type="password" class="fadeIn third" name="login" placeholder="password">
-                <input type="submit" class="fadeIn fourth" value="Log In">
-            </form>
+          <!-- Login Form -->
+          <form @submit="login">
+              <p v-if="errors.length">
+                  <b>Please correct the following error(s):</b>
+                  <ul>
+                      <li v-for="error in errors" :key="error">{{ error }}</li>
+                  </ul>
+              </p>
+              <input v-model="username" type="text" class="fadeIn second" placeholder="login">
+              <input v-model="password" type="password" class="fadeIn third" placeholder="password">
+              <input type="submit" class="fadeIn fourth" value="Log In">
+          </form>
 
-            <!-- Remind Passowrd -->
-            <div id="formFooter">
-                <a class="underlineHover" href="#">Forgot Password?</a>
-            </div>
+          <!-- Remind Passowrd -->
+          <div id="formFooter">
+            <router-link class="underlineHover" to="/passwordhelp">Forgot Password?</router-link>
+          </div>
 
-            </div>
         </div>
+      </div>
     </div>
 </template>
 
@@ -37,13 +37,10 @@
     import { UserConnector } from '../../connectors/UserConnector';
     export default {
         name: "Login",
-        components: {
-            
-        },
+        components: {},
         methods: {
-            login(e) {
+            async login(e) {
                 e.preventDefault();
-                
                 const uc = new UserConnector();
                 uc.authenticate(this.username, this.password)
                     .then(function(data) {
@@ -88,10 +85,6 @@ a {
 
 h2 {
   text-align: center;
-  font-size: 16px;
-  font-weight: 600;
-  margin: 40px 8px 10px 8px; 
-  color: #cccccc;
 }
 
 

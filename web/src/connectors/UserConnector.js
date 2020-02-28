@@ -18,19 +18,7 @@ export class UserConnector extends RestConnectorBase {
     };
 
     logout(callback, errorCallback) {
-        $.ajax({
-            url: this.handlerBase + '/logout.php',
-            type: 'POST',
-            dataType: 'json',
-            contentType: 'application/json',
-            cache: false,
-            success: function (data, textStatus, jqXHR) {
-                callback(data, textStatus, jqXHR);
-            },
-            error: function(data, textStatus, errorThrown) {
-                errorCallback(data.responseJSON, textStatus, errorThrown);
-            }
-        });
+        return this._post({}, '/logout.php');
     };
 
     requestPasswordReset(user, callback, errorCallback) {

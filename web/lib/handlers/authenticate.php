@@ -20,7 +20,6 @@ if (isset($input->data)) {
 }
 
 if (isset($username) && isset($password)) {
-	error_log(json_encode($input));
 	$dbConnection = (new DataAccess())->getConnection();
 	$userData = new UserData($dbConnection);
 

@@ -1,3 +1,5 @@
+import { UserConnector } from './connectors/UserConnector';
+
 import VueRouter from 'vue-router';
 Vue.use(VueRouter);
 
@@ -18,8 +20,6 @@ import ManageUser from './components/manage/ManageUser.vue';
 import Login from './components/manage/Login.vue';
 import PasswordHelp from './components/manage/PasswordHelp.vue';
 import PasswordReset from './components/manage/PasswordReset.vue';
-
-import { UserConnector } from './connectors/UserConnector';
 
 export const router = new VueRouter({
     routes: [
@@ -60,8 +60,8 @@ export const router = new VueRouter({
             name: 'login',
             component: Login 
         },
-        { path: '/PasswordHelp', component: PasswordHelp },
-        { path: '/PasswordReset', component: PasswordReset },
+        { path: '/passwordhelp', component: PasswordHelp },
+        { path: '/passwordreset', component: PasswordReset },
     ],
     mode: 'history',
 });

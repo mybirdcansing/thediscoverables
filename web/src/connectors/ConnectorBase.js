@@ -2,14 +2,14 @@ import axios from 'axios';
 
 export class ConnectorBase {
 	constructor(handler) {
-        this.handlerBase = `/lib/handlers`;
-        this.handlerUrl = `${this.handlerBase}/${handler}/`;
+        this.handlerBase = '/lib/handlers/';
+        this.handlerUrl = `${this.handlerBase}${handler}/`;
         this.handler = handler;
     }
       
     client() {
         return axios.create({
-            baseURL: '/lib/handlers',
+            baseURL: this.handlerBase,
             headers: {
                 Accept: 'application/json',
                 'Content-Type': 'application/json'
@@ -26,11 +26,18 @@ export class ConnectorBase {
     }
 
     _post(obj, url) {
-        return new Promise((resolve, reject) => {
+        return new Promise(function(resolve, reject) {
+            debugger;
             this.client().post(url, { data: obj })
-                .then(response => resolve(response.data))
-                .catch(error => this.rejector(reject, error));
-        });
+                .then(response => {
+                    debugger;
+                    return resolve(response.data)
+                })
+                .catch(error => {
+                    debugger;
+                    this.rejector(reject, error)
+                });
+        }.bind(this));
     }
 
     rejector(reject, error) {

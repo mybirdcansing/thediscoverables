@@ -18,6 +18,7 @@ export class RestConnectorBase extends ConnectorBase {
 	}
 
 	update(obj) {
+        // debugger;
         return this._post(obj, this.handler + '/' + obj.id);
 	}
 

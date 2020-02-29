@@ -1,10 +1,13 @@
 <template>
     <div>
-        <h2>Manage Songs</h2>
-  
+        <div class="container some-vpadding">
+            <h2>Manage Songs</h2>
+        </div>
         <div class="container">
-            <button class="btn btn-sm btn-outline-secondary" type="button"><strong>+</strong> Add a Song</button>
-            <div style="margin-top:10px">
+            <div class="more-vpadding">
+                <button class="btn btn-sm btn-outline-secondary" type="button"><strong>+</strong> Add a Song</button>
+            </div>
+            <div class="some-vpadding">
                 <div class="row border-top justify-content-between some-vpadding" v-for="song in allSongs" :key="song.id">
                     <div class="col"><span>{{ song.title }}</span></div>
                     <div class="col-sm-2.1">
@@ -20,13 +23,11 @@
                 </div>
             </div>
         </div>
-        
 
-      <!-- use the modal component, pass in the prop -->
-      <modal v-if="showModal" @close="closeDeleteItemModal" @submit="deleteItem">
-        <h3 slot="header">Confirm!</h3>
-        <div slot="body">Are you sure you want to delete {{itemToDelete.title}}</div>
-      </modal>
+        <modal v-if="showModal" @close="closeDeleteItemModal" @submit="deleteItem">
+            <h3 slot="header">Confirm!</h3>
+            <div slot="body">Are you sure you want to delete <strong>{{itemToDelete.title}}</strong>?</div>
+        </modal>
     </div>
 </template>
 
@@ -41,13 +42,14 @@
         data: function() {
             return {
                 showModal: false,
-                itemToDelete: ''
+                modalSubmit: false,
+                itemToDelete: null
             }
         },
         methods: {
             confirmDeleteItem(song) {
                 this.$data.itemToDelete = song;
-                this.$data.showModal = true;
+                this.$data.showModal = true;    
             },
             closeDeleteItemModal() {
                 this.$data.showModal = false;
@@ -70,18 +72,16 @@
             })
         },
         mounted() {
-            $(document).keydown((e) => {
+            this.$el.ownerDocument.addEventListener("keydown", function(e) {
                 e = e || window.event;
                 if (this.$data.showModal && e.key == "Escape") {
                     this.closeDeleteItemModal();
                 }
-            });
+            }.bind(this));
         }
     }
 </script>
 
 <style scoped>
-    a {
-        cursor: pointer;
-    }
+
 </style>

@@ -7,18 +7,15 @@
 
           <!-- Icon -->
           <div class="fadeIn first">
-              <img src="../../assets/images/edit-button.svg" id="icon" alt="Login Icon" />
+              <img src="../../assets/images/edit-button.svg" class="loginIcon" alt="Login Icon" />
           </div>
 
           <!-- Login Form -->
           <form @submit="login">
-              <p v-if="errors.length">
-                  <b>Please correct the following error(s):</b>
-                  <ul>
-                      <li v-for="error in errors" :key="error">{{ error }}</li>
-                  </ul>
-              </p>
-              <input v-model="username" type="text" class="fadeIn second" placeholder="login">
+              <div class=" alerts" v-if="errors.length">
+                    <div class="alert alert-primary" role="alert" v-for="error in errors" :key="error">{{ error }}</div>
+              </div>
+              <input v-model="username" type="text" class="fadeIn second" placeholder="login" autofocus>
               <input v-model="password" type="password" class="fadeIn third" placeholder="password">
               <input type="submit" class="fadeIn fourth" value="Log In">
           </form>
@@ -195,7 +192,10 @@ input[type=text],input[type=password] {
   -webkit-border-radius: 5px 5px 5px 5px;
   border-radius: 5px 5px 5px 5px;
 }
-
+.alerts {
+    margin: auto;
+  width: 85%;
+}
 input[type=text]:focus {
   background-color: #fff;
   border-bottom: 2px solid #5fbae9;
@@ -317,7 +317,7 @@ input[type=text]:placeholder {
     outline: none;
 } 
 
-#icon {
+.loginIcon {
   width:60%;
 }
 

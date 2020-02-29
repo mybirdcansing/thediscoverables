@@ -18,10 +18,10 @@
 
                       <div class="modal-footer">
                           <slot name="footer">
-                              <button class="modal-default-button" @click="$emit('submit')">
+                              <button class="btn btn-sm btn-outline-primary" @click="$emit('submit')">
                                   OK
                               </button>
-                              <button class="modal-default-button" @click="$emit('close')">
+                              <button class="btn btn-sm btn-outline-secondary" @click="$emit('close')">
                                   Cancle
                               </button>
                           </slot>

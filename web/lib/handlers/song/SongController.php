@@ -19,8 +19,6 @@ class SongController {
 
     public function processRequest()
     {
-
-
         switch ($this->action) {
             case GET_ACTION:
                 if ($this->songId) {
@@ -33,6 +31,7 @@ class SongController {
                 $response = $this->_deleteSong();
                 break;
             case UPDATE_ACTION:
+                error_log("songId: " . $this->songId);
                 $response = $this->_updateSong();
                 break;
             case CREATE_ACTION:
@@ -130,8 +129,14 @@ class SongController {
     }
 
     private function _updateSong()
-    {
-        $song = Song::fromJson(file_get_contents('php://input'));
+    {   
+        $json = json_decode(file_get_contents('php://input'));
+        if (isset($json->data)) {
+            $song = Song::fromJson(json_encode($json->data));
+        } else {
+            $song = Song::fromJson(file_get_contents('php://input'));
+        }
+        
         $validationIssues = $this->_validationIssues($song);
         if ((bool)$validationIssues) {
             return $this->_unprocessableEntityResponse([
@@ -158,7 +163,7 @@ class SongController {
 
         try {
             $this->songData->update($song, $this->administrator);
-
+            
             return $this->_okResponse([
                 "songUpdated" => true,
                 "songId" => $song->id

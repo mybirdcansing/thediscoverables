@@ -1,6 +1,7 @@
 import {CatalogConnector} from '../../connectors/CatalogConnector';
 import { SongConnector } from '../../connectors/SongConnector';
 const catalogConnector = new CatalogConnector();
+const songConnector = new SongConnector();
 
 const state = {
     songs: {},
@@ -13,11 +14,11 @@ const state = {
 
 const getters = {
     songSet: (state) => state.songList.map(id => state.songs[id]),
-    getSongById: (state) => (id) => state.songs.find(song => song.id === id),
+    getSongById: (state) => (id) => state.songs[id],
     playlistSet: (state) => state.playlistList.map(id => state.playlists[id]),
-    getPlaylistById: (state) => (id) => state.playlists.find(playlist => playlist.id === id),
+    getPlaylistById: (state) => (id) => state.playlists[id],
     albumSet: (state) => state.albumList.map(id => state.albums[id]),
-    getAlbumById: (state) => (id) => state.albums.find(album => album.id === id),
+    getAlbumById: (state) => (id) => state.albums[id],
 }
 
 const actions = {
@@ -30,7 +31,6 @@ const actions = {
     },
     deleteSong({commit}, songId) {
         return new Promise(async (resolve, reject) => {
-            const songConnector = new SongConnector()
             try {
                 await songConnector.delete(songId);
                 commit('DELETE_ITEM', {
@@ -42,6 +42,44 @@ const actions = {
             } catch (data) {
                 reject(data);
             }
+        });
+    },
+    updateSong({commit}, song) {
+        // songConnector.ajaxUpdate(song,
+        //     function(response) {
+            
+        //         debugger;
+        //         if (response.songUpdated) {
+        //             commit('UPDATE_ITEM', {
+        //                 data: song,
+        //                 categoryList: 'songList',
+        //                 category: 'songs'
+        //             });
+
+        //         }
+        //     });
+        return new Promise((resolve, reject) => {
+            debugger;
+            
+            songConnector.update(song)
+                .then(function(response) {
+                
+                    debugger;
+                    if (response.songUpdated) {
+                        commit('UPDATE_ITEM', {
+                            data: song,
+                            categoryList: 'songList',
+                            category: 'songs'
+                        });
+                        resolve(response);
+                    } else {
+                        reject(response);
+                    }
+                })
+                .catch(function(data) {
+
+                    reject(data);
+                });
         });
 
     }
@@ -57,6 +95,12 @@ const mutations = {
         const index = state[obj.categoryList].findIndex((id) => id === obj.id);
         state[obj.categoryList].splice(index, 1);
         delete state[obj.category][obj.id];
+    },
+    UPDATE_ITEM(state, obj) {
+        debugger;
+        // const index = state[obj.categoryList].findIndex((id) => id === obj.id);
+        // state[obj.categoryList].splice(index, 1);
+        // delete state[obj.category][obj.id];
     }
 }
 

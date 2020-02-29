@@ -20,9 +20,6 @@
             ])
         },
         computed: {
-            ...mapGetters({
-                allSongs: 'songSet',
-            })
         },
         created: function() {
             this.fetchCatalog();

@@ -5,8 +5,8 @@ export class UserConnector extends RestConnectorBase {
         super('user');
     }
 
-    authorize(callback, errorCallback) {
-        return this._get('/authorize.php');
+    authorize() {
+        return this._get('authorize.php');
     };
 
     authenticate(username, password) {
@@ -14,11 +14,11 @@ export class UserConnector extends RestConnectorBase {
         return this._post({
             username: username, 
             password: password
-        }, '/authenticate.php');
+        }, 'authenticate.php');
     };
 
-    logout(callback, errorCallback) {
-        return this._post({}, '/logout.php');
+    logout() {
+        return this._post({}, 'logout.php');
     };
 
     requestPasswordReset(user, callback, errorCallback) {

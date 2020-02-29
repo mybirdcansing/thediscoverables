@@ -27,14 +27,11 @@ export class ConnectorBase {
 
     _post(obj, url) {
         return new Promise(function(resolve, reject) {
-            debugger;
             this.client().post(url, { data: obj })
                 .then(response => {
-                    debugger;
                     return resolve(response.data)
                 })
                 .catch(error => {
-                    debugger;
                     this.rejector(reject, error)
                 });
         }.bind(this));

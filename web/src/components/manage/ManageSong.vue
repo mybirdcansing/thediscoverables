@@ -4,7 +4,7 @@
             <h2>Manage Song</h2>
         </div>
         <div class="container">
-            <form @submit="submitSong">
+            <form v-on:submit.prevent="submitSong">
                 <div class="form-group">
                     <label for="manageSongTitle">Title</label>
                     <input v-model="song.title" class="form-control" type="text" id="manageSongTitle" placeholder="Enter title">
@@ -19,7 +19,7 @@
                     <small class="form-text text-muted">Current file: {{song.filename}}</small>
                 </div>                
                 <button type="submit" class="btn btn-sm btn-primary">Submit</button>
-                <button type="button" class="btn btn-sm btn-secondary">Cancel</button>
+                <button type="button" class="btn btn-sm btn-secondary" @click="goToSongsPage">Cancel</button>
             </form>
         </div>
     </div>
@@ -42,8 +42,13 @@
                 getById: 'getSongById'
             }),
             submitSong(e) {
-                e.preventDefault();
-                this.updateSong(this.song);
+                // e.preventDefault();
+                this.updateSong(this.song).then(() => {
+                    this.goToSongsPage();
+                });
+            },
+            goToSongsPage() {
+                this.$router.push('/manager/songs');
             },
             ...mapActions([
                   'updateSong'

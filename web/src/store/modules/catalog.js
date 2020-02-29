@@ -45,26 +45,9 @@ const actions = {
         });
     },
     updateSong({commit}, song) {
-        // songConnector.ajaxUpdate(song,
-        //     function(response) {
-            
-        //         debugger;
-        //         if (response.songUpdated) {
-        //             commit('UPDATE_ITEM', {
-        //                 data: song,
-        //                 categoryList: 'songList',
-        //                 category: 'songs'
-        //             });
-
-        //         }
-        //     });
         return new Promise((resolve, reject) => {
-            debugger;
-            
             songConnector.update(song)
                 .then(function(response) {
-                
-                    debugger;
                     if (response.songUpdated) {
                         commit('UPDATE_ITEM', {
                             data: song,
@@ -77,7 +60,6 @@ const actions = {
                     }
                 })
                 .catch(function(data) {
-
                     reject(data);
                 });
         });

@@ -2,9 +2,11 @@
     <div>
         <div class="container some-vpadding">
             <h2>Manage Song</h2>
+            <router-link to="/manager/songs" class="text-secondary">&lt;&lt; Back to Songs</router-link>
         </div>
         <div class="container">
             <form v-on:submit.prevent="submitSong">
+                <form-alerts v-bind:errors="errors" v-bind:showSavingAlert="showSavingAlert" savingMessage="Saving song..." />
                 <div class="form-group">
                     <label for="manageSongTitle">Title</label>
                     <input v-model="song.title" class="form-control" type="text" id="manageSongTitle" placeholder="Enter title">
@@ -27,53 +29,73 @@
 
 <script>
     import { mapActions, mapGetters } from 'vuex';
- 
+    import FormAlerts from './FormAlerts.vue';
+
     export default {
         name: "ManageSong",
         components: {
-            
+            FormAlerts
         },
         data: function() {
             return {
+                errors: [],
+                showSavingAlert: false
             }
         },
         methods: {
             ...mapGetters({
                 getById: 'getSongById'
             }),
-            submitSong(e) {
-                // e.preventDefault();
-                this.updateSong(this.song).then(() => {
-                    this.goToSongsPage();
-                });
-            },
-            goToSongsPage() {
-                this.$router.push('/manager/songs');
-            },
-            ...mapActions([
-                  'updateSong'
-            ]),
             processFile(e) {
                 const files = e.target.files || e.dataTransfer.files;
                 if (!files.length) {
                     return;
                 }
+                const file = files[0];
                 const input = e.target;
                 const reader = new FileReader();
                 reader.onload = function() {
                     this.song.fileInput = reader.result;
                 }.bind(this);
-                reader.readAsDataURL(files[0]);
-            }
+                this.song.filename = file.name;
+                console.log(file.name);
+                reader.readAsDataURL(file);
+            },
+            submitSong(e) {
+                this.showSavingAlert = true;
+                const saveAction = (this.song.id) ? this.updateSong : this.createSong;
+                saveAction(this.song).then((response) => {
+                    this.errors = [];
+                    setTimeout(() => {
+                        this.showSavingAlert = false;
+                        this.$router.push('/manager/song/' + response.songId)
+                    }, 1000);
+                }).catch(function(data) {
+                    this.showSavingAlert = false;
+                    this.errors = Object.values(data.errorMessages).reverse();
+                }.bind(this));
+            },
+            goToSongsPage() {
+                this.$router.push('/manager/songs');
+            },
+            ...mapActions([
+                  'updateSong',
+                  'createSong'
+            ]),
         },
         computed: {
             song: function() {
-                // const songFromStore = this.$store.state.catalog.songs[this.$route.params.id];
-                const songFromStore = this.getById()(this.$route.params.id);
-                return Vue.util.extend({}, songFromStore);
+                if (this.$route.params.id === "create") {
+                    return { id: null, title: null, filename: null, description: null, fileInput: null };
+                } else {
+                    // const songFromStore = this.$store.state.catalog.songs[this.$route.params.id];
+                    const songFromStore = this.getById()(this.$route.params.id);
+                    return Vue.util.extend({}, songFromStore);
+                }
             }
         }
     }
 </script>
 
-<style scoped></style>
+<style scoped>
+</style>

@@ -92,7 +92,12 @@ class SongController {
 
     private function _createSong()
     {
-        $song = Song::fromJson(file_get_contents('php://input'));
+        $json = json_decode(file_get_contents('php://input'));
+        if (isset($json->data)) {
+            $song = Song::fromJson(json_encode($json->data));
+        } else {
+            $song = Song::fromJson(file_get_contents('php://input'));
+        }
 
         $validationIssues = $this->_validationIssues($song);
 
@@ -185,8 +190,7 @@ class SongController {
         if (!$song) {
             return $this->_notFoundResponse();
         }
-        $deleted = $this->songData->delete($this->songId);
-
+        $this->songData->delete($this->songId);
         return $this->_okResponse();
     }
 

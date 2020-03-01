@@ -73,7 +73,12 @@ class UserController {
 
     private function _createUser()
     {
-        $user = User::fromJson(file_get_contents('php://input'));
+        $json = json_decode(file_get_contents('php://input'));
+        if (isset($json->data)) {
+            $user = User::fromJson(json_encode($json->data));
+        } else {
+            $user = User::fromJson(file_get_contents('php://input'));
+        }
         $validationIssues = $this->_validationIssues($user, true);
 
         if ((bool)$validationIssues) {
@@ -100,7 +105,12 @@ class UserController {
 
     private function _updateUser()
     {
-        $user = User::fromJson(file_get_contents('php://input'));
+        $json = json_decode(file_get_contents('php://input'));
+        if (isset($json->data)) {
+            $user = User::fromJson(json_encode($json->data));
+        } else {
+            $user = User::fromJson(file_get_contents('php://input'));
+        }
         $validationIssues = $this->_validationIssues($user, false);
         if ((bool)$validationIssues) {
             return $this->_unprocessableEntityResponse([

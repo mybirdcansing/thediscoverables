@@ -11,9 +11,10 @@ class PlaylistGateway extends GatewayBase
         $response = $this->httpClient->get($this->handlerPath . $id, [
             'cookies' => $this->cookieJar
         ]);
-
         $this->assertEquals(200, $response->getStatusCode());
-        return Playlist::fromJson($response->getBody()->getContents());
+        $json = $response->getBody()->getContents();
+        $playlist = Playlist::fromJson($json);
+        return $playlist;
     }
 
     public function createPlaylist($playlist)
@@ -25,7 +26,8 @@ class PlaylistGateway extends GatewayBase
         $json = json_decode($response->getBody()->getContents());
         $this->assertTrue($json->playlistCreated, '`playlistCreated` should be true');
         $this->assertEquals(201, $response->getStatusCode());
-        return $this->getPlaylist($json->playlistId);
+        $createdPlaylist = $this->getPlaylist($json->playlistId);
+        return $createdPlaylist;
     }
 
     public function createPlaylistWithErrors($playlist, $expectedErrors, $expectedStatusCode)

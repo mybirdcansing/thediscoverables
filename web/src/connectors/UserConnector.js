@@ -10,7 +10,6 @@ export class UserConnector extends RestConnectorBase {
     };
 
     authenticate(username, password) {
-        // debugger;
         return this._post({
             username: username, 
             password: password

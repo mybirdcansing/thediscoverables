@@ -76,9 +76,9 @@ class PlaylistData
                 s.filename AS song_filename
             FROM
             	playlist pl
-            JOIN playlist_song pls ON
+            left JOIN playlist_song pls ON
             	pls.playlist_id = pl.playlist_id
-            JOIN song s ON
+            left JOIN song s ON
             	s.song_id = pls.song_id
             WHERE pl.playlist_id = ?;
         ";
@@ -96,12 +96,14 @@ class PlaylistData
                 	    $playlist->title = $row["playlist_title"];
                 	    $playlist->description = $row["playlist_description"];
                     }
-                    $song = new Song();
-            	    $song->id = $row["song_id"];
-            	    $song->title = $row["song_title"];
-            	    $song->description = $row["song_description"];
-            	    $song->filename = $row["song_filename"];
-                    $playlist->songs[] = $song;
+                    if ($row["song_id"]) {
+                        $song = new Song();
+                        $song->id = $row["song_id"];
+                        $song->title = $row["song_title"];
+                        $song->description = $row["song_description"];
+                        $song->filename = $row["song_filename"];
+                        $playlist->songs[] = $song;
+                    }
                 }
             }
         } catch (\mysqli_sql_exception $e) {
@@ -153,17 +155,18 @@ class PlaylistData
                     )
                 VALUES (?, ?, ?, now(), ?);
             ";
-
-            foreach($playlist->songs as $song) {
-                $stmt2 = $this->dbConnection->prepare($sql2);
-                $playlistSongId = GUID();
-                $stmt2->bind_param("ssss",
-                    $playlistSongId,
-                    $song->id,
-                    $playlistId,
-                    $administrator->id
-                );
-                $stmt2->execute();
+            if ($playlist->songs) {
+                foreach($playlist->songs as $song) {
+                    $stmt2 = $this->dbConnection->prepare($sql2);
+                    $playlistSongId = GUID();
+                    $stmt2->bind_param("ssss",
+                        $playlistSongId,
+                        $song->id,
+                        $playlistId,
+                        $administrator->id
+                    );
+                    $stmt2->execute();
+                }
             }
             $this->dbConnection->commit();
             return $playlistId;

@@ -39,8 +39,8 @@ const actions = {
                     category: 'songs'
                 });
                 resolve(true);
-            } catch (data) {
-                reject(data);
+            } catch (response) {
+                reject(response);
             }
         });
     },
@@ -59,12 +59,53 @@ const actions = {
                         reject(response);
                     }
                 })
-                .catch(function(data) {
-                    reject(data);
-                });
+                .catch(function(response) {
+                    reject(response);
+                }
+            );
         });
-
-    }
+    },
+    createSong({commit}, song) {
+        return new Promise((resolve, reject) => {
+            songConnector.create(song)
+                .then(function(response) {
+                    if (response.songCreated) {
+                        song.id = response.songId;
+                        commit('CREATE_ITEM', {
+                            data: song,
+                            categoryList: 'songList',
+                            category: 'songs'
+                        });
+                        resolve(response);
+                    } else {
+                        reject(response);
+                    }
+                })
+                .catch(function(response) {
+                    reject(response);
+                }
+            );
+        });
+    },
+    // createSong({commit}, song) {
+    //     return new Promise(async (resolve, reject) => {
+    //         try {
+    //             const response = await songConnector.create(song);
+    //             if (response.songCreated) {
+    //                 commit('CREATE_ITEM', {
+    //                     data: song,
+    //                     categoryList: 'songList',
+    //                     category: 'songs'
+    //                 });
+    //                 resolve(response);
+    //             } else {
+    //                 reject(response);
+    //             }
+    //         } catch (response) {
+    //             reject(response);
+    //         }
+    //     });
+    // }
 }
 
 const mutations = {
@@ -79,10 +120,11 @@ const mutations = {
         delete state[obj.category][obj.id];
     },
     UPDATE_ITEM(state, obj) {
-        debugger;
-        // const index = state[obj.categoryList].findIndex((id) => id === obj.id);
-        // state[obj.categoryList].splice(index, 1);
-        // delete state[obj.category][obj.id];
+        state[obj.category][obj.data.id] = obj.data;
+    },
+    CREATE_ITEM(state, obj) {
+        state[obj.category][obj.data.id] = obj.data;
+        state[obj.categoryList].push(obj.data.id);
     }
 }
 

@@ -11,9 +11,9 @@
           </div>
 
           <!-- Login Form -->
-          <form @submit="login">
+          <form v-on:submit.prevent="login">
               <div class=" alerts" v-if="errors.length">
-                    <div class="alert alert-primary" role="alert" v-for="error in errors" :key="error">{{ error }}</div>
+                    <div class="alert alert-warning" role="alert" v-for="error in errors" :key="error">{{ error }}</div>
               </div>
               <input v-model="username" type="text" class="fadeIn second" placeholder="login" autofocus>
               <input v-model="password" type="password" class="fadeIn third" placeholder="password">
@@ -42,7 +42,7 @@
                 uc.authenticate(this.username, this.password)
                     .then(function(data) {
                         let path = this.$route.query.redirect || '/manager';
-                        this.$router.push(path)
+                        this.$router.push(path);
                     }.bind(this))
                     .catch(function(data){
                         this.errors = Object.values(data.errorMessages).reverse();

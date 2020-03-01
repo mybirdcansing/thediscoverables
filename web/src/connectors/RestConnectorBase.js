@@ -14,11 +14,10 @@ export class RestConnectorBase extends ConnectorBase {
 	}
 
 	create(obj) {
-        return this._post(obj, this.handler);
+        return this._post(obj, this.handler + '/create');
 	}
 
 	update(obj) {
-        // debugger;
         return this._post(obj, this.handler + '/' + obj.id);
 	}
 

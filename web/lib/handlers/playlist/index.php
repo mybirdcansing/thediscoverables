@@ -34,7 +34,7 @@ if ($uri[3] !== 'playlist') {
 
 // the playlist id is optional and must be a uuid:
 $playlistId = null;
-if (isset($uri[4]) && $uri[4] != '') {
+if (isset($uri[4]) && $uri[4] != '' && $uri[4] != 'create') {
     $playlistId = $uri[4];
 }
 

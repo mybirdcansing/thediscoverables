@@ -71,7 +71,13 @@ class AlbumController {
 
     private function _createAlbum()
     {
-        $album = Album::fromJson(file_get_contents('php://input'));
+        $json = json_decode(file_get_contents('php://input'));
+        if (isset($json->data)) {
+            $album = Album::fromJson(json_encode($json->data));
+        } else {
+            $album = Album::fromJson(file_get_contents('php://input'));
+        }
+
         $validationIssues = $this->_validationIssues($album);
         if ((bool)$validationIssues) {
             return $this->_unprocessableEntityResponse([
@@ -97,7 +103,12 @@ class AlbumController {
 
     private function _updateAlbum()
     {
-        $album = Album::fromJson(file_get_contents('php://input'));
+        $json = json_decode(file_get_contents('php://input'));
+        if (isset($json->data)) {
+            $album = Album::fromJson(json_encode($json->data));
+        } else {
+            $album = Album::fromJson(file_get_contents('php://input'));
+        }
         $validationIssues = $this->_validationIssues($album);
         if ((bool)$validationIssues) {
             return $this->_unprocessableEntityResponse([

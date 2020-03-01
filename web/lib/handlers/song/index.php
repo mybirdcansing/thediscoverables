@@ -14,6 +14,7 @@ header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
 $requestMethod = $_SERVER["REQUEST_METHOD"];
+
 if(!$requestMethod == 'GET' && !AuthCookie::isValid()) {
     header("'HTTP/1.1 403 Forbidden'");
 	echo json_encode(
@@ -33,7 +34,7 @@ if ($uri[3] !== 'song') {
 
 // the user id is, of course, optional and must be a uuid:
 $songId = null;
-if (isset($uri[4]) && $uri[4] != '') {
+if (isset($uri[4]) && $uri[4] != '' && $uri[4] != 'create') {
     $songId = $uri[4];  
 }
 
@@ -42,9 +43,9 @@ if (isset($uri[5]) && $uri[5] != '') {
 	$requestAction = $uri[5];
 }
 $headers = getallheaders();  
+
 if (array_key_exists('X-HTTP-Method-Override', $headers)) {
     $requestMethod = strtoupper($headers['X-HTTP-Method-Override']);
-    // error_log('X-HTTP-Method-Override:' . $message);
 }
 $action = null;
 switch ($requestMethod) {

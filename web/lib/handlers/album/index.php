@@ -33,7 +33,7 @@ if ($uri[3] !== 'album') {
 
 // the album id is, of course, optional and must be a uuid:
 $albumId = null;
-if (isset($uri[4]) && $uri[4] != '') {
+if (isset($uri[4]) && $uri[4] != '' && $uri[4] != 'create') {
     $albumId = $uri[4];  
 }
 

@@ -77,6 +77,7 @@ class PlaylistController {
     {
         $playlist = $this->playlistData->find($this->playlistId);
         if (!$playlist) {
+            error_log('playlistId from _getPlaylist: ' . $this->playlistId);
             return $this->_notFoundResponse();
         }
         return $this->_okResponse($playlist->expose());
@@ -91,7 +92,12 @@ class PlaylistController {
 
     private function _createPlaylist()
     {
-        $playlist = Playlist::fromJson(file_get_contents('php://input'));
+        $json = json_decode(file_get_contents('php://input'));
+        if (isset($json->data)) {
+            $playlist = Playlist::fromJson(json_encode($json->data));
+        } else {
+            $playlist = Playlist::fromJson(file_get_contents('php://input'));
+        }
         $validationIssues = $this->_validationIssues($playlist);
         if ((bool)$validationIssues) {
             return $this->_unprocessableEntityResponse([
@@ -101,6 +107,7 @@ class PlaylistController {
         }
         try {
             $playlistId = $this->playlistData->insert($playlist, $this->administrator);
+            error_log("playlistId from handler:" . $playlistId);
             $response['status_code_header'] = 'HTTP/1.1 201 Created';
             $response['body'] = json_encode([
                 "playlistCreated" => true,
@@ -118,7 +125,12 @@ class PlaylistController {
 
     private function _updatePlaylist()
     {
-        $playlist = Playlist::fromJson(file_get_contents('php://input'));
+        $json = json_decode(file_get_contents('php://input'));
+        if (isset($json->data)) {
+            $playlist = Playlist::fromJson(json_encode($json->data));
+        } else {
+            $playlist = Playlist::fromJson(file_get_contents('php://input'));
+        }
         $validationIssues = $this->_validationIssues($playlist);
         if ((bool)$validationIssues) {
             return $this->_unprocessableEntityResponse([

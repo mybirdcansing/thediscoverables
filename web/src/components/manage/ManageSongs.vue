@@ -5,20 +5,19 @@
         </div>
         <div class="container">
             <div class="more-vpadding">
-                <button class="btn btn-sm btn-outline-secondary" type="button"><strong>+</strong> Add a Song</button>
+                <button class="btn btn-sm btn-outline-secondary" 
+                    @click="$router.push('/manager/song/create')"
+                    type="button"><strong>+</strong> Add a Song</button>
             </div>
-            <div class="some-vpadding">
-                <div class="row border-top justify-content-between some-vpadding" v-for="song in allSongs" :key="song.id">
-                    <div class="col"><span>{{ song.title }}</span></div>
-                    <div class="col-sm-2.1">
-                        <div class="row">
-                            <div class="col-sm-1">
-                                <router-link :to="`/manager/song/${ song.id }`"><img src="../../assets/images/edit-button.svg"/></router-link>
-                            </div>
-                            <div class="col-sm-1">
-                                <a @click="confirmDeleteItem(song)"><img src="../../assets/images/delete-button.svg" /></a>
-                            </div>
-                        </div>
+            <div class="container some-vpadding">
+                <div class="row border-top some-vpadding" v-for="song in allSongs" :key="song.id">
+                    <div class="col">
+                        <router-link :to="`/manager/song/${ song.id }`"><span>{{ song.title }}</span></router-link>
+                    </div>
+                    <div class="col">
+                        <!-- <router-link :to="`/manager/song/${ song.id }`"><img src="../../assets/images/edit-button.svg"/></router-link> -->
+                        <!-- <a @click="confirmDeleteItem(song)"><img src="../../assets/images/delete-button.svg" /></a> -->
+                        <button class="btn btn-sm btn-outline-warning" @click="confirmDeleteItem(song)">Delete</button>
                     </div>
                 </div>
             </div>
@@ -42,7 +41,6 @@
         data: function() {
             return {
                 showModal: false,
-                modalSubmit: false,
                 itemToDelete: null
             }
         },

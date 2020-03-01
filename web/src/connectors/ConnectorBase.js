@@ -3,7 +3,7 @@ import axios from 'axios';
 export class ConnectorBase {
 	constructor(handler) {
         this.handlerBase = '/lib/handlers/';
-        this.handlerUrl = `${this.handlerBase}${handler}/`;
+        this.handlerUrl = `${this.handlerBase}${handler}`;
         this.handler = handler;
     }
       

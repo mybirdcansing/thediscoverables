@@ -25,7 +25,7 @@
 </script>
 
 <style scoped>
-.alerts {
+/* .alerts {
     margin-top: 10px;
-}
+} */
 </style>

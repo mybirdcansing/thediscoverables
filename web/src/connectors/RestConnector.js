@@ -1,6 +1,6 @@
 import { ConnectorBase } from "./ConnectorBase";
 
-export class RestConnectorBase extends ConnectorBase {
+export class RestConnector extends ConnectorBase {
 	constructor(handler) {
         super(handler);
   	}

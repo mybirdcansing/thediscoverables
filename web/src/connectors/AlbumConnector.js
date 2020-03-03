@@ -1,6 +1,6 @@
-import { RestConnectorBase } from "./RestConnectorBase";
+import { RestConnector } from "./RestConnector";
 
-export class AlbumConnector extends RestConnectorBase {
+export class AlbumConnector extends RestConnector {
 	constructor() {
     	super('album');
   	}

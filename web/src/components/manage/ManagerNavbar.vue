@@ -13,10 +13,10 @@
                 <router-link class="nav-link" to="/manager/playlists">Playlists</router-link>
             </li>
             <li class="nav-item">
-                <router-link class="nav-link" to="/manager/albums">Albums</router-link>
+                <router-link class="nav-link" to="/manager/albums" data-toggle="collapse" data-target=".navbar-collapse">Albums</router-link>
             </li>
             <li class="nav-item">
-                <router-link class="nav-link" to="/manager/users">Users</router-link>
+                <router-link class="nav-link" to="/manager/users" data-toggle="collapse" data-target=".navbar-collapse">Users</router-link>
             </li>
             <li class="nav-item">
                 <a @click='logout' class="nav-link">Logout</a>
@@ -28,6 +28,7 @@
 
 <script>
     import { UserConnector } from '../../connectors/UserConnector';
+    
     export default {
         name: "Manager-Navbar",
         methods: {

@@ -14,6 +14,10 @@ a {
 	font-weight: 400;
 }
 
+.item-buttons {
+	text-align: right;
+}
+
 h2 {
 	font-size: 16px;
 	font-weight: 600;
@@ -23,10 +27,13 @@ h2 {
 
 .some-vpadding {
 	padding-top: 4px;
-	padding-bottom: 2px;
+	padding-bottom: 4px;
 }
 
 .more-vpadding {
 	padding-top: 5px;
 	padding-bottom: 10px;
+}
+.clickable-text {
+    cursor: default;
 }

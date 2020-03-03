@@ -229,13 +229,12 @@ class PlaylistData
             if (isset($playlist->songs)) {
                 $orderIndex = 0;
                 foreach($playlist->songs as $song) {
-                    //   error_log( 'stuff: '. gettype($song) . '---------' . json_encode($song));
+                    $orderIndex = $orderIndex + 1;
+                    // error_log( 'stuff: '. gettype($song) . '---------' . json_encode($song));
                     if (gettype($song) === 'object') {
                         $songId = $song->id;
-                        $orderIndex = $song->orderIndex;
                     } else {
                         $songId = $song;
-                        $orderIndex = $orderIndex + 1;
                     }
                     $stmt3 = $this->dbConnection->prepare($sql3);
                     $playlistSongId = GUID();

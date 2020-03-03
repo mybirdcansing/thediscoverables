@@ -42,15 +42,13 @@
                         <div class="col-6">
                             <h6>Songs in Playlist</h6>
                             <draggable class="list-group droppable-song-list"
-                                v-bind="dragOptions" 
-                                @update="updateOrder"
-                                @add="addSong"
-                                @remove="removeSong"
+                                v-bind="dragOptions"
                                 :list="playlistSongs" 
-                                group="songLists" @change="log">
+                                group="songLists"
+                                @change="log">
                                 <div class="list-group-item clickable-text"
                                     v-for="song in playlistSongs"
-                                    :key="song.orderIndex">
+                                    :key="song.id">
                                     {{ song.title }}
                                 </div>
                             </draggable>
@@ -59,12 +57,12 @@
                             <h6>Songs Not in Playlist</h6>
                             <draggable class="list-group droppable-song-list"
                                 v-bind="dragOptions" 
-
                                 :list="songsNotInPlaylist"
-                                group="songLists" @change="log">
+                                group="songLists" 
+                                @change="log">
                                 <div class="list-group-item clickable-text"
                                     v-for="song in songsNotInPlaylist"
-                                    :key="song.orderIndex">
+                                    :key="song.id">
                                     {{ song.title }}
                                 </div>
                             </draggable>
@@ -128,23 +126,12 @@
             },
             savePlaylist(e) {
                 this.showSavingAlert = true;
-                const songsIndex = [];
                 this.playlist.songs = this.playlistSongs.map(function(song, index) {
-                    songsIndex.push({
-                        playlistId: this.playlist.id,
-                        songId: song.id,
-                        orderIndex: index + 1
-                    });
-                    s.orderIndex = index + 1;
                     return song.id;
                 }.bind(this));
                 
-                const saveAction = (this.playlist.id) ? this.updatePlaylist : this.createPlaylist;
-                const actionOptions = {
-                    playlist: this.playlist,
-                    songsIndex: songsIndex
-                }
-                saveAction(actionOptions).then((response) => {
+                const saveMethod = (this.playlist.id) ? this.updatePlaylist : this.createPlaylist;
+                saveMethod(this.playlist).then((response) => {
                     this.errors = [];
                     setTimeout(() => {
                         this.showSavingAlert = false;
@@ -196,27 +183,15 @@
                     return;
                 }
                 
-                this.playlistSongs = this.playlist.songs.map(function(songId, orderIndex) {
-                        const song = Vue.util.extend({}, this.songs[songId]);
-                        const playlistSongEntry = this.playlistSongIndex.find((pls) => {
-                            return pls.songId === songId && pls.playlistId === this.playlist.id;
-                        });
-                        song.orderIndex = parseInt(playlistSongEntry.orderIndex);
-                        console.log(song.orderIndex, song.title);
-                        return song;
-                    }.bind(this)).sort((one, two) => {
-                        return one.orderIndex - two.orderIndex;
-                    });
+                this.playlistSongs = this.playlist.songs.map(function(songId) {
+                    return Vue.util.extend({}, this.songs[songId]);
+                }.bind(this));
 
                 this.songsNotInPlaylist = this.songSet.filter(function(song){
-                        if (!this.playlist.songs.includes(song.id)) {
-                            return song;
-                        }
-                    }.bind(this)).map((song, orderIndex) => {
-                        const s = Vue.util.extend({}, song)
-                        s.orderIndex = orderIndex + 1 + 10000;
-                        return s;
-                    });   
+                    if (!this.playlist.songs.includes(song.id)) {
+                        return Vue.util.extend({}, song);
+                    }
+                }.bind(this)); 
             }.bind(this);
             requestAnimationFrame(tick);
         },

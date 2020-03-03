@@ -27,7 +27,6 @@ const state = {
     songList: [],
     playlists: {},
     playlistList: [],
-    playlistSongIndex: [],
     albums: {},
     albumList: [],
 }
@@ -37,7 +36,6 @@ const getters = {
     songSet: (state) => state.songList.map(id => state.songs[id]),
     getSongById: (state) => (id) => state.songs[id],
     playlistSet: (state) => state.playlistList.map(id => state.playlists[id]),
-    playlistSongIndex: (state) => state.playlistSongIndex,
     getPlaylistById: (state) => (id) => state.playlists[id],
     albumSet: (state) => state.albumList.map(id => state.albums[id]),
     getAlbumById: (state) => (id) => state.albums[id],
@@ -132,9 +130,7 @@ const actions = {
             );
         });
     },
-    createPlaylist({commit}, options) {
-        const playlist = options.playlist;
-        const songsIndex = options.songsIndex;
+    createPlaylist({commit}, playlist) {
         return new Promise((resolve, reject) => {
             playlistConnector.create(playlist)
                 .then(function(response) {
@@ -181,35 +177,6 @@ const mutations = {
         state[obj.category][obj.data.id] = obj.data;
         state[obj.categoryList].push(obj.data.id);
     },
-    // REFRESH_PLAYLIST_SONG_INDEX(state, options) {
-        // debugger;
-        // // remove the existing entries
-        // const playlistSongIndex = state.playlistSongIndex;
-        // const playlistSongs = options.playlist.songs;
-        // const playlistId = options.playlist.id;
-        // const playlistSongsToDelete = playlistSongIndex.filter(value => {
-        //     return value.playlistId === playlistId && !playlistSongs.includes(value.songId)
-        // });
-        // const setToDelete = new Set(playlistSongsToDelete);
-        // if (setToDelete.length) {
-        //     // filterInPlace(playlistSongIndex, obj => !setToDelete.has(obj.id));
-        //     let end = 0;
-
-        //     for (let i = 0; i < playlistSongIndex.length; i++) {
-        //         const entry = playlistSongIndex[i];
-        //         const f = obj => !setToDelete.has(obj.id)
-        //         if (f(entry)) {
-        //             playlistSongIndex[end++] = entry;
-        //         }
-        //     }
-        
-        //     playlistSongIndex.length = end;
-        // }
-        
-        //update or add the remaining entries
-
-        
-    // }
 }
 
 

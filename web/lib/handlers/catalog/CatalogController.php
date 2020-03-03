@@ -65,10 +65,24 @@ class CatalogController {
             $catalog->playlists[$playlist->id] = $playlist;
             $catalog->playlistList[] = $playlist->id;
         }
-
+        // $listOfPlaylistSongs = [];
         foreach($playlistSongs as $entry) {
-            $catalog->playlists[$entry->playlistId]->songs[] = $entry->songId;
+            // $listOfPlaylistSongs[$entry->playlistId];
             $catalog->playlistSongIndex[] = $entry;
+        }
+
+        foreach($catalog->playlists as $playlist) {
+            $indexList = array_filter($playlistSongs, function($v, $k) use ($playlist) {
+                return $v->playlistId == $playlist->id;
+            }, ARRAY_FILTER_USE_BOTH);
+            
+            usort($indexList, function($a, $b) {
+                return strcmp(intval($a->orderIndex), intval($b->orderIndex));
+            });
+            foreach($indexList as $entry) {
+                $catalog->playlists[$entry->playlistId]->songs[] = $entry->songId;
+            }
+            
         }
 
         foreach($albums as $album) {

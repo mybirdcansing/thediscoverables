@@ -135,11 +135,16 @@
                         songId: song.id,
                         orderIndex: index + 1
                     });
+                    s.orderIndex = index + 1;
                     return song.id;
                 }.bind(this));
                 
-                const createUpdateMethod = (this.playlist.id) ? this.updatePlaylist : this.createPlaylist;
-                createUpdateMethod(playlist).then((response) => {
+                const saveAction = (this.playlist.id) ? this.updatePlaylist : this.createPlaylist;
+                const actionOptions = {
+                    playlist: this.playlist,
+                    songsIndex: songsIndex
+                }
+                saveAction(actionOptions).then((response) => {
                     this.errors = [];
                     setTimeout(() => {
                         this.showSavingAlert = false;

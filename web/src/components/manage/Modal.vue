@@ -36,16 +36,18 @@
     
     export default {
         name: "Modal",
-        components: {
-            
-        },
-        methods: {
-          
-        },
+        components: {},
+        methods: {},
         data: function() {
-            return {
-
-            }
+            return {}
+        },
+        mounted() {
+            this.$el.ownerDocument.addEventListener("keydown", function(e) {
+                e = e || window.event;
+                if (e.key == "Escape") {
+                    this.$emit('close')
+                }
+            }.bind(this));
         }
     }
 </script>
@@ -72,7 +74,7 @@
     width: 300px;
     margin: 0px auto;
     padding: 20px 30px;
-    background-color: #fff;
+    background-color: #efefef;
     border-radius: 2px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);
     transition: all 0.3s ease;

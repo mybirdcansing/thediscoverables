@@ -42,7 +42,8 @@ class PlaylistData
         $sql = "
             SELECT
                 playlist_id,
-                song_id
+                song_id,
+                order_index
             FROM
                 playlist_song;
         ";
@@ -54,6 +55,7 @@ class PlaylistData
                 $playlistSong = new stdClass();
                 $playlistSong->playlistId = $row["playlist_id"];
                 $playlistSong->songId = $row["song_id"];
+                $playlistSong->orderIndex = $row["order_index"];
 			    $playlistSongs[] = $playlistSong;
 			}
             return $playlistSongs;
@@ -207,6 +209,7 @@ class PlaylistData
                 $playlist->id
             );
             $stmt1->execute();
+
             $sql2 = "DELETE FROM playlist_song WHERE playlist_id = ?;";
             $stmt2 = $this->dbConnection->prepare($sql2);
             $stmt2->bind_param("s", $playlist->id);
@@ -217,19 +220,30 @@ class PlaylistData
                         playlist_song_id,
                         song_id,
                         playlist_id,
+                        order_index,
                         created_date,
                         created_by_id
                     )
-                VALUES (?, ?, ?, now(), ?);
+                VALUES (?, ?, ?, ?, now(), ?);
             ";
             if (isset($playlist->songs)) {
+                $orderIndex = 0;
                 foreach($playlist->songs as $song) {
+                    //   error_log( 'stuff: '. gettype($song) . '---------' . json_encode($song));
+                    if (gettype($song) === 'object') {
+                        $songId = $song->id;
+                        $orderIndex = $song->orderIndex;
+                    } else {
+                        $songId = $song;
+                        $orderIndex = $orderIndex + 1;
+                    }
                     $stmt3 = $this->dbConnection->prepare($sql3);
                     $playlistSongId = GUID();
-                    $stmt3->bind_param("ssss",
+                    $stmt3->bind_param("sssis",
                         $playlistSongId,
-                        $song->id,
+                        $songId,
                         $playlist->id,
+                        $orderIndex,
                         $administrator->id
                     );
                     $stmt3->execute();

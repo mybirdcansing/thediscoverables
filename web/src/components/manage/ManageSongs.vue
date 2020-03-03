@@ -2,28 +2,26 @@
     <div>
         <div class="container some-vpadding">
             <h2>Manage Songs</h2>
-        </div>
-        <div class="container">
             <div class="more-vpadding">
-                <button class="btn btn-sm btn-outline-secondary" 
-                    @click="$router.push('/manager/song/create')"
-                    type="button"><strong>+</strong> Add a Song</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" 
+                    @click="$router.push('/manager/song/create')"><strong>+</strong> Add a Song</button>
             </div>
-            <div class="container some-vpadding">
-                <div class="row border-top some-vpadding" v-for="song in allSongs" :key="song.id">
-                    <div class="col">
-                        <router-link :to="`/manager/song/${ song.id }`"><span>{{ song.title }}</span></router-link>
-                    </div>
-                    <div class="col">
-                        <!-- <router-link :to="`/manager/song/${ song.id }`"><img src="../../assets/images/edit-button.svg"/></router-link> -->
-                        <!-- <a @click="confirmDeleteItem(song)"><img src="../../assets/images/delete-button.svg" /></a> -->
-                        <button class="btn btn-sm btn-outline-warning" @click="confirmDeleteItem(song)">Delete</button>
-                    </div>
-                </div>
-            </div>
+            <table class="table table-hover table-sm">
+                <tbody>
+                    <tr v-for="song in allSongs" :key="song.id" class='clickable-text'>
+                        <td @click.self="openItem(song.id)">
+                            <span class="align-middle" @click.self="openItem(song.id)">{{ song.title }}</span>
+                            <div class="float-right">
+                                <button class="btn-xs btn-outline-secondary" 
+                                    @click.self.prevent="confirmDeleteItem(song)">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
 
-        <modal v-if="showModal" @close="closeDeleteItemModal" @submit="deleteItem">
+        <modal v-if="showModal" @close="closeDeleteItemModal" @submit="submitDelete">
             <h3 slot="header">Confirm!</h3>
             <div slot="body">Are you sure you want to delete <strong>{{itemToDelete.title}}</strong>?</div>
         </modal>
@@ -45,37 +43,36 @@
             }
         },
         methods: {
-            confirmDeleteItem(song) {
-                this.$data.itemToDelete = song;
+            confirmDeleteItem(item) {
+                this.$data.itemToDelete = item;
                 this.$data.showModal = true;    
             },
             closeDeleteItemModal() {
                 this.$data.showModal = false;
                 this.$data.itemToDelete = null;
             },
-            deleteItem() {
-                this.deleteSong(this.$data.itemToDelete.id).then(() => {
+            submitDelete(e) {
+                const options = {
+                    id: this.$data.itemToDelete.id,
+                    handler: 'song'
+                };
+                this.deleteItem(options).then(() => {
                     this.closeDeleteItemModal();
                 }).catch((data) => {
                     console.log(data.errorMessages);
                 })
             },
             ...mapActions([
-                  'deleteSong'
+                'deleteItem'
             ]),
+            openItem(id) {
+                 this.$router.push(`/manager/song/${ id }`);
+            }
         },
         computed: {
             ...mapGetters({
                 allSongs: 'songSet',
             })
-        },
-        mounted() {
-            this.$el.ownerDocument.addEventListener("keydown", function(e) {
-                e = e || window.event;
-                if (this.$data.showModal && e.key == "Escape") {
-                    this.closeDeleteItemModal();
-                }
-            }.bind(this));
         }
     }
 </script>

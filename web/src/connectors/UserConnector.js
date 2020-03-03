@@ -1,6 +1,6 @@
-import { RestConnectorBase } from "./RestConnectorBase";
+import { RestConnector } from "./RestConnector";
 
-export class UserConnector extends RestConnectorBase {
+export class UserConnector extends RestConnector {
     constructor() {
         super('user');
     }

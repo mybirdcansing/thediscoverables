@@ -51,32 +51,33 @@ class CatalogController {
         $catalog->songList = [];
         $catalog->playlists = [];
         $catalog->playlistList = [];
+        $catalog->playlistSongIndex = [];
         $catalog->albums = [];
         $catalog->albumList = [];
 
         foreach($songs as $song) {
-            $catalog->songs[$song->id] = $song->expose();
+            $catalog->songs[$song->id] = $song;
             $catalog->songList[] = $song->id;
         }
 
         foreach($playlists as $playlist) {
             $playlist->songs = [];
-            foreach($playlistSongs as $playlistSong) {
-                if ($playlistSong->playlistId == $playlist->id) {
-                    $playlist->songs[] = $playlistSong->songId;
-                }
-            }
-            $catalog->playlists[$playlist->id] = $playlist->expose();
+            $catalog->playlists[$playlist->id] = $playlist;
             $catalog->playlistList[] = $playlist->id;
+        }
+
+        foreach($playlistSongs as $entry) {
+            $catalog->playlists[$entry->playlistId]->songs[] = $entry->songId;
+            $catalog->playlistSongIndex[] = $entry;
         }
 
         foreach($albums as $album) {
             $album->playlist = $album->playlistId;
             unset($album->playlistId); // we don't need the playlistId here
-            $catalog->albums[$album->id] = $album->expose();
+            $catalog->albums[$album->id] = $album;
             $catalog->albumList[] = $album->id;
         }
-        
+
         return $this->_okResponse(get_object_vars($catalog));
     }
 

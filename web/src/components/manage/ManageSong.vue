@@ -6,6 +6,22 @@
         </div>
         <div class="container">
             <form v-on:submit.prevent="submitSong">
+                <table class="table table-borderless table-sm">
+                    <tbody>
+                        <tr>
+                            <td>
+                                <button type="submit" class="btn btn-sm btn-outline-primary">Save</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" @click="goToSongsPage">Cancel</button>
+                            </td>
+                            <td>
+                                <div class="float-right">
+                                <button class="btn-xs btn-outline-secondary" 
+                                    @click.self.prevent="confirmDeleteItem(song)">Delete</button>
+                            </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>                
                 <form-alerts v-bind:errors="errors" v-bind:showSavingAlert="showSavingAlert" savingMessage="Saving song..." />
                 <div class="form-group">
                     <label for="manageSongTitle">Title</label>
@@ -19,33 +35,59 @@
                     <label for="manageSongUpload">Upload an Mp3 file</label>
                     <input type="file" class="form-control-file" id="manageSongUpload" accept="audio/mp3" @change='processFile'>
                     <small class="form-text text-muted">Current file: {{song.filename}}</small>
-                </div>                
-                <button type="submit" class="btn btn-sm btn-primary">Submit</button>
-                <button type="button" class="btn btn-sm btn-secondary" @click="goToSongsPage">Cancel</button>
+                </div>
             </form>
         </div>
+        <modal v-if="showModal" @close="closeDeleteItemModal" @submit="submitDelete">
+            <h3 slot="header">Confirm!</h3>
+            <div slot="body">Are you sure you want to delete <strong>{{itemToDelete.title}}</strong>?</div>
+        </modal>
     </div>
 </template>
 
 <script>
     import { mapActions, mapGetters } from 'vuex';
     import FormAlerts from './FormAlerts.vue';
+    import Modal from './Modal.vue'
 
     export default {
         name: "ManageSong",
         components: {
-            FormAlerts
+            FormAlerts,
+            Modal
         },
         data: function() {
             return {
                 errors: [],
-                showSavingAlert: false
+                showSavingAlert: false,
+                showModal: false,
+                itemToDelete: null
             }
         },
         methods: {
             ...mapGetters({
                 getById: 'getSongById'
             }),
+            confirmDeleteItem(song) {
+                this.$data.itemToDelete = song;
+                this.$data.showModal = true;    
+            },
+            closeDeleteItemModal() {
+                this.$data.showModal = false;
+                this.$data.itemToDelete = null;
+            },
+            submitDelete() {
+                const options = {
+                    id: this.$data.itemToDelete.id,
+                    handler: 'song'
+                };
+                this.deleteItem(options).then(() => {
+                    this.closeDeleteItemModal();
+                    this.$router.push('/manager/songs')
+                }).catch((data) => {
+                    console.log(data.errorMessages);
+                })
+            },
             processFile(e) {
                 const files = e.target.files || e.dataTransfer.files;
                 if (!files.length) {
@@ -68,7 +110,6 @@
                     this.errors = [];
                     setTimeout(() => {
                         this.showSavingAlert = false;
-                        this.$router.push('/manager/song/' + response.songId)
                     }, 1000);
                 }).catch(function(data) {
                     this.showSavingAlert = false;
@@ -79,8 +120,9 @@
                 this.$router.push('/manager/songs');
             },
             ...mapActions([
-                  'updateSong',
-                  'createSong'
+                'deleteItem',
+                'updateSong',
+                'createSong'
             ]),
         },
         computed: {
@@ -89,8 +131,8 @@
                     return { id: null, title: null, filename: null, description: null, fileInput: null };
                 } else {
                     // const songFromStore = this.$store.state.catalog.songs[this.$route.params.id];
-                    const songFromStore = this.getById()(this.$route.params.id);
-                    return Vue.util.extend({}, songFromStore);
+                    const storeData = this.getById()(this.$route.params.id);
+                    return Vue.util.extend({}, storeData);
                 }
             }
         }
@@ -98,4 +140,12 @@
 </script>
 
 <style scoped>
+/* td {
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+} */
+/* table {
+    margin-bottom: 0;
+} */
 </style>

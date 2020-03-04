@@ -152,19 +152,28 @@ class PlaylistData
                         playlist_song_id,
                         song_id,
                         playlist_id,
+                        order_index,
                         created_date,
                         created_by_id
                     )
-                VALUES (?, ?, ?, now(), ?);
+                VALUES (?, ?, ?, ?, now(), ?);
             ";
             if ($playlist->songs) {
+                $orderIndex = 0;
                 foreach($playlist->songs as $song) {
+                    $orderIndex = $orderIndex + 1;
+                    if (gettype($song) === 'object') {
+                        $songId = $song->id;
+                    } else {
+                        $songId = $song;
+                    }
                     $stmt2 = $this->dbConnection->prepare($sql2);
                     $playlistSongId = GUID();
-                    $stmt2->bind_param("ssss",
+                    $stmt2->bind_param("sssis",
                         $playlistSongId,
-                        $song->id,
+                        $songId,
                         $playlistId,
+                        $orderIndex,
                         $administrator->id
                     );
                     $stmt2->execute();
@@ -230,7 +239,6 @@ class PlaylistData
                 $orderIndex = 0;
                 foreach($playlist->songs as $song) {
                     $orderIndex = $orderIndex + 1;
-                    // error_log( 'stuff: '. gettype($song) . '---------' . json_encode($song));
                     if (gettype($song) === 'object') {
                         $songId = $song->id;
                     } else {

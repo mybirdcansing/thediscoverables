@@ -65,22 +65,27 @@ class CatalogController {
             $catalog->playlists[$playlist->id] = $playlist;
             $catalog->playlistList[] = $playlist->id;
         }
-        // $listOfPlaylistSongs = [];
+        $listOfPlaylistSongs = [];
         foreach($playlistSongs as $entry) {
-            // $listOfPlaylistSongs[$entry->playlistId];
+            if (!array_key_exists($entry->playlistId, $listOfPlaylistSongs)) {
+                $listOfPlaylistSongs[$entry->playlistId] = [];
+            }
+            $listOfPlaylistSongs[$entry->playlistId][] = $entry;
             $catalog->playlistSongIndex[] = $entry;
         }
 
         foreach($catalog->playlists as $playlist) {
-            $indexList = array_filter($playlistSongs, function($v, $k) use ($playlist) {
-                return $v->playlistId == $playlist->id;
-            }, ARRAY_FILTER_USE_BOTH);
-            
-            usort($indexList, function($a, $b) {
-                return strcmp(intval($a->orderIndex), intval($b->orderIndex));
-            });
-            foreach($indexList as $entry) {
-                $catalog->playlists[$entry->playlistId]->songs[] = $entry->songId;
+            // $indexList = array_filter($playlistSongs, function($v, $k) use ($playlist) {
+            //     return $v->playlistId == $playlist->id;
+            // }, ARRAY_FILTER_USE_BOTH);
+            if (array_key_exists($playlist->id, $listOfPlaylistSongs)) {                
+                $indexList = $listOfPlaylistSongs[$playlist->id];
+                usort($indexList, function($a, $b) {
+                    return strcmp(intval($a->orderIndex), intval($b->orderIndex));
+                });
+                foreach($indexList as $entry) {
+                    $catalog->playlists[$entry->playlistId]->songs[] = $entry->songId;
+                }
             }
             
         }
@@ -91,7 +96,7 @@ class CatalogController {
             $catalog->albums[$album->id] = $album;
             $catalog->albumList[] = $album->id;
         }
-
+        $catalog->playlistSongIndex = [];
         return $this->_okResponse(get_object_vars($catalog));
     }
 

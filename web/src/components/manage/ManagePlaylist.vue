@@ -72,7 +72,7 @@
         
             </form>
         </div>  
-        <modal v-if="showModal" @close="closeDeleteItemModal" @submit="submitDelete">
+        <modal handler="playlist" v-if="showModal" @close="closeDeleteItemModal" @submit="submitDelete">
             <h3 slot="header">Confirm!</h3>
             <div slot="body">Are you sure you want to delete <strong>{{itemToDelete.title}}</strong>?</div>
         </modal>
@@ -83,47 +83,25 @@
     import draggable from "vuedraggable";
     import { mapActions, mapGetters } from 'vuex';
     import FormAlerts from './FormAlerts.vue';
-    import Modal from './Modal.vue';
+    import DeleteButtonMixin from './DeleteButtonMixin';
     import { StatusEnum } from '../../store/StatusEnum';
     export default {
         name: "ManagePlaylist",
+        mixins: [DeleteButtonMixin],
         display: "Manage Playlist",
         components: {
             FormAlerts,
-            Modal,
             draggable
         },
         data: function() {
             return {
                 errors: [],
                 showSavingAlert: false,
-                showModal: false,
-                itemToDelete: null,
                 playlistSongs: [],
                 songsNotInPlaylist: []
             }
         },
         methods: {
-            confirmDeleteItem(playlist) {
-                this.$data.itemToDelete = playlist;
-                this.$data.showModal = true;    
-            },
-            closeDeleteItemModal() {
-                this.$data.showModal = false;
-                this.$data.itemToDelete = null;
-            },
-            submitDelete() {
-                const options = {
-                    id: this.$data.itemToDelete.id,
-                    handler: 'playlist'
-                };
-                this.deleteItem(options).then(() => {
-                    this.closeDeleteItemModal();
-                    this.$router.push('/manager/playlists')
-                }).catch((data) => {
-                    console.log(data.errorMessages);
-                });
-            },
             savePlaylist(e) {
                 this.showSavingAlert = true;
                 this.playlist.songs = this.playlistSongs.map(function(song, index) {
@@ -148,7 +126,6 @@
                 'getPlaylistById',
             ]),
             ...mapActions([
-                'deleteItem',
                 'updatePlaylist',
                 'createPlaylist'
             ]),
@@ -160,15 +137,6 @@
             //     const draggedElement = draggedContext.element;
             //     return ((!relatedElement || !relatedElement.fixed) && !draggedElement.fixed);
             // },
-            addSong(e) {
-
-            },
-            removeSong(e) {
-
-            },
-            updateOrder(e) {
-
-            }
         },
         created() {
             let frameCount = 0;
@@ -224,12 +192,17 @@
 
 <style scoped>
 .droppable-song-list {
-    min-height: 200px;
+    min-height: 100px;
     background-color:#f8f9fa;
     border-radius: 5px;
+    padding-bottom: 2px;
 }
 .ghost {
     opacity: 0.5;
     background: #c8ebfb;
+}
+
+.list-group-item:hover {
+    background: #f9fafd;
 }
 </style>

@@ -38,7 +38,7 @@
                 </div>
             </form>
         </div>
-        <modal v-if="showModal" @close="closeDeleteItemModal" @submit="submitDelete">
+        <modal v-if="showModal" handler="song" @close="closeDeleteItemModal" @submit="submitDelete">
             <h3 slot="header">Confirm!</h3>
             <div slot="body">Are you sure you want to delete <strong>{{itemToDelete.title}}</strong>?</div>
         </modal>
@@ -48,46 +48,24 @@
 <script>
     import { mapActions, mapGetters } from 'vuex';
     import FormAlerts from './FormAlerts.vue';
-    import Modal from './Modal.vue'
+    import DeleteButtonMixin from './DeleteButtonMixin';
 
     export default {
         name: "ManageSong",
+        mixins: [DeleteButtonMixin],
         components: {
             FormAlerts,
-            Modal
         },
         data: function() {
             return {
                 errors: [],
                 showSavingAlert: false,
-                showModal: false,
-                itemToDelete: null
             }
         },
         methods: {
             ...mapGetters({
                 getById: 'getSongById'
             }),
-            confirmDeleteItem(song) {
-                this.$data.itemToDelete = song;
-                this.$data.showModal = true;    
-            },
-            closeDeleteItemModal() {
-                this.$data.showModal = false;
-                this.$data.itemToDelete = null;
-            },
-            submitDelete() {
-                const options = {
-                    id: this.$data.itemToDelete.id,
-                    handler: 'song'
-                };
-                this.deleteItem(options).then(() => {
-                    this.closeDeleteItemModal();
-                    this.$router.push('/manager/songs')
-                }).catch((data) => {
-                    console.log(data.errorMessages);
-                })
-            },
             processFile(e) {
                 const files = e.target.files || e.dataTransfer.files;
                 if (!files.length) {
@@ -120,7 +98,6 @@
                 this.$router.push('/manager/songs');
             },
             ...mapActions([
-                'deleteItem',
                 'updateSong',
                 'createSong'
             ]),
@@ -140,12 +117,5 @@
 </script>
 
 <style scoped>
-/* td {
-  padding: 0 !important;
-  margin: 0 !important;
-  border: 0 !important;
-} */
-/* table {
-    margin-bottom: 0;
-} */
+
 </style>

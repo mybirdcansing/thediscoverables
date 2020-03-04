@@ -18,7 +18,7 @@
 
                       <div class="modal-footer">
                           <slot name="footer">
-                              <button class="btn btn-sm btn-outline-primary" @click="$emit('submit')">
+                              <button class="btn btn-sm btn-outline-primary" @click="$emit('submit', handler)">
                                   OK
                               </button>
                               <button class="btn btn-sm btn-outline-secondary" @click="$emit('close')">
@@ -41,6 +41,7 @@
         data: function() {
             return {}
         },
+        props: ['handler'],
         mounted() {
             this.$el.ownerDocument.addEventListener("keydown", function(e) {
                 e = e || window.event;

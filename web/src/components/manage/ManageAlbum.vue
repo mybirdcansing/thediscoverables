@@ -58,7 +58,7 @@
                         <div class="row">
                             <div class="col-sm-8">
                                 <small v-if="album.artworkFilename" class="form-text text-muted">File:</small>
-                                <img class="albumArtwork" id="newAlbumArtworkImage" v-bind:src="'../../../artwork/' + album.artworkFilename" />
+                                <img class="albumArtwork" ref="artworkImg" id="albumArtworkImage" />
                             </div>
                         </div>
                     </div>
@@ -80,6 +80,7 @@
     import FormAlerts from './FormAlerts.vue';
     import DeleteButtonMixin from './DeleteButtonMixin';
     import { StatusEnum } from '../../store/StatusEnum';
+    const artworkFolderPath = '../../../artwork/';
     export default {
         name: "ManageAlbum",
         mixins: [
@@ -97,6 +98,9 @@
             }
         },
         methods: {
+            setArtworkSrc(path) {
+                this.$refs.artworkImg.src = path;
+            },
             ...mapGetters({
                 getById: 'getAlbumById',
                 getPlaylistById: 'getPlaylistById'
@@ -111,7 +115,7 @@
                 const reader = new FileReader();
                 reader.onload = function() {
                     const fileAsText = reader.result;
-                    document.getElementById('newAlbumArtworkImage').src = fileAsText;
+                    this.setArtworkSrc(fileAsText);
                     this.album.artworkFilename = file.name;
                     this.album.fileInput = fileAsText;
                 }.bind(this);
@@ -168,25 +172,27 @@
         },
         mounted() {
             if (this.$route.params.id === "create") {
-                document.getElementById('newAlbumArtworkImage').src = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
-            }
-            
-            let frameCount = 0;
-            const tick = function () {
-                frameCount++;
-                if (this.catalogState !== StatusEnum.LOADED) {
-                    if (frameCount > 600 || this.catalogState === StatusEnum.ERROR) {
-                        console.error('it took too long to get the catalog :(')
-                        return;
-                    }
-                    requestAnimationFrame(tick);
-                    return;
-                }
+                this.setArtworkSrc("data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==");
+            } else if (this.catalogState === StatusEnum.LOADED) {
+                this.setArtworkSrc(artworkFolderPath + this.album.artworkFilename);
                 if (this.album.playlist) {
                     this.$data.songs = this.getPlaylistSongs(this.getPlaylistById()(this.album.playlist));
                 }
-            }.bind(this);
-            requestAnimationFrame(tick);
+            }
+        },
+        watch: {
+            catalogState: function(newState, oldState) {
+                if (newState === StatusEnum.LOADED) {
+                    if (this.$route.params.id === "create") {
+                        this.setArtworkSrc("data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==");
+                    } else {
+                        this.setArtworkSrc(artworkFolderPath + this.album.artworkFilename);
+                    }
+                    if (this.album.playlist) {
+                        this.$data.songs = this.getPlaylistSongs(this.getPlaylistById()(this.album.playlist));
+                    }
+                }
+            }
         }
     }
 </script>
@@ -197,7 +203,10 @@
         border: 1px solid;
         border-color: #aaa;
         padding: 10px;
-        box-shadow: 5px 10px #bbb;
+        /* box-shadow: 5px 10px #bbb; */
+        -moz-box-shadow: 2px 2px 4px 0px #006773;
+        -webkit-box-shadow:  2px 2px 4px 0px #006773;
+        box-shadow: 2px 2px 4px 0px #006773;        
     }
     .nopadding {
         padding-left: 0 !important;

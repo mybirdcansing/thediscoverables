@@ -85,11 +85,15 @@ define("PLAYLIST_BLANK_MESSAGE", "Please select a playlist.");
 
 define("MP3_ONLY_CODE", 1026);
 define("MP3_ONLY_MESSAGE", "Only mp3s allowed.");
-define("FILE_BLANK_CODE", 1020);
+define("FILE_BLANK_CODE", 1027);
 define("FILE_BLANK_MESSAGE", "Please upload a song.");
 
-define("CATALOG_NOT_FOUND_CODE", 1021);
+define("CATALOG_NOT_FOUND_CODE", 1028);
 define("CATALOG_NOT_FOUND_MESSAGE", "Try using the GET request method");
+
+
+define("IMAGE_ONLY_CODE", 1029);
+define("IMAGE_ONLY_MESSAGE", "Only images allowed.");
 
 // global methods
 function GUID()

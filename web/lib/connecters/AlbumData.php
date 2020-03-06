@@ -96,7 +96,7 @@ class AlbumData
                 $albumId,
 				$album->title,
 				$album->description,
-                $album->playlist->id,
+                $album->playlist,
                 $album->artworkFilename,
                 $album->publishDate,
                 $administrator->id,

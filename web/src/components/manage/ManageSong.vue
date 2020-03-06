@@ -114,8 +114,7 @@
             }
             this.$watch('audioSrc', () => {
                 this.$refs.player.load();
-                // this.$refs.player.play();
-            })
+            });
         },
         watch: {
             catalogState: function(newState, oldState) {
@@ -146,8 +145,8 @@ audio {
     -moz-box-shadow: 2px 2px 4px 0px #006773;
     -webkit-box-shadow:  2px 2px 4px 0px #006773;
     box-shadow: 2px 2px 4px 0px #006773;
-    -moz-border-radius:7px 7px 7px 7px ;
-    -webkit-border-radius:7px 7px 7px 7px ;
-    border-radius:7px 7px 7px 7px ;
+    -moz-border-radius:27px 27px 27px 27px ;
+    -webkit-border-radius:27px 27px 27px 27px ;
+    border-radius:27px 27px 27px 27px ;
 }
 </style>

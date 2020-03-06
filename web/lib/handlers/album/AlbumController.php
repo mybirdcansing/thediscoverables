@@ -85,6 +85,18 @@ class AlbumController {
                 "errorMessages" => $validationIssues
             ]);
         }
+
+        if (isset($album->fileInput)) {
+            try {
+                $this->_handleUpload($album);
+            } catch (BadMimeTypeException $e) {
+                return $this->_unprocessableEntityResponse([
+                    "songCreated" => false,
+                    "errorMessages" => [IMAGE_ONLY_CODE => IMAGE_ONLY_MESSAGE]
+                ]);
+            }
+        }
+
         try {
             $albumId = $this->albumData->insert($album, $this->administrator);
             $response['status_code_header'] = 'HTTP/1.1 201 Created';
@@ -103,7 +115,6 @@ class AlbumController {
 
     private function _updateAlbum()
     {
-        error_log(json_encode(file_get_contents('php://input')));
         $json = json_decode(file_get_contents('php://input'));
         if (isset($json->data)) {
             $album = Album::fromJson(json_encode($json->data));
@@ -123,6 +134,17 @@ class AlbumController {
             return $this->_notFoundResponse();
         }
 
+        if (isset($album->fileInput)) {
+            try {
+                $this->_handleUpload($album);
+            } catch (BadMimeTypeException $e) {
+                return $this->_unprocessableEntityResponse([
+                    "songCreated" => false,
+                    "errorMessages" => [IMAGE_ONLY_CODE => IMAGE_ONLY_MESSAGE]
+                ]);
+            }
+        }
+
         try {
             $this->albumData->update($album, $this->administrator);
             return $this->_okResponse([
@@ -138,6 +160,35 @@ class AlbumController {
         }
 
         return $response;
+    }
+
+
+
+    private function _handleUpload($options)
+    {
+
+        // Decode base64 data
+        list($type, $data) = explode(';', $options->fileInput);
+        list(, $data) = explode(',', $data);
+        $fileData = base64_decode($data);
+
+        // Get file mime type
+        $finfo = finfo_open();
+        $fileMimeType = finfo_buffer($finfo, $fileData, FILEINFO_MIME_TYPE);
+
+        // Validate type of file
+        if(
+            $fileMimeType == 'image/jpeg'
+            || $fileMimeType == 'image/gif'
+            || $fileMimeType == 'image/png'
+            ) {
+            //overwrites file with the same name (this is intentional)
+            $options->artworkFilename = str_replace(" ", "_", $options->artworkFilename);
+            file_put_contents('../../../artwork/' . $options->artworkFilename, $fileData);
+        }
+        else {
+            throw new BadMimeTypeException();
+        }
     }
 
     private function _deleteAlbum()

@@ -19,7 +19,9 @@ class AlbumData
             SELECT
 				album_id,
 				title,
-				description,
+                description,
+                artwork_filename,
+                publish_date,
                 playlist_id
 		  	FROM
 		  		album;";
@@ -44,6 +46,8 @@ class AlbumData
                 album_id,
                 title,
                 description,
+                artwork_filename,
+                publish_date,
                 playlist_id
 		  	FROM
 		  		album
@@ -75,22 +79,26 @@ class AlbumData
                     title,
                     description,
                     playlist_id,
+                    artwork_filename,
+                    publish_date,
                     modified_date,
                     modified_by_id,
                     created_date,
                     created_by_id
                 )
-			VALUES (?, ?, ?, ?, now(), ?, now(), ?);
+			VALUES (?, ?, ?, ?, ?, ?, now(), ?, now(), ?);
         ";
 
         try {
             $stmt = $this->dbConnection->prepare($sql);
             $albumId = GUID();
-            $stmt->bind_param("ssssss",
+            $stmt->bind_param("ssssssss",
                 $albumId,
 				$album->title,
 				$album->description,
-				$album->playlist->id,
+                $album->playlist->id,
+                $album->artworkFilename,
+                $album->publishDate,
                 $administrator->id,
                 $administrator->id
             );
@@ -111,12 +119,15 @@ class AlbumData
 
     public function update(Album $album, User $administrator)
     {
+        
         $sql = "
             UPDATE album
                 SET
                     title = ?,
                     description = ?,
                     playlist_id = ?,
+                    artwork_filename = ?,
+                    publish_date = ?,
                     modified_date = now(),
                     modified_by_id = ?
                 WHERE album_id = ?;
@@ -124,10 +135,12 @@ class AlbumData
 
         try {
             $stmt = $this->dbConnection->prepare($sql);
-            $stmt->bind_param("sssss",
+            $stmt->bind_param("sssssss",
                 $album->title,
                 $album->description,
-                $album->playlist->id,
+                $album->playlist,
+                $album->artworkFilename,
+                $album->publishDate,
                 $administrator->id,
                 $album->id
             );
@@ -168,7 +181,9 @@ class AlbumData
 	    $album = new Album();
 	    $album->id = $row["album_id"];
 	    $album->title = $row["title"];
-	    $album->description = $row["description"];
+        $album->description = $row["description"];
+        $album->artworkFilename = $row['artwork_filename'];
+        $album->publishDate = $row['publish_date'];
 	    $album->playlistId  = $row["playlist_id"];
 	    return $album;
 	}

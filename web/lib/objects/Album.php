@@ -9,6 +9,9 @@ class Album extends JsonConvertible {
     public $description;
     public $playlistId;
     public $playlist;
+    public $artworkFilename;
+    public $publishDate;
+    public $fileInput;
 
     function __construct() {
     }

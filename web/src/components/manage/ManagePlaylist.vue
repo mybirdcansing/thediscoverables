@@ -6,22 +6,7 @@
         </div>
         <div class="container">
             <form v-on:submit.prevent="savePlaylist">
-                <table class="table table-borderless table-sm">
-                    <tbody>
-                        <tr>
-                            <td>
-                                <button type="submit" class="btn btn-sm btn-outline-primary">Save</button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary" @click="goToPlaylistsPage">Cancel</button>
-                            </td>
-                            <td>
-                                <div class="float-right">
-                                <button class="btn-xs btn-outline-secondary" 
-                                    @click.self.prevent="confirmDeleteItem(playlist)">Delete</button>
-                            </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <form-buttons @cancel="goToPlaylistsPage" @delete="confirmDeleteItem(playlist)" @submit="savePlaylist" />
                 <form-alerts v-bind:errors="errors" 
                     v-bind:showSavingAlert="showSavingAlert" 
                     savingMessage="Saving playlist..." />
@@ -37,15 +22,14 @@
                     <label for="managePlaylistDescription">Description</label>
                     <textarea v-model="playlist.description" class="form-control" id="managePlaylistDescription" placeholder="Enter description" rows="3"></textarea>
                 </div>
-                <div class="form-group">
+                <div>
                     <div class="row">
                         <div class="col-6">
                             <h6>Songs in Playlist</h6>
                             <draggable class="list-group droppable-song-list"
                                 v-bind="dragOptions"
                                 :list="playlistSongs" 
-                                group="songLists"
-                                @change="log">
+                                group="songLists">
                                 <div class="list-group-item clickable-text"
                                     v-for="song in playlistSongs"
                                     :key="song.id">
@@ -58,8 +42,7 @@
                             <draggable class="list-group droppable-song-list"
                                 v-bind="dragOptions" 
                                 :list="songsNotInPlaylist"
-                                group="songLists" 
-                                @change="log">
+                                group="songLists">
                                 <div class="list-group-item clickable-text"
                                     v-for="song in songsNotInPlaylist"
                                     :key="song.id">
@@ -69,7 +52,8 @@
                         </div>
                     </div>
                 </div>
-        
+                <br/>
+                <form-buttons @cancel="goToPlaylistsPage" @delete="confirmDeleteItem(playlist)" @submit="savePlaylist" />
             </form>
         </div>  
         <modal handler="playlist" v-if="showModal" @close="closeDeleteItemModal" @submit="submitDelete">
@@ -82,6 +66,7 @@
 <script>
     import draggable from "vuedraggable";
     import { mapActions, mapGetters } from 'vuex';
+    import FormButtons from './FormButtons.vue';
     import FormAlerts from './FormAlerts.vue';
     import DeleteButtonMixin from './DeleteButtonMixin';
     import { StatusEnum } from '../../store/StatusEnum';
@@ -91,7 +76,8 @@
         display: "Manage Playlist",
         components: {
             FormAlerts,
-            draggable
+            FormButtons,
+            draggable,
         },
         data: function() {
             return {
@@ -132,11 +118,6 @@
             log: function(e) {
                 console.log(e);
             },
-            // onMove({ relatedContext, draggedContext }) {
-            //     const relatedElement = relatedContext.element;
-            //     const draggedElement = draggedContext.element;
-            //     return ((!relatedElement || !relatedElement.fixed) && !draggedElement.fixed);
-            // },
         },
         created() {
             let frameCount = 0;
@@ -157,7 +138,7 @@
 
                 this.songsNotInPlaylist = this.songSet.filter(function(song){
                     if (!this.playlist.songs.includes(song.id)) {
-                        return Vue.util.extend({}, song);
+                        return song;
                     }
                 }.bind(this)); 
             }.bind(this);
@@ -169,7 +150,21 @@
                     return { id: null, title: null, description: null, songs: [] };
                 } else {
                     const storeData = this.getPlaylistById()(this.$route.params.id);
-                    return Vue.util.extend({}, storeData);
+                    let data = Vue.util.extend({}, storeData);
+
+                    // if (data.songs && this.songs && this.songSet) {
+                    //     this.playlistSongs = data.songs.map(function(songId) {
+                    //         return Vue.util.extend({}, this.songs[songId]);
+                    //     }.bind(this));
+                    //     this.songsNotInPlaylist = this.songSet.filter(function(song){
+                    //         if (!data.songs.includes(song.id)) {
+                    //             return song;
+                    //         }
+                    //     }.bind(this)); 
+                    // }
+
+
+                    return data;
                 }
             },
             ...mapGetters([
@@ -193,7 +188,7 @@
 <style scoped>
 .droppable-song-list {
     min-height: 100px;
-    background-color:#f8f9fa;
+    background-color:#ebf2f9;
     border-radius: 5px;
     padding-bottom: 2px;
 }

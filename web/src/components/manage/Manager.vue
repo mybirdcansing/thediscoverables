@@ -1,7 +1,11 @@
 <template>
-    <div>
-        <manager-navbar/>
-        <router-view></router-view>
+    <div class="container">
+        <div class="row justify-content-md-center">
+            <div class="col col-md-10">
+                <manager-navbar/>
+                <router-view></router-view>
+            </div>
+        </div>
     </div>
 </template>
 

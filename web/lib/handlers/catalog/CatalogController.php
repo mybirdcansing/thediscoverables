@@ -100,7 +100,6 @@ class CatalogController {
         return $this->_okResponse(get_object_vars($catalog));
     }
 
-
     private function _okResponse($json = '{}')
     {
         $response['status_code_header'] = 'HTTP/1.1 200 OK';

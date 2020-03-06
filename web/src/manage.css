@@ -37,3 +37,8 @@ h2 {
 .clickable-text {
     cursor: default;
 }
+@media (min-width: 992px) { 
+	.collapsing {
+		transition: none !important;
+	  }
+}

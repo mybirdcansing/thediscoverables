@@ -103,6 +103,7 @@ class AlbumController {
 
     private function _updateAlbum()
     {
+        error_log(json_encode(file_get_contents('php://input')));
         $json = json_decode(file_get_contents('php://input'));
         if (isset($json->data)) {
             $album = Album::fromJson(json_encode($json->data));

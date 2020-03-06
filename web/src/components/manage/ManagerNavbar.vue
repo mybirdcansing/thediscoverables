@@ -7,10 +7,10 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
             <li class="nav-item">
-                <router-link class="nav-link" to="/manager/songs">Songs</router-link>
+                <router-link class="nav-link" to="/manager/songs" data-toggle="collapse" data-target=".navbar-collapse">Songs</router-link>
             </li>
             <li class="nav-item">
-                <router-link class="nav-link" to="/manager/playlists">Playlists</router-link>
+                <router-link class="nav-link" to="/manager/playlists" data-toggle="collapse" data-target=".navbar-collapse">Playlists</router-link>
             </li>
             <li class="nav-item">
                 <router-link class="nav-link" to="/manager/albums" data-toggle="collapse" data-target=".navbar-collapse">Albums</router-link>
@@ -19,7 +19,7 @@
                 <router-link class="nav-link" to="/manager/users" data-toggle="collapse" data-target=".navbar-collapse">Users</router-link>
             </li>
             <li class="nav-item">
-                <a @click='logout' class="nav-link">Logout</a>
+                <a @click='logout' class="nav-link" data-toggle="collapse" data-target=".navbar-collapse">Logout</a>
             </li>
         </ul>
         </div>

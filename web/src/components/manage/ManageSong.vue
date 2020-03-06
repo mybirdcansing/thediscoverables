@@ -6,22 +6,7 @@
         </div>
         <div class="container">
             <form v-on:submit.prevent="submitSong">
-                <table class="table table-borderless table-sm">
-                    <tbody>
-                        <tr>
-                            <td>
-                                <button type="submit" class="btn btn-sm btn-outline-primary">Save</button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary" @click="goToSongsPage">Cancel</button>
-                            </td>
-                            <td>
-                                <div class="float-right">
-                                <button class="btn-xs btn-outline-secondary" 
-                                    @click.self.prevent="confirmDeleteItem(song)">Delete</button>
-                            </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>                
+                <form-buttons @cancel="goToSongsPage" @delete="confirmDeleteItem(song)" @submit="submitSong" />          
                 <form-alerts v-bind:errors="errors" v-bind:showSavingAlert="showSavingAlert" savingMessage="Saving song..." />
                 <div class="form-group">
                     <label for="manageSongTitle">Title</label>
@@ -34,8 +19,13 @@
                 <div class="form-group">
                     <label for="manageSongUpload">Upload an Mp3 file</label>
                     <input type="file" class="form-control-file" id="manageSongUpload" accept="audio/mp3" @change='processFile'>
-                    <small class="form-text text-muted">Current file: {{song.filename}}</small>
+                    <small class="form-text text-muted more-vpadding">Filename: {{song.filename}}</small>
+                    <audio controls ref="player" :key="audioSrc">
+                        <source v-bind:src="audioSrc" type="audio/mpeg">
+                    </audio>
                 </div>
+                <br/>
+                <form-buttons @cancel="goToSongsPage" @delete="confirmDeleteItem(song)" @submit="submitSong" />
             </form>
         </div>
         <modal v-if="showModal" handler="song" @close="closeDeleteItemModal" @submit="submitDelete">
@@ -48,18 +38,21 @@
 <script>
     import { mapActions, mapGetters } from 'vuex';
     import FormAlerts from './FormAlerts.vue';
+    import FormButtons from './FormButtons.vue';
     import DeleteButtonMixin from './DeleteButtonMixin';
-
+    import { StatusEnum } from '../../store/StatusEnum';
     export default {
         name: "ManageSong",
         mixins: [DeleteButtonMixin],
         components: {
             FormAlerts,
+            FormButtons,
         },
         data: function() {
             return {
                 errors: [],
                 showSavingAlert: false,
+                audioSrc: "",
             }
         },
         methods: {
@@ -75,10 +68,9 @@
                 const input = e.target;
                 const reader = new FileReader();
                 reader.onload = function() {
-                    this.song.fileInput = reader.result;
+                    this.$data.audioSrc = this.song.fileInput = reader.result;
                 }.bind(this);
-                this.song.filename = file.name;
-                console.log(file.name);
+                this.song.filename = file.name.replace(/ |'/g, "_");;
                 reader.readAsDataURL(file);
             },
             submitSong(e) {
@@ -111,11 +103,51 @@
                     const storeData = this.getById()(this.$route.params.id);
                     return Vue.util.extend({}, storeData);
                 }
+            },
+            ...mapGetters({
+                catalogState: 'catalogState',
+            }),            
+        },
+        mounted() {
+            if (this.catalogState === StatusEnum.LOADED) {
+                this.$data.audioSrc = "/audio/" + encodeURI(this.song.filename);
+            }
+            this.$watch('audioSrc', () => {
+                this.$refs.player.load();
+                // this.$refs.player.play();
+            })
+        },
+        watch: {
+            catalogState: function(newState, oldState) {
+                if (newState === StatusEnum.LOADED) {
+                    this.$data.audioSrc = "/audio/" + encodeURI(this.song.filename);
+                }
             }
         }
+
     }
 </script>
 
 <style scoped>
-
+audio:hover, audio:focus, audio:active {
+    -webkit-box-shadow: 15px 15px 20px rgba(0,0, 0, 0.4);
+    -moz-box-shadow: 15px 15px 20px rgba(0,0, 0, 0.4);
+    box-shadow: 15px 15px 20px rgba(0,0, 0, 0.4);
+    -webkit-transform: scale(1.01);
+    -moz-transform: scale(1.01);
+    transform: scale(1.01);
+}
+audio {
+    width: 100%;
+    -webkit-transition:all 0.2s linear;
+    -moz-transition:all 0.2s linear;
+    -o-transition:all 0.2s linear;
+    transition:all 0.2s linear;
+    -moz-box-shadow: 2px 2px 4px 0px #006773;
+    -webkit-box-shadow:  2px 2px 4px 0px #006773;
+    box-shadow: 2px 2px 4px 0px #006773;
+    -moz-border-radius:7px 7px 7px 7px ;
+    -webkit-border-radius:7px 7px 7px 7px ;
+    border-radius:7px 7px 7px 7px ;
+}
 </style>

@@ -71,6 +71,7 @@ class SongController {
 
     private function _handleUpload($song)
     {
+        error_log("in _handleUpload");
         // Decode base64 data
         list($type, $data) = explode(';', $song->fileInput);
         list(, $data) = explode(',', $data);
@@ -83,6 +84,7 @@ class SongController {
         // Validate type of file
         if($fileMimeType == 'audio/mpeg') {
             //overwrites file with the same name (this is intentional)
+            $song->filename = str_replace(" ", "_", $song->filename);
             file_put_contents('../../../audio/' . $song->filename, $fileData);
         }
         else {
@@ -155,7 +157,7 @@ class SongController {
             return $this->_notFoundResponse();
         }
 
-        if (isset($song->fileData)) {
+        if (isset($song->fileInput)) {
             try {
                 $this->_handleUpload($song);
             } catch (BadMimeTypeException $e) {

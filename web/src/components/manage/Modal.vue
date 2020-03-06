@@ -43,7 +43,7 @@
         },
         props: ['handler'],
         mounted() {
-            this.$el.ownerDocument.addEventListener("keydown", function(e) {
+            document.addEventListener("keydown", function(e) {
                 e = e || window.event;
                 if (e.key == "Escape") {
                     this.$emit('close')

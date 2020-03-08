@@ -58,7 +58,10 @@ export const router = new VueRouter({
         { 
             path: '/login',
             name: 'login',
-            component: Login 
+            component: Login,
+            children: [
+                { path: 'passwordhelp', component: PasswordHelp },
+            ]
         },
         { path: '/passwordhelp', component: PasswordHelp },
         { path: '/passwordreset', component: PasswordReset },

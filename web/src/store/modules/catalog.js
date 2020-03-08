@@ -7,20 +7,6 @@ const catalogConnector = new CatalogConnector();
 const songConnector = new SongConnector();
 const playlistConnector = new PlaylistConnector();
 
-const filterInPlace = (array, predicate) => {
-    let end = 0;
-
-    for (let i = 0; i < array.length; i++) {
-        const obj = array[i];
-
-        if (predicate(obj)) {
-            array[end++] = obj;
-        }
-    }
-
-    array.length = end;
-};
-
 const state = {
     catalogState: StatusEnum.INIT,
     songs: {},
@@ -66,10 +52,6 @@ const actions = {
             }
         });
     },
-    // options {
-    //     data: song,
-    //     handler: 'song'
-    // }
     updateItem({commit}, options) {
         return new Promise(async (resolve, reject) => {
             try {

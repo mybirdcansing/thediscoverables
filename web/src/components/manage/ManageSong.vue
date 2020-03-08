@@ -17,12 +17,20 @@
                     <textarea v-model="song.description" class="form-control" id="manageSongDescription" placeholder="Enter description" rows="3"></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="manageSongUpload">Upload an Mp3 file</label>
-                    <input type="file" class="form-control-file" id="manageSongUpload" accept="audio/mp3" @change='processFile'>
-                    <small class="form-text text-muted more-vpadding">Filename: {{song.filename}}</small>
-                    <audio controls ref="player" :key="audioSrc">
-                        <source v-bind:src="audioSrc" type="audio/mpeg">
-                    </audio>
+                    <div class="container">
+                        <div class="row">
+                            <div style="col col-md-8">
+                                <label for="manageSongUpload">Upload an Mp3 file</label>
+                                <input type="file" class="form-control-file" id="manageSongUpload" accept="audio/mp3" @change='processFile'>
+                                <small class="form-text text-muted more-vpadding">Filename: {{song.filename}}</small>
+                            </div>
+                            <div style="col col-md-4">
+                                <audio controls ref="player" :key="audioSrc">
+                                    <source v-bind:src="audioSrc" type="audio/mpeg">
+                                </audio>
+                            </div>
+                         </div>
+                    </div>
                 </div>
                 <br/>
                 <form-buttons @cancel="goToSongsPage" @delete="confirmDeleteItem(song)" @submit="submitSong" />
@@ -81,10 +89,10 @@
                     setTimeout(() => {
                         this.showSavingAlert = false;
                     }, 1000);
-                }).catch(function(data) {
+                }).catch((data) => {
                     this.showSavingAlert = false;
                     this.errors = Object.values(data.errorMessages).reverse();
-                }.bind(this));
+                });
             },
             goToSongsPage() {
                 this.$router.push('/manager/songs');
@@ -111,42 +119,19 @@
         mounted() {
             if (this.catalogState === StatusEnum.LOADED) {
                 this.$data.audioSrc = "/audio/" + encodeURI(this.song.filename);
+            } else {
+                this.$watch('catalogState', (newState, oldState) => {
+                    if (newState === StatusEnum.LOADED) {
+                        this.$data.audioSrc = "/audio/" + encodeURI(this.song.filename);
+                    }
+                }); 
             }
             this.$watch('audioSrc', () => {
                 this.$refs.player.load();
             });
-        },
-        watch: {
-            catalogState: function(newState, oldState) {
-                if (newState === StatusEnum.LOADED) {
-                    this.$data.audioSrc = "/audio/" + encodeURI(this.song.filename);
-                }
-            }
         }
-
     }
 </script>
 
 <style scoped>
-audio:hover, audio:focus, audio:active {
-    -webkit-box-shadow: 15px 15px 20px rgba(0,0, 0, 0.4);
-    -moz-box-shadow: 15px 15px 20px rgba(0,0, 0, 0.4);
-    box-shadow: 15px 15px 20px rgba(0,0, 0, 0.4);
-    -webkit-transform: scale(1.01);
-    -moz-transform: scale(1.01);
-    transform: scale(1.01);
-}
-audio {
-    width: 100%;
-    -webkit-transition:all 0.2s linear;
-    -moz-transition:all 0.2s linear;
-    -o-transition:all 0.2s linear;
-    transition:all 0.2s linear;
-    -moz-box-shadow: 2px 2px 4px 0px #006773;
-    -webkit-box-shadow:  2px 2px 4px 0px #006773;
-    box-shadow: 2px 2px 4px 0px #006773;
-    -moz-border-radius:27px 27px 27px 27px ;
-    -webkit-border-radius:27px 27px 27px 27px ;
-    border-radius:27px 27px 27px 27px ;
-}
 </style>

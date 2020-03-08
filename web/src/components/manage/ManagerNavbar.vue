@@ -35,7 +35,7 @@
             async logout() {
                 const uc = new UserConnector();
                 await uc.logout();
-                this.$router.push('/');
+                this.$router.push('/login');
             }
         }
     }

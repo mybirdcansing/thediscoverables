@@ -9,7 +9,7 @@ class UserController {
     private $userData;
     private $administrator;
 
-    public function __construct($db, $action, $userId, $administrator)
+    public function __construct($db, $action, $userId = null, $administrator = null)
     {
         $this->action = $action;
         $this->userId = $userId;
@@ -145,6 +145,10 @@ class UserController {
     private function _updatePassword()
     {
         $objJson = json_decode(file_get_contents('php://input'));
+        if (isset($objJson->data)) {
+            $objJson = $objJson->data;
+        }
+
         $token = $objJson->token;
         $password = $objJson->password;
 

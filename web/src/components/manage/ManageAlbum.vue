@@ -18,14 +18,11 @@
                     <label for="manageAlbumDescription">Description</label>
                     <textarea v-model="album.description" class="form-control" id="manageAlbumDescription" placeholder="Enter description" rows="3"></textarea>
                 </div>
-                <div class="form-group">
+                <div class="form-group">                      
                     <div class="row">
-                        <div class="col-sm-5">Playlist:</div>
-                        <div class="col-sm-6 nopadding some-vpadding">Songs:</div>
-                    </div>                        
-                    <div class="row ">
-                        <div class="col-sm-5">
-                            <div class="form-check">
+                        <div class="col-sm-5 some-vpadding">
+                            <h6>Playlist:</h6>
+                            <div class="form-check playlist-list">
                                 <div v-for="item in allPlaylists" :key="item.id">
                                     <input 
                                         v-bind:id="item.id"
@@ -34,15 +31,17 @@
                                         v-bind:checked="album.playlist === item.id" 
                                         v-model="album.playlist"
                                         class="form-check-input" type="radio" name="playlistRadios">
-                                    <!-- checked -->
                                     <label class="form-check-label"  v-bind:for="item.id">
                                         {{item.title}}
                                     </label>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-sm-6">
-                            <div class='row' v-for="song in songs" :key="song.id" v-text="song.title"></div>
+                        <div class="col-sm-6 some-vpadding">
+                            <h6>Songs:</h6>
+                            <div class="song-list">
+                                <div v-for="song in songs" :key="song.id" v-text="song.title"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -203,7 +202,6 @@
         border: 1px solid;
         border-color: #aaa;
         padding: 10px;
-        /* box-shadow: 5px 10px #bbb; */
         -moz-box-shadow: 2px 2px 4px 0px #006773;
         -webkit-box-shadow:  2px 2px 4px 0px #006773;
         box-shadow: 2px 2px 4px 0px #006773;        
@@ -212,5 +210,23 @@
         padding-left: 0 !important;
         margin-left: 0 !important;
     }
-    .top-buffer { margin-top:20px !important; }
+    .top-buffer { 
+        margin-top:20px !important;
+    }
+    .song-list {
+        background-color:#ebf2f9;
+        border-radius: 5px;
+        margin-top: 4px;
+        padding-top: 2px;
+        padding-left: 12px;        
+        padding-bottom: 2px;
+    }
+    .playlist-list {
+        background-color:#ebf2f9;
+        border-radius: 5px;
+        margin-top: 4px;
+        padding-top: 2px;
+        padding-left: 28px;        
+        padding-bottom: 2px;
+    }    
 </style>

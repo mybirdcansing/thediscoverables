@@ -56,7 +56,7 @@
                 <form-buttons @cancel="goToPlaylistsPage" @delete="confirmDeleteItem(playlist)" @submit="savePlaylist" />
             </form>
         </div>  
-        <modal handler="playlist" v-if="showModal" @close="closeDeleteItemModal" @submit="submitDelete">
+        <modal v-if="showModal" @close="closeDeleteItemModal" @submit="submitDelete" handler="playlist">
             <h3 slot="header">Confirm!</h3>
             <div slot="body">Are you sure you want to delete <strong>{{itemToDelete.title}}</strong>?</div>
         </modal>
@@ -64,12 +64,12 @@
 </template>
 
 <script>
-    import draggable from "vuedraggable";
     import { mapActions, mapGetters } from 'vuex';
     import FormButtons from './FormButtons.vue';
     import FormAlerts from './FormAlerts.vue';
     import DeleteButtonMixin from './DeleteButtonMixin';
     import { StatusEnum } from '../../store/StatusEnum';
+    import draggable from "vuedraggable";
     export default {
         name: "ManagePlaylist",
         mixins: [DeleteButtonMixin],
@@ -120,51 +120,34 @@
             },
         },
         created() {
-            let frameCount = 0;
-            const tick = function () {
-                frameCount++;
-                if (this.catalogState !== StatusEnum.LOADED) {
-                    if (frameCount > 600 || this.catalogState === StatusEnum.ERROR) {
-                        console.error('it took too long to get the catalog :(')
-                        return;
-                    }
-                    requestAnimationFrame(tick);
-                    return;
-                }
-                
-                this.playlistSongs = this.playlist.songs.map(function(songId) {
+            const setSongLists = () => {
+                this.playlistSongs = this.playlist.songs.map((songId) => {
                     return Vue.util.extend({}, this.songs[songId]);
-                }.bind(this));
+                });
 
-                this.songsNotInPlaylist = this.songSet.filter(function(song){
+                this.songsNotInPlaylist = this.songSet.filter((song) => {
                     if (!this.playlist.songs.includes(song.id)) {
-                        return song;
+                        return Vue.util.extend({}, song);                
                     }
-                }.bind(this)); 
-            }.bind(this);
-            requestAnimationFrame(tick);
+                }); 
+            };
+
+            if (this.catalogState === StatusEnum.LOADED) {
+                setSongLists();
+            } else {
+                this.$watch('catalogState', (newState, oldState) => {
+                    if (newState === StatusEnum.LOADED) {
+                        setSongLists();
+                    }
+                }); 
+            }
         },
         computed: {
             playlist: function() {
                 if (this.$route.params.id === "create") {
                     return { id: null, title: null, description: null, songs: [] };
                 } else {
-                    const storeData = this.getPlaylistById()(this.$route.params.id);
-                    let data = Vue.util.extend({}, storeData);
-
-                    // if (data.songs && this.songs && this.songSet) {
-                    //     this.playlistSongs = data.songs.map(function(songId) {
-                    //         return Vue.util.extend({}, this.songs[songId]);
-                    //     }.bind(this));
-                    //     this.songsNotInPlaylist = this.songSet.filter(function(song){
-                    //         if (!data.songs.includes(song.id)) {
-                    //             return song;
-                    //         }
-                    //     }.bind(this)); 
-                    // }
-
-
-                    return data;
+                    return Vue.util.extend({}, this.getPlaylistById()(this.$route.params.id));
                 }
             },
             ...mapGetters([
@@ -176,10 +159,7 @@
                 return this.$store.state.catalog.songs;
             },
             dragOptions() {
-                return {
-                    ghostClass: "ghost"
-                };
-                
+                return { ghostClass: "ghost" };   
             }
         }
     }

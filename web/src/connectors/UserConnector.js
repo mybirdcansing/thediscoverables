@@ -6,12 +6,10 @@ export class UserConnector extends RestConnector {
     }
 
     authorize() {
-        console.log('authorize');
         return this._get('authorize.php');
     };
 
     authenticate(username, password) {
-        console.log(`authenticate ${username}`);
         return this._post({
             username: username, 
             password: password
@@ -19,7 +17,6 @@ export class UserConnector extends RestConnector {
     };
 
     logout() {
-        console.log('logout');
         return this._post({}, 'logout.php');
     };
 
@@ -32,11 +29,9 @@ export class UserConnector extends RestConnector {
     };
 
     resetPassword(password, token) {
-        console.log(`resetPassword ${token}`);
         return this._post({
             password: password, 
             token: token
         }, 'password.php');
     };
-   
 }

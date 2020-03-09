@@ -36,7 +36,7 @@
                 <form-buttons @cancel="goToSongsPage" @delete="confirmDeleteItem(song)" @submit="submitSong" />
             </form>
         </div>
-        <modal v-if="showModal" handler="song" @close="closeDeleteItemModal" @submit="submitDelete">
+        <modal v-if="showDeleteModal" handler="song" @close="closeDeleteItemModal" @submit="submitDelete">
             <h3 slot="header">Confirm!</h3>
             <div slot="body">Are you sure you want to delete <strong>{{itemToDelete.title}}</strong>?</div>
         </modal>

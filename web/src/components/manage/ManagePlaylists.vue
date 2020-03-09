@@ -23,7 +23,7 @@
             </div>
         </div>
 
-        <modal v-if="showModal" handler="playlist" @close="closeDeleteItemModal" @submit="submitDelete">
+        <modal v-if="showDeleteModal" handler="playlist" @close="closeDeleteItemModal" @submit="submitDelete">
             <h3 slot="header">Confirm!</h3>
             <div slot="body">Are you sure you want to delete <strong>{{itemToDelete.title}}</strong>?</div>
         </modal>

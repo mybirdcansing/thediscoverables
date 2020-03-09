@@ -7,7 +7,7 @@
         <div class="container">
             <form v-on:submit.prevent="submitUser">
                 <form-buttons @cancel="goToUsersPage" @delete="confirmDeleteItem(user)" @submit="submitUser" />          
-                <form-alerts v-bind:errors="errors" v-bind:showSavingAlert="showSavingAlert" savingMessage="Saving user..." />
+                <form-alerts :errors="errors" :showSavingAlert="showSavingAlert" :savingMessage="savingMessage" />
                 <div class="form-group">
                     <label for="manageUsername">Username</label>
                     <input v-model="user.username" class="form-control" type="text" id="manageUsername" placeholder="username">
@@ -32,16 +32,27 @@
                     <div class="form-group">
                         <label for="managePasswordConfirmation">Password Confirmation</label>
                         <input v-model="user.passwordConfirm" class="form-control" type="password" id="managePasswordConfirmation" placeholder="Re-enter password">
-                    </div>                       
+                    </div>
+                </div>
+                <div v-else>
+                    <div class="form-group" style="text-align:center;">
+                        <button type="button" class="btn btn-sm btn-outline-dark" @click="showPasswordResetModal = true">Send Password Rest Email</button>
+                    </div>
                 </div>
                 <br/>
                 <form-buttons @cancel="goToUsersPage" @delete="confirmDeleteItem(user)" @submit="submitUser" />
             </form>
         </div>
-        <modal v-if="showModal" handler="user" @close="closeDeleteItemModal" @submit="submitDelete">
+        <modal v-if="showDeleteModal" handler="user" @close="closeDeleteItemModal" @submit="submitDelete">
             <h3 slot="header">Confirm!</h3>
-            <div slot="body">Are you sure you want to delete <strong>{{itemToDelete.title}}</strong>?</div>
+            <div slot="body">Are you sure you want to delete <strong>{{itemToDelete.firstName}} {{itemToDelete.lastName}}</strong>?</div>
         </modal>
+        <modal v-if="showPasswordResetModal" handler="user" @close="showPasswordResetModal = false" @submit="submitPasswordResetRequest">
+            <h3 slot="header">Confirm!</h3>
+            <div slot="body" :class="{ 'sending-email': sendingPasswordResetMessageStatus }">
+                {{passwordResetConfirm}}
+            </div>
+        </modal>        
     </div>
 </template>
 
@@ -50,7 +61,15 @@
     import FormAlerts from './FormAlerts.vue';
     import FormButtons from './FormButtons.vue';
     import DeleteButtonMixin from './DeleteButtonMixin';
-    import { StatusEnum } from '../../store/StatusEnum';    
+    import { StatusEnum } from '../../store/StatusEnum';
+    import {UserConnector} from '../../connectors/UserConnector';
+    const userConnector = new UserConnector();
+    const sendingPasswordResetMessageStatusEnum = {
+        INIT: 0,
+        SENDING: 1,
+        ERROR: 2,
+        SENT: 3
+    };
     export default {
         name: "ManageUser",
         mixins: [DeleteButtonMixin],
@@ -62,13 +81,32 @@
             return {
                 errors: [],
                 showSavingAlert: false,
-                create: this.$route.params.id === 'create'
+                create: this.$route.params.id === 'create',
+                showPasswordResetModal: false,
+                sendingPasswordResetMessageStatus: sendingPasswordResetMessageStatusEnum.INIT,
+                savingMessage: `Saving user...`,
             }
         },
         methods: {
             ...mapGetters('manage', {
                 getById: 'getUserById'
             }),
+            submitPasswordResetRequest() {
+                this.errors = [];
+                this.$data.sendingPasswordResetMessageStatus = sendingPasswordResetMessageStatusEnum.SENDING;
+                userConnector.requestPasswordReset(this.user.username, this.user.email)
+                    .then((response) => {
+                        this.errors = [];
+                        this.$data.sendingPasswordResetMessageStatus = sendingPasswordResetMessageStatusEnum.SENT;
+                        setTimeout(() => {
+                            this.$data.showPasswordResetModal = false;
+                            this.$data.sendingPasswordResetMessageStatus = sendingPasswordResetMessageStatusEnum.INIT;
+                        }, 900);
+                    }).catch((data) => {
+                        this.errors = Object.values(data.errorMessages).reverse();
+                    });
+                
+            },
             submitUser() {
                 this.errors = [];
                 const saveAction = (this.$data.create) ? this.createItem : this.updateItem;
@@ -83,18 +121,17 @@
                     }
                 }
                 this.showSavingAlert = true;
-                saveAction({
-                    data: this.user,
-                    handler: 'user'            
-                }).then((response) => {
-                    this.errors = [];
-                    setTimeout(() => {
+                saveAction({ data: this.user, handler: 'user'})
+                    .then((response) => {
+                        this.errors = [];
+                        setTimeout(() => {
+                            this.showSavingAlert = false;
+                        }, 900);
+                    })
+                    .catch((data) => {
                         this.showSavingAlert = false;
-                    }, 900);
-                }).catch(function(data) {
-                    this.showSavingAlert = false;
-                    this.errors = Object.values(data.errorMessages).reverse();
-                }.bind(this));
+                        this.errors = Object.values(data.errorMessages).reverse();
+                    });
             },
             goToUsersPage() {
                 this.$router.push('/manager/users');
@@ -115,9 +152,22 @@
                     const storeData = this.getById()(this.$route.params.id);
                     return Vue.util.extend({}, storeData);
                 }
-            }
+            },
+            passwordResetConfirm: function() {
+                if (this.$data.sendingPasswordResetMessageStatus === sendingPasswordResetMessageStatusEnum.SENDING){
+                    return `Okay, sending email to: ${this.user.email}...`;
+                } else if (this.$data.sendingPasswordResetMessageStatus === sendingPasswordResetMessageStatusEnum.INIT) {
+                    return `Send a password reset email to ${this.user.firstName} ${this.user.lastName}?`;
+                } else if (this.$data.sendingPasswordResetMessageStatus === sendingPasswordResetMessageStatusEnum.SENT) {
+                    return `Done!`;
+                }
+            } 
         } 
     }
 </script>
 
-<style scoped></style>
+<style scoped>
+.sending-email {
+    color: rgb(41, 113, 41);
+}
+</style>

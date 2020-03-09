@@ -10,8 +10,13 @@
                 <table class="table table-hover table-sm">
                     <tbody>
                         <tr v-for="user in allUsers" :key="user.id" class='clickable-text'>
+                            <td @click="openItem(user.id)">
+                                <span class="align-middle">{{ displayName(user) }}</span>
+                            </td>
+                            <td @click="openItem(user.id)">
+                                {{user.username}}
+                            </td>
                             <td @click.self="openItem(user.id)">
-                                <span class="align-middle" @click.self="openItem(user.id)">{{ displayName(user) }}</span>
                                 <div class="float-right">
                                     <button class="btn-xs btn-outline-secondary" 
                                         @click.self.prevent="confirmDeleteItem(user)">Delete</button>
@@ -23,9 +28,9 @@
             </div>
         </div>
 
-        <modal v-if="showModal" handler="user" @close="closeDeleteItemModal" @submit="submitDelete">
+        <modal v-if="showDeleteModal" handler="user" @close="closeDeleteItemModal" @submit="submitDelete">
             <h3 slot="header">Confirm!</h3>
-            <div slot="body">Are you sure you want to delete <strong>{{itemToDelete.title}}</strong>?</div>
+            <div slot="body">Are you sure you want to delete <strong>{{displayName(itemToDelete)}}</strong>?</div>
         </modal>
     </div>
 </template>
@@ -47,7 +52,7 @@
                  this.$router.push(`/manager/user/${ id }`);
             },
             displayName(user) {
-                return `${user.firstName} ${user.lastName} <${user.email}> (${user.username}) `;
+                return `${user.firstName} ${user.lastName}`;
             },        
         },
         computed: {

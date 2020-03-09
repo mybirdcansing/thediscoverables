@@ -6,17 +6,17 @@ export default {
     },
     data: function() {
         return {
-            showModal: false,
+            showDeleteModal: false,
             itemToDelete: null
         }
     },
     methods: {
         confirmDeleteItem(item) {
             this.$data.itemToDelete = item;
-            this.$data.showModal = true;    
+            this.$data.showDeleteModal = true;    
         },
         closeDeleteItemModal() {
-            this.$data.showModal = false;
+            this.$data.showDeleteModal = false;
             this.$data.itemToDelete = null;
         },
         submitDelete(handler) {

@@ -38,10 +38,6 @@
         mixins: [DeleteButtonMixin],
         components: {
         },
-        data: function() {
-            return {
-                }
-        },
         methods: {
             openItem(id) {
                  this.$router.push(`/manager/album/${ id }`);

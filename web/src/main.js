@@ -1,13 +1,9 @@
 "use strict"
 import regeneratorRuntime from "regenerator-runtime";
 import "./manage.css";
-
-import {router} from './router';
-import {store} from './store/store';
+import router from './router';
+import store from './store/store';
 import App from './components/App.vue';
-
-
-
 
 new Vue({
     router,

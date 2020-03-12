@@ -7,7 +7,7 @@
 
           <!-- Icon -->
           <div class="fadeIn first">
-              <img src="../../assets/images/edit-button.svg" class="loginIcon" alt="Login Icon" />
+              <img src="../../assets/edit-button.svg" class="loginIcon" alt="Login Icon" />
           </div>
 
           <!-- Login Form -->
@@ -31,6 +31,7 @@
 </template>
 
 <script>
+    import(/* webpackChunkName: "bootstrap", webpackPrefetch: true */ '../../bootstrap');
     import { UserConnector } from '../../connectors/UserConnector';
     export default {
         name: "Login",

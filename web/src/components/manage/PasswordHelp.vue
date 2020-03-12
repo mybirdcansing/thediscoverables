@@ -39,6 +39,7 @@
 </template>
 
 <script>
+    import(/* webpackChunkName: "bootstrap" */ '../../bootstrap');
     import FormAlerts from './FormAlerts.vue';
     import {UserConnector} from '../../connectors/UserConnector';
     export default {

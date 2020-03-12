@@ -24,7 +24,13 @@ const getters = {
     playlistSet: (state) => state.playlistList.map(id => state.playlists[id]),
     getPlaylistById: (state) => (id) => state.playlists[id],
     albumSet: (state) => state.albumList.map(id => state.albums[id]),
-    getAlbumById: (state) => (id) => state.albums[id],
+    getAlbumById: (state) => (id) => {
+        const a = state.albums[id];
+        if (a && a.publishDate) {
+            a.publishDate = a.publishDate.split(' ')[0];
+        }        
+        return a;
+    },
     getPlaylistSongs: (state) => (playlist) => playlist.songs.map(songId => state.songs[songId]),
 }
 

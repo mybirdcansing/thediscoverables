@@ -28,7 +28,7 @@
 
 <script>
     import { UserConnector } from '../../connectors/UserConnector';
-    
+
     export default {
         name: "Manager-Navbar",
         methods: {
@@ -37,6 +37,9 @@
                 await uc.logout();
                 this.$router.push('/login');
             }
+        },
+        created() {
+            // debugger;
         }
     }
 </script>

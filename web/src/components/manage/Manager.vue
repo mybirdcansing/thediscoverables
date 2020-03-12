@@ -10,9 +10,9 @@
 </template>
 
 <script>
+    import(/* webpackChunkName: "bootstrap" */ '../../bootstrap');
     import ManagerNavbar from './ManagerNavbar.vue';
-    import { mapActions, mapGetters } from 'vuex';
-
+    import { mapActions } from 'vuex';
     export default {
         name: "Manager",
         components: {
@@ -23,11 +23,6 @@
                 'fetchUsers'
             ])
         },
-        data: function() {
-            return {
-
-            }
-        },
         created: function() {
             this.fetchUsers();
         }
@@ -35,5 +30,21 @@
 </script>
 
 <style>
+    .some-vpadding {
+        padding-top: 4px;
+        padding-bottom: 4px;
+    }
 
+    .more-vpadding {
+        padding-top: 8px;
+        padding-bottom: 10px;
+    }
+    .clickable-text {
+        cursor: default;
+    }
+    @media (min-width: 992px) { 
+        .collapsing {
+            transition: none !important;
+        }
+    }
 </style>

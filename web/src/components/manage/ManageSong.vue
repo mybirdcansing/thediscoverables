@@ -64,9 +64,6 @@
             }
         },
         methods: {
-            ...mapGetters({
-                getById: 'getSongById'
-            }),
             processFile(e) {
                 const files = e.target.files || e.dataTransfer.files;
                 if (!files.length) {
@@ -81,18 +78,22 @@
                 this.song.filename = file.name.replace(/ |'/g, "_");;
                 reader.readAsDataURL(file);
             },
-            submitSong(e) {
+            submitSong: async function() {
                 this.showSavingAlert = true;
-                const saveAction = (this.song.id) ? this.updateSong : this.createSong;
-                saveAction(this.song).then((response) => {
+                try {
+                    if (this.song.id) {
+                        const response = await this.updateSong(this.song);
+                    } else {
+                        const response = await this.createSong(this.song);
+                    }
                     this.errors = [];
                     setTimeout(() => {
                         this.showSavingAlert = false;
                     }, 1000);
-                }).catch((data) => {
+                } catch(data) {
                     this.showSavingAlert = false;
                     this.errors = Object.values(data.errorMessages).reverse();
-                });
+                }
             },
             goToSongsPage() {
                 this.$router.push('/manager/songs');
@@ -107,14 +108,13 @@
                 if (this.$route.params.id === "create") {
                     return { id: null, title: null, filename: null, description: null, fileInput: null };
                 } else {
-                    // const songFromStore = this.$store.state.catalog.songs[this.$route.params.id];
-                    const storeData = this.getById()(this.$route.params.id);
-                    return Vue.util.extend({}, storeData);
+                    return Vue.util.extend({}, this.getSongById(this.$route.params.id));
                 }
             },
-            ...mapGetters({
-                catalogState: 'catalogState',
-            }),            
+            ...mapGetters([
+                'catalogState',
+                'getSongById'
+                ]),      
         },
         mounted() {
             if (this.catalogState === StatusEnum.LOADED) {

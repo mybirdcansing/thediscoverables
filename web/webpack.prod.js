@@ -10,7 +10,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 module.exports = merge(common, {
     mode: "production",
     output: {
-        publicPath: '/dist'
+        publicPath: '/dist/'
     },
     plugins: [
         new MiniCssExtractPlugin({ filename: "[name].[contentHash].css" }),

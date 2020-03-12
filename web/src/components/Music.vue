@@ -13,15 +13,5 @@
         components: {
             Navbar
         },
-        methods: {
-          
-        },
-        data: function() {
-            return {
-
-            }
-        }
     }
 </script>
-
-<style scoped></style>

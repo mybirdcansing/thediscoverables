@@ -6,8 +6,13 @@
         </div>
         <div class="container">
             <form v-on:submit.prevent="savePlaylist">
-                <form-buttons @cancel="goToPlaylistsPage" @delete="confirmDeleteItem(playlist)" @submit="savePlaylist" />
-                <form-alerts v-bind:errors="errors" 
+                <form-buttons 
+                    @submit="savePlaylist"
+                    @cancel="goToPlaylistsPage"
+                    @delete="confirmDeleteItem(playlist)"
+                />
+                <form-alerts 
+                    v-bind:errors="errors" 
                     v-bind:showSavingAlert="showSavingAlert" 
                     savingMessage="Saving playlist..." />
                 <div class="form-group">
@@ -88,36 +93,33 @@
             }
         },
         methods: {
-            savePlaylist(e) {
+            savePlaylist: async function(e) {
                 this.showSavingAlert = true;
-                this.playlist.songs = this.playlistSongs.map(function(song, index) {
+                this.playlist.songs = this.playlistSongs.map((song, index) => {
                     return song.id;
-                }.bind(this));
-                
-                const saveMethod = (this.playlist.id) ? this.updatePlaylist : this.createPlaylist;
-                saveMethod(this.playlist).then((response) => {
+                });
+                try {
+                    if  (this.playlist.id) {
+                        const response = await this.updatePlaylist(this.playlist);
+                    } else {
+                        const response = await this.createPlaylist(this.playlist);
+                    }
                     this.errors = [];
                     setTimeout(() => {
                         this.showSavingAlert = false;
-                    }, 1000);
-                }).catch(function(data) {
+                    }, 900);
+                } catch(data) {
                     this.showSavingAlert = false;
                     this.errors = Object.values(data.errorMessages).reverse();
-                }.bind(this));
+                }
             },
             goToPlaylistsPage() {
                 this.$router.push('/manager/playlists');
             },
-            ...mapGetters([
-                'getPlaylistById',
-            ]),
             ...mapActions([
                 'updatePlaylist',
                 'createPlaylist'
             ]),
-            log: function(e) {
-                console.log(e);
-            },
         },
         created() {
             const setSongLists = () => {
@@ -131,7 +133,6 @@
                     }
                 }); 
             };
-
             if (this.catalogState === StatusEnum.LOADED) {
                 setSongLists();
             } else {
@@ -147,13 +148,13 @@
                 if (this.$route.params.id === "create") {
                     return { id: null, title: null, description: null, songs: [] };
                 } else {
-                    return Vue.util.extend({}, this.getPlaylistById()(this.$route.params.id));
+                    return Vue.util.extend({}, this.getPlaylistById(this.$route.params.id));
                 }
             },
             ...mapGetters([
                 'songSet',
                 'catalogState',
-                'playlistSongIndex',
+                'getPlaylistById',
             ]),
             songs: function() {
                 return this.$store.state.catalog.songs;

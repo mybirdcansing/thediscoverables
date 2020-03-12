@@ -3,9 +3,7 @@
         <h2>Album {{ $route.params.id }}</h2>
     </div>
 </template>
-
 <script>
-    
     export default {
         name: "Album",
         components: {

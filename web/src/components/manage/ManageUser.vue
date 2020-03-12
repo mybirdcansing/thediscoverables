@@ -49,7 +49,7 @@
         </modal>
         <modal v-if="showPasswordResetModal" handler="user" @close="showPasswordResetModal = false" @submit="submitPasswordResetRequest">
             <h3 slot="header">Confirm!</h3>
-            <div slot="body" :class="{ 'sending-email': sendingPasswordResetMessageStatus }">
+            <div slot="body" :class="{ 'sending-email': sendingPasswordResetEmailStatus }">
                 {{passwordResetConfirm}}
             </div>
         </modal>        
@@ -64,7 +64,7 @@
     import { StatusEnum } from '../../store/StatusEnum';
     import {UserConnector} from '../../connectors/UserConnector';
     const userConnector = new UserConnector();
-    const sendingPasswordResetMessageStatusEnum = {
+    const PasswordResetEmailStatus = {
         INIT: 0,
         SENDING: 1,
         ERROR: 2,
@@ -83,33 +83,29 @@
                 showSavingAlert: false,
                 create: this.$route.params.id === 'create',
                 showPasswordResetModal: false,
-                sendingPasswordResetMessageStatus: sendingPasswordResetMessageStatusEnum.INIT,
+                sendingPasswordResetEmailStatus: PasswordResetEmailStatus.INIT,
                 savingMessage: `Saving user...`,
             }
         },
         methods: {
-            ...mapGetters('manage', {
-                getById: 'getUserById'
-            }),
             submitPasswordResetRequest() {
                 this.errors = [];
-                this.$data.sendingPasswordResetMessageStatus = sendingPasswordResetMessageStatusEnum.SENDING;
+                this.$data.sendingPasswordResetEmailStatus = PasswordResetEmailStatus.SENDING;
                 userConnector.requestPasswordReset(this.user.username, this.user.email)
                     .then((response) => {
                         this.errors = [];
-                        this.$data.sendingPasswordResetMessageStatus = sendingPasswordResetMessageStatusEnum.SENT;
+                        this.$data.sendingPasswordResetEmailStatus = PasswordResetEmailStatus.SENT;
                         setTimeout(() => {
                             this.$data.showPasswordResetModal = false;
-                            this.$data.sendingPasswordResetMessageStatus = sendingPasswordResetMessageStatusEnum.INIT;
+                            this.$data.sendingPasswordResetEmailStatus = PasswordResetEmailStatus.INIT;
                         }, 900);
                     }).catch((data) => {
                         this.errors = Object.values(data.errorMessages).reverse();
                     });
                 
             },
-            submitUser() {
+            submitUser: async function() {
                 this.errors = [];
-                const saveAction = (this.$data.create) ? this.createItem : this.updateItem;
                 if (this.$data.create) {
                     if (!this.user.password){
                         this.$data.errors.push("Please enter a password");
@@ -121,25 +117,26 @@
                     }
                 }
                 this.showSavingAlert = true;
-                saveAction({ data: this.user, handler: 'user'})
-                    .then((response) => {
-                        this.errors = [];
-                        setTimeout(() => {
-                            this.showSavingAlert = false;
-                        }, 900);
-                    })
-                    .catch((data) => {
+                try {
+                    if (this.$data.create) {
+                        const response = await this.createItem({ data: this.user, handler: 'user'});
+                    } else {
+                        const response = await this.updateItem({ data: this.user, handler: 'user'});
+                    }
+                    this.errors = [];
+                    setTimeout(() => {
                         this.showSavingAlert = false;
-                        this.errors = Object.values(data.errorMessages).reverse();
-                    });
+                    }, 900);
+                } catch(data) {
+                    this.showSavingAlert = false;
+                    this.errors = Object.values(data.errorMessages).reverse();
+                };
             },
             goToUsersPage() {
                 this.$router.push('/manager/users');
-            },
+            },   
             ...mapActions('manage', [
-                'deleteItem'
-            ]),            
-            ...mapActions('manage', [
+                'deleteItem',
                 'updateItem',
                 'createItem'
             ])
@@ -147,21 +144,31 @@
         computed: {
             user: function() {
                 if (this.$data.create) {
-                    return { id: null, username: null, firstName: null, lastName: null, email: null, password: null, passwordConfirm: null };
+                    return { 
+                        id: null,
+                        username: null,
+                        firstName: null,
+                        lastName: null,
+                        email: null,
+                        password: null,
+                        passwordConfirm: null
+                    };
                 } else {
-                    const storeData = this.getById()(this.$route.params.id);
-                    return Vue.util.extend({}, storeData);
+                    return Vue.util.extend({}, this.getUserById(this.$route.params.id));
                 }
             },
             passwordResetConfirm: function() {
-                if (this.$data.sendingPasswordResetMessageStatus === sendingPasswordResetMessageStatusEnum.SENDING){
+                if (this.$data.sendingPasswordResetEmailStatus === PasswordResetEmailStatus.SENDING){
                     return `Okay, sending email to: ${this.user.email}...`;
-                } else if (this.$data.sendingPasswordResetMessageStatus === sendingPasswordResetMessageStatusEnum.INIT) {
+                } else if (this.$data.sendingPasswordResetEmailStatus === PasswordResetEmailStatus.INIT) {
                     return `Send a password reset email to ${this.user.firstName} ${this.user.lastName}?`;
-                } else if (this.$data.sendingPasswordResetMessageStatus === sendingPasswordResetMessageStatusEnum.SENT) {
+                } else if (this.$data.sendingPasswordResetEmailStatus === PasswordResetEmailStatus.SENT) {
                     return `Done!`;
                 }
-            } 
+            },
+            ...mapGetters('manage', [
+                'getUserById'
+            ]),
         } 
     }
 </script>

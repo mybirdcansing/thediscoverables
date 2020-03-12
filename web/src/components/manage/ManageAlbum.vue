@@ -23,13 +23,13 @@
                         <div class="col-sm-5 some-vpadding">
                             <h6>Playlist:</h6>
                             <div class="form-check playlist-list">
-                                <div v-for="item in allPlaylists" :key="item.id">
+                                <div v-for="item in playlistSet" :key="item.id">
                                     <input 
-                                        v-bind:id="item.id"
-                                        v-bind:value="item.id"
-                                        v-on:change="setPlaylistSongs(item)" 
-                                        v-bind:checked="album.playlist === item.id" 
                                         v-model="album.playlist"
+                                        :id="item.id"
+                                        :value="item.id"
+                                        :checked="album.playlist === item.id" 
+                                        @change="$data.songs = getPlaylistSongs(item)" 
                                         class="form-check-input" type="radio" name="playlistRadios">
                                     <label class="form-check-label"  v-bind:for="item.id">
                                         {{item.title}}
@@ -52,7 +52,7 @@
                 </div>
                 <div class="form-group">
                     <label for="manageArtUpload">Upload Cover Art</label>
-                    <input type="file" class="form-control-file" id="manageArtUpload" accept="image/*" @change='processFile'>
+                    <input type="file" class="form-control-file" id="manageArtUpload" accept="image/*" @change='processArtworkFile'>
                     <div class="container more-vpadding">
                         <div class="row">
                             <div class="col-sm-8">
@@ -100,11 +100,7 @@
             setArtworkSrc(path) {
                 this.$refs.artworkImg.src = path;
             },
-            ...mapGetters({
-                getById: 'getAlbumById',
-                getPlaylistById: 'getPlaylistById'
-            }),
-            processFile(e) {
+            processArtworkFile(e) {
                 const files = e.target.files || e.dataTransfer.files;
                 if (!files.length) {
                     return;
@@ -112,30 +108,31 @@
                 const file = files[0];
                 const input = e.target;
                 const reader = new FileReader();
-                reader.onload = function() {
+                reader.onload = () => {
                     const fileAsText = reader.result;
                     this.setArtworkSrc(fileAsText);
                     this.album.artworkFilename = file.name;
                     this.album.fileInput = fileAsText;
-                }.bind(this);
+                };
                 reader.readAsDataURL(file);
             },
-            submitAlbum() {
-                this.showSavingAlert = true;
+            submitAlbum: async function() {
+                this.$data.showSavingAlert = true;
                 const saveAction = (this.album.id) ? this.updateItem : this.createItem;
-                saveAction({
-                    data: this.album,
-                    handler: 'album'
-                }).then((response) => {
+                try{
+                    const response = await saveAction({
+                        data: this.album,
+                        handler: 'album'
+                    });
                     this.errors = [];
                     setTimeout(() => {
-                        this.showSavingAlert = false;
-                    }, 1000);
-                }).catch(function(data) {
-                    this.showSavingAlert = false;
+                        this.$data.showSavingAlert = false;
+                    }, 900);
+                } catch (data) {
+                    this.$data.showSavingAlert = false;
                     this.errors = Object.values(data.errorMessages).reverse();
-                }.bind(this));
-            },
+                }
+            },            
             goToAlbumsPage() {
                 this.$router.push('/manager/albums');
             },
@@ -143,56 +140,53 @@
                 'updateItem',
                 'createItem'
             ]),
-            setPlaylistSongs(playlist) {
-                this.$data.songs = this.getPlaylistSongs(playlist);
-            }
         },
         computed: {
             album: function() {
                 if (this.$route.params.id === "create") {
-                    return { id: null, title: null, description: null, playlist: null, artworkFilename: null, publishDate: null, fileInput: null };
+                    return { 
+                        id: null,
+                        title: null,
+                        description: null,
+                        playlist: null,
+                        artworkFilename: null,
+                        publishDate: null,
+                        fileInput: null                     
+                    };
                 } else {
-                    let data = Vue.util.extend({}, this.getById()(this.$route.params.id)); //this.$store.state.catalog.albums[this.$route.params.id];
-                    if (data.publishDate) {
-                        data.publishDate = data.publishDate.split(' ')[0];
-                    }
-                    return data; 
+                    return Vue.util.extend({}, this.getAlbumById(this.$route.params.id)); 
                 }
             },
             ...mapGetters([
+                'playlistSet',
+                'catalogState',
+                'getPlaylistSongs',
+                'getAlbumById',
+                'getPlaylistById',
                 'catalogState',
             ]),
-            ...mapGetters({
-                allPlaylists: 'playlistSet',
-                allSongs: 'songSet',
-                catalogState: 'catalogState',
-                getPlaylistSongs: 'getPlaylistSongs',
-            }),
         },
         mounted() {
-            if (this.$route.params.id === "create") {
-                this.setArtworkSrc("data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==");
-            } else if (this.catalogState === StatusEnum.LOADED) {
+            const postLoad = () => {
                 this.setArtworkSrc(artworkFolderPath + this.album.artworkFilename);
                 if (this.album.playlist) {
-                    this.$data.songs = this.getPlaylistSongs(this.getPlaylistById()(this.album.playlist));
+                    this.$data.songs = this.getPlaylistSongs(this.getPlaylistById(this.album.playlist));
                 }
+            };
+
+            if (this.$route.params.id === 'create') {
+                this.setArtworkSrc('data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==');
+            } else if (this.catalogState === StatusEnum.LOADED) {
+                postLoad();
+            } else {
+                this.$watch('catalogState', (newState, oldState) => {
+                    if (newState === StatusEnum.LOADED) {
+                        postLoad();
+                    }
+                }); 
             }
+            
         },
-        watch: {
-            catalogState: function(newState, oldState) {
-                if (newState === StatusEnum.LOADED) {
-                    if (this.$route.params.id === "create") {
-                        this.setArtworkSrc("data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==");
-                    } else {
-                        this.setArtworkSrc(artworkFolderPath + this.album.artworkFilename);
-                    }
-                    if (this.album.playlist) {
-                        this.$data.songs = this.getPlaylistSongs(this.getPlaylistById()(this.album.playlist));
-                    }
-                }
-            }
-        }
     }
 </script>
 

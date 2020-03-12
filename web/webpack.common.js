@@ -5,20 +5,17 @@ const VueLoaderPlugin = require('vue-loader/lib/plugin')
 module.exports = {
     entry: {
         main: "./src/main.js",
-        vendor: "./src/vendor.js"
+        // vendor: "./src/bootstrap.js"
     },
     plugins: [
         new webpack.ProvidePlugin({
-            $: "jquery",
-            jQuery: "jquery",
-            ko: "knockout",
             Vue: ['vue/dist/vue.esm.js', 'default'],
-
         }),
         new VueLoaderPlugin()
     ],
     output: {
         filename: "[name].[contentHash].bundle.js",
+        chunkFilename: '[name].[contentHash].bundle.js',
         path: path.resolve(__dirname, "dist"),
     },
     devtool: 'source-map',
@@ -27,7 +24,7 @@ module.exports = {
             {
                 test: /\.m?js$/,
                 exclude: /(node_modules|bower_components)/,
-                use: {
+                use: [{
                     loader: 'babel-loader',
                     options: {
                         presets: ['@babel/preset-env'],
@@ -35,7 +32,10 @@ module.exports = {
                         plugins: ["@babel/plugin-proposal-private-methods"],
                         plugins: ["@babel/plugin-syntax-dynamic-import"]
                     }
-                }
+                },
+                {
+                    loader:  'webpack-conditional-loader'
+                }]
             },
             {
                 test: /\.html/,

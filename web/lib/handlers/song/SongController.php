@@ -31,7 +31,6 @@ class SongController {
                 $response = $this->_deleteSong();
                 break;
             case UPDATE_ACTION:
-                error_log("songId: " . $this->songId);
                 $response = $this->_updateSong();
                 break;
             case CREATE_ACTION:

@@ -84,7 +84,7 @@
                 create: this.$route.params.id === 'create',
                 showPasswordResetModal: false,
                 sendingPasswordResetEmailStatus: PasswordResetEmailStatus.INIT,
-                savingMessage: `Saving user...`,
+                savingMessage: 'Saving user...',
             }
         },
         methods: {

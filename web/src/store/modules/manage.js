@@ -6,24 +6,29 @@ const state = {
     manageState: StatusEnum.INIT,
     users: {},
     userList: [],
+    manager: null
 }
 
 const getters = {
+    getManager: (state) => Object.values(state.users).find(user => state.manager === user.username),
     userSet: (state) => state.userList.map(id => state.users[id]),
     getUserById: (state) => (id) => state.users[id],
+    manageState: (state) => state.manageState,
 }
 
 const actions = {
-    async fetchUsers({commit}) {
-        try {
-            commit('SET_MANAGE_STATE', StatusEnum.LOADING);
-            const userConnector = new UserConnector();
-            commit('SET_USERS', await userConnector.getAll());
+    fetchData({commit}) {
+        commit('SET_MANAGE_STATE', StatusEnum.LOADING);
+        const userConnector = new UserConnector();
+        userConnector.getAll().then(response => {
+            commit('SET_USERS', response);
             commit('SET_MANAGE_STATE', StatusEnum.LOADED);
-        } catch (e) {
+        }).catch(data => {
             commit('SET_MANAGE_STATE', StatusEnum.ERROR);
-            console.error(e);
-        }
+        });
+    },
+    setManager({commit}, user) {
+        commit('SET_MANAGER', user);
     },
     deleteItem({commit}, options) {   
         options.categoryList = `${options.handler}List`;
@@ -88,6 +93,9 @@ const actions = {
 }
 
 const mutations = {
+    SET_MANAGER(state, user) {
+        state.manager = user;
+    },
     SET_USERS(state, userData) {
         let userList = [];
         let users = {};

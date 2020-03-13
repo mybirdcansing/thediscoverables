@@ -28,15 +28,19 @@
 
 <script>
     import { UserConnector } from '../../connectors/UserConnector';
-
+    import { mapActions } from 'vuex';
     export default {
         name: "Manager-Navbar",
         methods: {
             async logout() {
                 const uc = new UserConnector();
                 await uc.logout();
-                this.$router.push('/login');
-            }
+                this.setManager(null);
+               this.$router.push('/login');
+            },
+            ...mapActions('manage', [
+                'setManager'
+            ])
         },
         created() {
             // debugger;

@@ -37,6 +37,7 @@
 
 <script>
     import(/* webpackChunkName: "bootstrap" */ '../../bootstrap');
+    import "./manage.css";
     import FormAlerts from './FormAlerts.vue';
     import {UserConnector} from '../../connectors/UserConnector';
 

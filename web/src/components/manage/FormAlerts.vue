@@ -15,11 +15,6 @@
             "savingMessage",
             "showSavingAlert"
         ],
-        data: function() {
-            return {
-
-            }
-        }
     }
 
 </script>

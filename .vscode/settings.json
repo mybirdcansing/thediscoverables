@@ -1,0 +1,14 @@
+{
+    "sqltools.connections": [
+        {
+            "connectionTimeout": 4,
+            "database": "thediscoverables",
+            "dialect": "MySQL",
+            "name": "local dev",
+            "password": "abacadae",
+            "port": 3306,
+            "server": "localhost",
+            "username": "root"
+        }
+    ]
+}

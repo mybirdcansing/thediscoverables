@@ -1,54 +1,54 @@
 <template>
     <div>
-      <h2>thediscoverables.com login</h2>
-      <div class="wrapper fadeInDown">
-          <div id="formContent">
-          <!-- Tabs Titles -->
+        <h2>thediscoverables.com login</h2>
+        <div class="wrapper fadeInDown">
+            <div id="formContent">
 
-          <!-- Icon -->
-          <div class="fadeIn first">
-              <img src="../../assets/edit-button.svg" class="loginIcon" alt="Login Icon" />
-          </div>
-
-          <!-- Login Form -->
-          <form v-on:submit.prevent="login">
-              <div class=" alerts" v-if="errors.length">
-                    <div class="alert alert-warning" role="alert" v-for="error in errors" :key="error">{{ error }}</div>
+              <div class="fadeIn first">
+                  <img src="../../assets/edit-button.svg" class="loginIcon" alt="Login Icon" />
               </div>
-              <input v-model="username" type="text" class="fadeIn second" placeholder="login" autofocus>
-              <input v-model="password" type="password" class="fadeIn third" placeholder="password">
-              <input type="submit" class="fadeIn fourth" value="Log In">
-          </form>
 
-          <!-- Remind Passowrd -->
-          <div id="formFooter">
-            <router-link class="underlineHover" to="/passwordhelp">Forgot Password?</router-link>
-          </div>
+              <form v-on:submit.prevent="login">
+                  <div class=" alerts" v-if="errors.length">
+                      <div class="alert alert-warning" role="alert" v-for="error in errors" :key="error">{{ error }}</div>
+                  </div>
+                  <input v-model="username" type="text" class="fadeIn second" placeholder="login" autofocus>
+                  <input v-model="password" type="password" class="fadeIn third" placeholder="password">
+                  <input type="submit" class="fadeIn fourth" value="Log In">
+              </form>
+              
+              <div id="formFooter">
+                  <router-link class="underlineHover" to="/passwordhelp">Forgot Password?</router-link>
+              </div>
 
+            </div>
         </div>
-      </div>
     </div>
 </template>
 
 <script>
-    import(/* webpackChunkName: "bootstrap", webpackPrefetch: true */ '../../bootstrap');
+    import(/* webpackChunkName: "bootstrap" */ '../../bootstrap');
+    import "./manage.css";
     import { UserConnector } from '../../connectors/UserConnector';
+    import { mapActions } from 'vuex';
+    const connector = new UserConnector();
     export default {
         name: "Login",
         components: {},
         methods: {
             async login(e) {
                 e.preventDefault();
-                const uc = new UserConnector();
-                uc.authenticate(this.username, this.password)
-                    .then(function(data) {
-                        let path = this.$route.query.redirect || '/manager';
-                        this.$router.push(path);
-                    }.bind(this))
-                    .catch(function(data){
-                        this.errors = Object.values(data.errorMessages).reverse();
-                    }.bind(this));
-            }
+                try {
+                    const response = await connector.authenticate(this.username, this.password);
+                    this.setManager(response.user.username);
+                    this.$router.push(this.$route.query.redirect || '/manager');
+                } catch(data) {
+                    this.errors = Object.values(data.errorMessages).reverse();
+                }
+            },
+            ...mapActions('manage', [
+                'setManager'
+            ])
         },
         data: function() {
             return {
@@ -56,10 +56,6 @@
                 password: '',
                 errors: []
             }
-        },
-        
-        created: function() {
-
         }
     }
 </script>
@@ -159,8 +155,10 @@ input[type=button], input[type=submit], input[type=reset]  {
   -ms-transition: all 0.3s ease-in-out;
   -o-transition: all 0.3s ease-in-out;
   transition: all 0.3s ease-in-out;
+  
 }
 
+    
 input[type=button]:hover, input[type=submit]:hover, input[type=reset]:hover  {
   background-color: #39ace7;
 }

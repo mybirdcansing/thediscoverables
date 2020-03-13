@@ -5,7 +5,6 @@ const VueLoaderPlugin = require('vue-loader/lib/plugin')
 module.exports = {
     entry: {
         main: "./src/main.js",
-        // vendor: "./src/bootstrap.js"
     },
     plugins: [
         new webpack.ProvidePlugin({
@@ -33,9 +32,10 @@ module.exports = {
                         plugins: ["@babel/plugin-syntax-dynamic-import"]
                     }
                 },
-                {
-                    loader:  'webpack-conditional-loader'
-                }]
+                // {
+                //     loader:  'webpack-conditional-loader'
+                // }
+                ]
             },
             {
                 test: /\.html/,

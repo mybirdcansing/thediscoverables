@@ -6,6 +6,8 @@ body {
 	height: 100vh;
 }
   
+
+
 a {
 	cursor: pointer;
 	color: #92badd;
@@ -20,4 +22,15 @@ h2 {
 	margin: 0px 0px 10px 0px;
 	color: #cccccc;
 }
+.some-vpadding {
+	padding-top: 4px;
+	padding-bottom: 4px;
+}
 
+.more-vpadding {
+	padding-top: 8px;
+	padding-bottom: 10px;
+}
+.clickable-text {
+	cursor: default;
+}

@@ -11,8 +11,11 @@
 
 <script>
     import(/* webpackChunkName: "bootstrap" */ '../../bootstrap');
+    import "./manage.css";
     import ManagerNavbar from './ManagerNavbar.vue';
-    import { mapActions } from 'vuex';
+    import { mapActions, mapGetters } from 'vuex';
+    import { StatusEnum } from '../../store/StatusEnum';
+
     export default {
         name: "Manager",
         components: {
@@ -20,28 +23,23 @@
         },
         methods: {
             ...mapActions('manage', [
-                'fetchUsers'
-            ])
+                'fetchData'
+            ]),
+        },
+        computed: {
+           ...mapGetters('manage', [
+                'manageState',
+                'getManager'
+            ]),
         },
         created: function() {
-            this.fetchUsers();
-        }
+            this.fetchData();
+        },
     }
 </script>
 
 <style>
-    .some-vpadding {
-        padding-top: 4px;
-        padding-bottom: 4px;
-    }
-
-    .more-vpadding {
-        padding-top: 8px;
-        padding-bottom: 10px;
-    }
-    .clickable-text {
-        cursor: default;
-    }
+    
     @media (min-width: 992px) { 
         .collapsing {
             transition: none !important;

@@ -6,20 +6,25 @@ Vue.use(VueRouter);
 import Music from './components/Music.vue';
 import Song from './components/Song.vue';
 import Album from './components/Album.vue';
+import store from './store/store';
 
-// import Manager from './components/manage/Manager.vue';
-// import ManageSongs from './components/manage/ManageSongs.vue';
-// import ManageSong from './components/manage/ManageSong.vue';
-// import ManagePlaylists from './components/manage/ManagePlaylists.vue';
-// import ManagePlaylist from './components/manage/ManagePlaylist.vue';
-// import ManageAlbums from './components/manage/ManageAlbums.vue';
-// import ManageAlbum from './components/manage/ManageAlbum.vue';
-// import ManageUsers from './components/manage/ManageUsers.vue';
-// import ManageUser from './components/manage/ManageUser.vue';
-
-// import Login from './components/manage/Login.vue';
-// import PasswordHelp from './components/manage/PasswordHelp.vue';
-// import PasswordReset from './components/manage/PasswordReset.vue';
+const authenticate = async (to, from, next) => {
+    if (!store.state.manage.manager) {
+        const uc = new UserConnector();
+        try {
+            const authResponse = await uc.authorize();
+            store.dispatch('manage/setManager', authResponse.username);
+            next();
+        } catch (e) {
+            next({
+                path: '/login',
+                query: { redirect: to.fullPath }
+            });
+        }
+    } else {
+        next();
+    }
+};
 
 export default new VueRouter({
     routes: [
@@ -33,35 +38,64 @@ export default new VueRouter({
         },
         { 
             path: '/manager',
-            component: () => import('./components/manage/Manager.vue'),
-            beforeEnter: (to, from, next) => {
-                const uc = new UserConnector();
-                uc.authorize()
-                    .then(() => next())
-                    .catch(() => next({
-                        name: 'login',
-                        query: { redirect: to.fullPath }
-                    }));
-            },
+            component: () => import(/* webpackChunkName: "mgmt" */ './components/manage/Manager.vue'),
             children: [
                 { path: '', redirect: 'songs' },
-                { path: 'songs', component: () => import('./components/manage/ManageSongs.vue') },
-                { path: 'song/:id', component: () => import('./components/manage/ManageSong.vue') },
-                { path: 'playlists', component: () => import('./components/manage/ManagePlaylists.vue') },
-                { path: 'playlist/:id', component: () => import('./components/manage/ManagePlaylist.vue') },
-                { path: 'albums', component: () => import('./components/manage/ManageAlbums.vue') },
-                { path: 'album/:id', component: () => import('./components/manage/ManageAlbum.vue') },
-                { path: 'users', component: () => import('./components/manage/ManageUsers.vue') },
-                { path: 'user/:id', component: () => import('./components/manage/ManageUser.vue') },
+                { 
+                    path: 'songs',
+                    component: () => import(/* webpackChunkName: "mgmt" */ './components/manage/ManageSongs.vue'),
+                    beforeEnter: authenticate,
+                },
+                { 
+                    path: 'song/:id',
+                    component: () => import(/* webpackChunkName: "mgmt" */ './components/manage/ManageSong.vue'),
+                    beforeEnter: authenticate,
+                },
+                { 
+                    path: 'playlists',
+                    component: () => import(/* webpackChunkName: "mgmt" */ './components/manage/ManagePlaylists.vue'),
+                    beforeEnter: authenticate,
+                },
+                { 
+                    path: 'playlist/:id',
+                    component: () => import(/* webpackChunkName: "mgmt" */ './components/manage/ManagePlaylist.vue'),
+                    beforeEnter: authenticate,
+                },
+                { 
+                    path: 'albums',
+                    component: () => import(/* webpackChunkName: "mgmt" */ './components/manage/ManageAlbums.vue'),
+                    beforeEnter: authenticate,
+                },
+                { 
+                    path: 'album/:id',
+                    component: () => import(/* webpackChunkName: "mgmt" */ './components/manage/ManageAlbum.vue'),
+                    beforeEnter: authenticate,
+                },
+                { 
+                    path: 'users',
+                    component: () => import(/* webpackChunkName: "mgmt" */ './components/manage/ManageUsers.vue'),
+                    beforeEnter: authenticate,
+                },
+                { 
+                    path: 'user/:id',
+                    component: () => import(/* webpackChunkName: "mgmt" */ './components/manage/ManageUser.vue'),
+                    beforeEnter: authenticate,
+                },             
             ]
         },
         { 
             path: '/login',
             name: 'login',
-            component: () => import('./components/manage/Login.vue'),
+            component: () => import(/* webpackChunkName: "login" */ './components/manage/Login.vue'),
         },
-        { path: '/passwordhelp', component: () => import('./components/manage/PasswordHelp.vue') },
-        { path: '/passwordreset', component: () => import('./components/manage/PasswordReset.vue') },
+        { 
+            path: '/passwordhelp', 
+            component: () => import(/* webpackChunkName: "login" */ './components/manage/PasswordHelp.vue'),
+        },
+        { 
+            path: '/passwordreset', 
+            component: () => import(/* webpackChunkName: "login" */ './components/manage/PasswordReset.vue'),
+        },
     ],
     mode: 'history',
 });

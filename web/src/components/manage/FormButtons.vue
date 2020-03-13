@@ -18,11 +18,6 @@
 <script>
     export default {
         name: "FormButtons",
-        data: function() {
-            return {
-
-            }
-        },
         computed: {
             hideDelete() {
                 return this.$route.params.id === 'create';

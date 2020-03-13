@@ -28,12 +28,8 @@ export class ConnectorBase {
     _post(obj, url) {
         return new Promise(function(resolve, reject) {
             this.client().post(url, { data: obj })
-                .then(response => {
-                    return resolve(response.data)
-                })
-                .catch(error => {
-                    this.rejector(reject, error)
-                });
+                .then(response => resolve(response.data))
+                .catch(error => this.rejector(reject, error));
         }.bind(this));
     }
 
@@ -41,10 +37,11 @@ export class ConnectorBase {
         if (process.env.NODE_ENV === "development") {
             this.logToConsole(error);
         }
-        if (error.response) {
-            reject(error.response.data);
+        const er = error.response;
+        if (er && er.data && er.data.errorMessages) {
+            reject(er.data);
         } else {
-            reject({ errorMessages: [error.message] });
+            reject(error);
         }
     }
 

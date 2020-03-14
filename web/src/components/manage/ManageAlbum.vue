@@ -5,9 +5,9 @@
             <router-link to="/manager/albums" class="text-secondary">&lt;&lt; Back to Albums</router-link>
         </div>
         <div class="container">
-            <form v-on:submit.prevent="submitAlbum">
+            <form @submit.prevent="submitAlbum">
                 <form-buttons @cancel="goToAlbumsPage" @delete="confirmDeleteItem(album)" @submit="submitAlbum" />
-                <form-alerts v-bind:errors="errors" v-bind:showSavingAlert="showSavingAlert" savingMessage="Saving album..." />
+                <form-alerts :errors="errors" :showSavingAlert="showSavingAlert" savingMessage="Saving album..." />
                 <div class="form-group">
                     <div class="col-sm-6 nopadding">
                         <label for="manageAlbumTitle">Title</label>
@@ -52,7 +52,7 @@
                 </div>
                 <div class="form-group">
                     <label for="manageArtUpload">Upload Cover Art</label>
-                    <input type="file" class="form-control-file" id="manageArtUpload" accept="image/*" @change='processArtworkFile'>
+                    <input id="manageArtUpload" @change='processArtworkFile' type="file" class="form-control-file" accept="image/*">
                     <div class="container more-vpadding">
                         <div class="row">
                             <div class="col-sm-8">
@@ -75,9 +75,9 @@
 
 <script>
     import { mapActions, mapGetters } from 'vuex';
-    import FormButtons from './FormButtons.vue';
-    import FormAlerts from './FormAlerts.vue';
-    import DeleteButtonMixin from './DeleteButtonMixin';
+    import FormButtons from './layout/FormButtons.vue';
+    import FormAlerts from './layout/FormAlerts.vue';
+    import DeleteButtonMixin from './layout/DeleteButtonMixin';
     import { StatusEnum } from '../../store/StatusEnum';
     const artworkFolderPath = '../../../artwork/';
     export default {
@@ -118,12 +118,13 @@
             },
             submitAlbum: async function() {
                 this.$data.showSavingAlert = true;
-                const saveAction = (this.album.id) ? this.updateItem : this.createItem;
                 try{
-                    const response = await saveAction({
-                        data: this.album,
-                        handler: 'album'
-                    });
+                    const payload = { data: this.album, handler: 'album' };
+                    if (this.album.id) {
+                        const response = await this.updateItem(payload);
+                    } else {
+                        const response = await this.createItem(payload);
+                    }
                     this.errors = [];
                     setTimeout(() => {
                         this.$data.showSavingAlert = false;
@@ -153,7 +154,7 @@
                         publishDate: null,
                         fileInput: null                     
                     };
-                } else {
+                } else { 
                     return Vue.util.extend({}, this.getAlbumById(this.$route.params.id)); 
                 }
             },

@@ -8,6 +8,7 @@ const state = {
     userList: [],
     manager: null
 }
+const userConnector = new UserConnector();
 
 const getters = {
     getManager: (state) => Object.values(state.users).find(user => state.manager === user.username),
@@ -19,7 +20,6 @@ const getters = {
 const actions = {
     fetchData({commit}) {
         commit('SET_MANAGE_STATE', StatusEnum.LOADING);
-        const userConnector = new UserConnector();
         userConnector.getAll().then(response => {
             commit('SET_USERS', response);
             commit('SET_MANAGE_STATE', StatusEnum.LOADED);
@@ -27,9 +27,40 @@ const actions = {
             commit('SET_MANAGE_STATE', StatusEnum.ERROR);
         });
     },
-    setManager({commit}, user) {
-        commit('SET_MANAGER', user);
+    logout({commit}) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const response = await userConnector.logout();
+                resolve(response);
+            } catch (response) {
+                reject(response);
+            } finally {
+                commit('SET_MANAGER', null);
+            }
+        });        
     },
+    login({commit}, {username, password}) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const response = await userConnector.authenticate(username, password);
+                commit('SET_MANAGER', response.user.username);
+                resolve(response);
+            } catch (response) {
+                reject(response);
+            } 
+        });        
+    },
+    authorize({commit}) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const response = await userConnector.authorize();
+                commit('SET_MANAGER', response.username);
+                resolve(response);
+            } catch (response) {
+                reject(response);
+            }
+        });        
+    },    
     deleteItem({commit}, options) {   
         options.categoryList = `${options.handler}List`;
         options.category = `${options.handler}s`;
@@ -93,8 +124,8 @@ const actions = {
 }
 
 const mutations = {
-    SET_MANAGER(state, user) {
-        state.manager = user;
+    SET_MANAGER(state, username) {
+        state.manager = username;
     },
     SET_USERS(state, userData) {
         let userList = [];

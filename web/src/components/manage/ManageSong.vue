@@ -45,9 +45,9 @@
 
 <script>
     import { mapActions, mapGetters } from 'vuex';
-    import FormAlerts from './FormAlerts.vue';
-    import FormButtons from './FormButtons.vue';
-    import DeleteButtonMixin from './DeleteButtonMixin';
+    import FormAlerts from './layout/FormAlerts.vue';
+    import FormButtons from './layout/FormButtons.vue';
+    import DeleteButtonMixin from './layout/DeleteButtonMixin';
     import { StatusEnum } from '../../store/StatusEnum';
     export default {
         name: "ManageSong",

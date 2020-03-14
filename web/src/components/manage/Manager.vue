@@ -12,7 +12,7 @@
 <script>
     import(/* webpackChunkName: "bootstrap" */ '../../bootstrap');
     import "./manage.css";
-    import ManagerNavbar from './ManagerNavbar.vue';
+    import ManagerNavbar from './layout/ManagerNavbar.vue';
     import { mapActions, mapGetters } from 'vuex';
     import { StatusEnum } from '../../store/StatusEnum';
 

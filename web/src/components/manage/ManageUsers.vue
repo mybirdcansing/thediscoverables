@@ -37,7 +37,7 @@
 
 <script>
     import { mapActions, mapGetters } from 'vuex';
-    import DeleteButtonMixin from './DeleteButtonMixin';    
+    import DeleteButtonMixin from './layout/DeleteButtonMixin';    
     export default {
         name: "ManageUsers",
         mixins: [DeleteButtonMixin],

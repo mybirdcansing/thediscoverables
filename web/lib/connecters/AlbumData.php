@@ -21,7 +21,7 @@ class AlbumData
 				title,
                 description,
                 artwork_filename,
-                publish_date,
+                DATE_FORMAT(publish_date, '%Y-%m-%d') as publish_date,
                 playlist_id
 		  	FROM
 		  		album;";
@@ -47,7 +47,7 @@ class AlbumData
                 title,
                 description,
                 artwork_filename,
-                publish_date,
+                DATE_FORMAT(publish_date, '%Y-%m-%d') as publish_date,
                 playlist_id
 		  	FROM
 		  		album

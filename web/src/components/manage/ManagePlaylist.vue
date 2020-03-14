@@ -5,15 +5,15 @@
             <router-link to="/manager/playlists" class="text-secondary">&lt;&lt; Back to Playlists</router-link>
         </div>
         <div class="container">
-            <form v-on:submit.prevent="savePlaylist">
+            <form @submit.prevent="savePlaylist">
                 <form-buttons 
                     @submit="savePlaylist"
                     @cancel="goToPlaylistsPage"
                     @delete="confirmDeleteItem(playlist)"
                 />
                 <form-alerts 
-                    v-bind:errors="errors" 
-                    v-bind:showSavingAlert="showSavingAlert" 
+                    :errors="errors" 
+                    :showSavingAlert="showSavingAlert" 
                     savingMessage="Saving playlist..." />
                 <div class="form-group">
                     <label for="managePlaylistTitle">Title</label>
@@ -25,7 +25,11 @@
                 </div>
                 <div class="form-group">
                     <label for="managePlaylistDescription">Description</label>
-                    <textarea v-model="playlist.description" class="form-control" id="managePlaylistDescription" placeholder="Enter description" rows="3"></textarea>
+                    <textarea 
+                        v-model="playlist.description" 
+                        class="form-control" 
+                        id="managePlaylistDescription"
+                        placeholder="Enter description" rows="3"></textarea>
                 </div>
                 <div>
                     <div class="row">
@@ -70,9 +74,9 @@
 
 <script>
     import { mapActions, mapGetters } from 'vuex';
-    import FormButtons from './FormButtons.vue';
-    import FormAlerts from './FormAlerts.vue';
-    import DeleteButtonMixin from './DeleteButtonMixin';
+    import FormButtons from './layout/FormButtons.vue';
+    import FormAlerts from './layout/FormAlerts.vue';
+    import DeleteButtonMixin from './layout/DeleteButtonMixin';
     import { StatusEnum } from '../../store/StatusEnum';
     import draggable from "vuedraggable";
     export default {

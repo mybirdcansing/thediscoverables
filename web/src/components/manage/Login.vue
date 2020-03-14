@@ -8,7 +8,7 @@
                   <img src="../../assets/edit-button.svg" class="loginIcon" alt="Login Icon" />
               </div>
 
-              <form v-on:submit.prevent="login">
+              <form v-on:submit.prevent="loginAndGo">
                   <div class=" alerts" v-if="errors.length">
                       <div class="alert alert-warning" role="alert" v-for="error in errors" :key="error">{{ error }}</div>
                   </div>
@@ -27,36 +27,27 @@
 </template>
 
 <script>
-    import(/* webpackChunkName: "bootstrap" */ '../../bootstrap');
-    import "./manage.css";
-    import { UserConnector } from '../../connectors/UserConnector';
-    import { mapActions } from 'vuex';
-    const connector = new UserConnector();
+    import './management-css';
     export default {
         name: "Login",
-        components: {},
-        methods: {
-            async login(e) {
-                e.preventDefault();
-                try {
-                    const response = await connector.authenticate(this.username, this.password);
-                    this.setManager(response.user.username);
-                    this.$router.push(this.$route.query.redirect || '/manager');
-                } catch(data) {
-                    this.errors = Object.values(data.errorMessages).reverse();
-                }
-            },
-            ...mapActions('manage', [
-                'setManager'
-            ])
-        },
         data: function() {
             return {
                 username: '',
                 password: '',
                 errors: []
             }
-        }
+        },
+        methods: {
+            async loginAndGo(e) {
+                try {
+                    const payload = { username: this.username, password: this.password };
+                    const response = await this.$store.dispatch('manage/login', payload);
+                    this.$router.push(this.$route.query.redirect || '/manager');
+                } catch(response) {
+                    this.errors = Object.values(response.errorMessages).reverse();
+                }
+            },
+        },
     }
 </script>
 

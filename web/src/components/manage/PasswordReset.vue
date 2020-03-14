@@ -36,9 +36,8 @@
 </template>
 
 <script>
-    import(/* webpackChunkName: "bootstrap" */ '../../bootstrap');
-    import "./manage.css";
-    import FormAlerts from './FormAlerts.vue';
+    import './management-css';
+    import FormAlerts from './layout/FormAlerts.vue';
     import {UserConnector} from '../../connectors/UserConnector';
 
     export default {

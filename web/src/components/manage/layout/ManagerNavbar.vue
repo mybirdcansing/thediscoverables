@@ -19,7 +19,7 @@
                 <router-link class="nav-link" to="/manager/users" data-toggle="collapse" data-target=".navbar-collapse">Users</router-link>
             </li>
             <li class="nav-item">
-                <a @click='logout' class="nav-link" data-toggle="collapse" data-target=".navbar-collapse">Logout</a>
+                <a @click='logoutAndGo' class="nav-link" data-toggle="collapse" data-target=".navbar-collapse">Logout</a>
             </li>
         </ul>
         </div>
@@ -27,24 +27,19 @@
 </template>
 
 <script>
-    import { UserConnector } from '../../connectors/UserConnector';
+    import { UserConnector } from '../../../connectors/UserConnector';
     import { mapActions } from 'vuex';
     export default {
         name: "Manager-Navbar",
         methods: {
-            async logout() {
-                const uc = new UserConnector();
-                await uc.logout();
-                this.setManager(null);
-               this.$router.push('/login');
+            async logoutAndGo() {
+                await this.logout();
+                this.$router.push('/login');
             },
             ...mapActions('manage', [
-                'setManager'
+                'logout'
             ])
         },
-        created() {
-            // debugger;
-        }
     }
 </script>
 

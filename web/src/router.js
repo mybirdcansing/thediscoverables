@@ -8,12 +8,10 @@ import Song from './components/Song.vue';
 import Album from './components/Album.vue';
 import store from './store/store';
 
-const authenticate = async (to, from, next) => {
+const authenticateAndGo = async (to, from, next) => {
     if (!store.state.manage.manager) {
-        const uc = new UserConnector();
         try {
-            const authResponse = await uc.authorize();
-            store.dispatch('manage/setManager', authResponse.username);
+            await store.dispatch('manage/authorize');
             next();
         } catch (e) {
             next({
@@ -44,42 +42,42 @@ export default new VueRouter({
                 { 
                     path: 'songs',
                     component: () => import(/* webpackChunkName: "mgmt" */ './components/manage/ManageSongs.vue'),
-                    beforeEnter: authenticate,
+                    beforeEnter: authenticateAndGo,
                 },
                 { 
                     path: 'song/:id',
                     component: () => import(/* webpackChunkName: "mgmt" */ './components/manage/ManageSong.vue'),
-                    beforeEnter: authenticate,
+                    beforeEnter: authenticateAndGo,
                 },
                 { 
                     path: 'playlists',
                     component: () => import(/* webpackChunkName: "mgmt" */ './components/manage/ManagePlaylists.vue'),
-                    beforeEnter: authenticate,
+                    beforeEnter: authenticateAndGo,
                 },
                 { 
                     path: 'playlist/:id',
                     component: () => import(/* webpackChunkName: "mgmt" */ './components/manage/ManagePlaylist.vue'),
-                    beforeEnter: authenticate,
+                    beforeEnter: authenticateAndGo,
                 },
                 { 
                     path: 'albums',
                     component: () => import(/* webpackChunkName: "mgmt" */ './components/manage/ManageAlbums.vue'),
-                    beforeEnter: authenticate,
+                    beforeEnter: authenticateAndGo,
                 },
                 { 
                     path: 'album/:id',
                     component: () => import(/* webpackChunkName: "mgmt" */ './components/manage/ManageAlbum.vue'),
-                    beforeEnter: authenticate,
+                    beforeEnter: authenticateAndGo,
                 },
                 { 
                     path: 'users',
                     component: () => import(/* webpackChunkName: "mgmt" */ './components/manage/ManageUsers.vue'),
-                    beforeEnter: authenticate,
+                    beforeEnter: authenticateAndGo,
                 },
                 { 
                     path: 'user/:id',
                     component: () => import(/* webpackChunkName: "mgmt" */ './components/manage/ManageUser.vue'),
-                    beforeEnter: authenticate,
+                    beforeEnter: authenticateAndGo,
                 },             
             ]
         },

@@ -13,7 +13,8 @@ module.exports =  merge(common, {
             '/audio': 'http://[::1]',
         },
         contentBase: "./dist",
-        historyApiFallback: true
+        historyApiFallback: true,
+        host: '192.168.1.72' // '192.168.1.72' this ip address is set manually in the router
     },
     output: {
         publicPath: '/'

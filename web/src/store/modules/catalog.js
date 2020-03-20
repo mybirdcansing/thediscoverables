@@ -15,6 +15,7 @@ const state = {
     playlistList: [],
     albums: {},
     albumList: [],
+    songQueue: [],
 }
 
 const getters = {
@@ -25,7 +26,27 @@ const getters = {
     getPlaylistById: (state) => (id) => state.playlists[id],
     albumSet: (state) => state.albumList.map(id => state.albums[id]),
     getAlbumById: (state) => (id) => state.albums[id],
-    getPlaylistSongs: (state) => (playlist) => playlist.songs.map(songId => state.songs[songId]),
+    getPlaylistSongs: (state) => (playlist) => playlist.songs.map(songId => state.songs[songId]),    
+    getSongAlbums: (state, getters) => (song) => {
+        // debugger;
+        // const playlistsInAlbums = getters.albumSet.map(album => state.playlists[album.playlist]);
+        // const playlistsWithSong = playlistsInAlbums.filter(playlist => playlist.songs.includes(song.id));
+        // const albumsWithSong = playlistsWithSong.map(playlist => getters.albumSet.filter(album => album.playlist === playlist.id))
+        //     // .map(playlist => getters.albumSet.filter(album => album.playlist = playlist.id));
+        // return albumsWithSong.filter(album => album);
+
+        return getters.playlistSet
+            .filter(playlist => playlist.songs.includes(song.id))
+            .map(playlist => getters.albumSet.find(album => album.playlist === playlist.id))
+            // .filter(album => album);
+    },
+    getSongAlbum: (state, getters) => (song) => {
+        //get the most recent album if the song is in more than one
+        console.log("in getSongAlbum");
+        
+        return getters.getSongAlbums(song)
+            .sort((a, b) => (a.publishDate > b.publishDate) ? 1 : -1)[0]; 
+    },
 }
 
 const actions = {

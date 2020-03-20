@@ -1,23 +1,13 @@
 <template>
-    <nav>
-        <a href="/">the discoverables</a>
-        <div>
-            <ul>
-                <li>
-                    <router-link class="nav-link" to="/">Home</router-link>
-                </li>
-                <li>
-                    <router-link class="nav-link" to="/album/1">Album</router-link>
-                </li>
-                <li>
-                    <router-link class="nav-link" to="/song/2">Song</router-link>
-                </li>
-                <li v-if='isDevelopment'>
-                    <router-link class="nav-link" to="/manager">Manager</router-link>
-                </li>
-            </ul>
-        </div>
-    </nav>
+    <div>
+        <nav>
+            <a href="/">The Discoverables</a>
+            <div style="float:right;padding-right:24px" v-if='isDevelopment'>
+                <router-link to="/manager">Manager</router-link>
+            </div>
+        </nav>
+        <div style="height:29px;"></div>
+    </div>
 </template>
 
 <script>

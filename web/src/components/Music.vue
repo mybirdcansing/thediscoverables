@@ -6,7 +6,8 @@
         </div>
         <footer class="footer-player">
             <div ref="slideContainer"  class="slidecontainer">
-              <!-- <input type="range" min="1" max="100" value="50" class="slider" id="playSlider"  ref="playSlider"> -->
+              <!-- <input type="range" min="1" max="100" value="50" class="slider" id="playSlider"  ref="playSlider">
+               @click="adjustSlider" -->
                 <div ref="playSlider" id="playSlider"></div>
             </div>
             <audio id="audio-player" controls ref="player" :key="audioSrc" preload="auto" v-bind:src="audioSrc"></audio>
@@ -30,6 +31,7 @@
         name: "Music",
         data: function () {
             return {
+                ticker: null,
                 audioSrc: 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA',
                 activeSong: {id:null}
             }
@@ -48,6 +50,7 @@
                 slider.style.transition = '';
                 if (this.$data.activeSong.id !== song.id) {
                     this.$data.activeSong = song;
+                    cancelAnimationFrame(this.$data.ticker);
                     requestAnimationFrame(function() {
                         slider.style.left = '-5px';
                     });
@@ -69,8 +72,7 @@
                 } else {
                     player.play();
                 }             
-            },
-
+            }
         },
 
         computed: {
@@ -90,68 +92,47 @@
             const player = this.$refs.player;
             const slider = this.$refs.playSlider;
             const slideContainer = this.$refs.slideContainer;
-            const mc = new Hammer(slider);
-            mc.on("pan", handleDrag);
-            let lastPosX = 0;
-            let isDragging = false;
-            function handleDrag(ev) {
-                let elem = ev.target;
-                slider.style.transition = '';
-                if (!isDragging) {
-                    isDragging = true;
-                    lastPosX = elem.offsetLeft;
+            const tick = function() {
+                if (!isNaN(player.duration) && !player.paused) {
+                    slider.style.left = `${(player.currentTime / player.duration) * 100 }%`;
                 }
-                let posX = ev.deltaX + lastPosX;
-                elem.style.left = posX + "px";
- 
+                this.$data.ticker = requestAnimationFrame(tick);
+            }.bind(this);
+            
+            const moveSlider = function (ev) {
+                cancelAnimationFrame(this.$data.ticker);
+                slider.style.left = `${ev.center.x - 9}px`;
                 if (ev.isFinal) {
-                    isDragging = false;
-                    player.pause();
-                    const timeRemaining = (posX / slideContainer.offsetWidth) * player.duration;
-                    player.currentTime = timeRemaining;
-                    player.play();                 
-                }
-            }
-            
-            
-            player.addEventListener('play', function(e) {
-                const timesToTry = 100;
-                let tryTime = 0;
-                const move = function() {
-   
-                    if (tryTime === timesToTry) {
-                        return; // this is taking too long
-                    }
-                    if (isNaN(player.duration)) {
-                        tryTime++;
-                        requestAnimationFrame(move);
-                        return;
-                    }                   
-                    const timeRemaining = player.duration - player.currentTime;
-                    slider.style.transition = `all ${timeRemaining}s 0s cubic-bezier(0, 0, 1, 1)`;
-                    requestAnimationFrame(function() {
-                        slider.style.left = `${slideContainer.offsetWidth}px`;
-                    });
-                };
-                requestAnimationFrame(move);
+                    const timeRemaining = ((ev.center.x - 9) / slideContainer.offsetWidth) * player.duration;
+                    player.currentTime = timeRemaining;           
+                }                
+            }.bind(this);
+
+            const tappableSlider = new Hammer(slideContainer);
+            tappableSlider.on("pan press tap pressup", moveSlider);
+
+            const dragableSlider = new Hammer(slider);
+            dragableSlider.on("pan", moveSlider);
+
+            player.addEventListener('playing', function(e) {
+                console.log("playing event bubbled");
+                this.$data.ticker = requestAnimationFrame(tick);
             }.bind(this));
 
-
             const handlePause = function(e) {
-                const player = this.$refs.player;
-                if (isNaN(player.duration)) {
-                    return;
-                }
-                const slider = this.$refs.playSlider;
-                const slideContainer = this.$refs.slideContainer;
-                slider.style.transition = '';
-                slider.style.left = `${((player.currentTime / player.duration) * slideContainer.offsetWidth)}px`;
-                // slider.style.left = `${((player.currentTime / player.duration) * 100)}%`;
+                slider.style.left = `${(player.currentTime / player.duration) * 100}%`;
+                // if the player is still paused on the next animation frame, cancel the ticker
+                requestAnimationFrame(function() {
+                    if (player.paused) {
+                        cancelAnimationFrame(this.$data.ticker);
+                    }
+                }.bind(this))
             }.bind(this);
             player.addEventListener('pause', handlePause);
             player.addEventListener('waiting', handlePause);
             player.addEventListener('stalled', handlePause);
             player.addEventListener('ended', function() {
+                cancelAnimationFrame(this.$data.ticker);                
                 const index = this.queue.findIndex(song => song.id === this.$data.activeSong.id);
                 const nextIndex = (this.songSet.length > index) ? index + 1 : 0;
                 this.playSongToggle(this.queue[nextIndex]);            
@@ -185,6 +166,7 @@
         width: 100%;
         height: 5px;
         background: #d3d3d3;
+        cursor: pointer;
     }
 
     #playSlider {

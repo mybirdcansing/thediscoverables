@@ -11,18 +11,21 @@ body {
     color: #fff;
     font: 1em sans-serif;
     /* touch-action: manipulation; */
-  }
-  nav {
+}
+nav {
     background-color: rgb(60, 64, 65);
     padding: 12px;
     position: fixed;
     width: 100%;
-  }
-  h4 {
-      margin: 6px 0px 6px 0px;
-  }
-
- .music {      
+}
+h4 {
+    margin: 6px 0px 6px 0px;
+}
+img {
+    -webkit-user-drag: element;
+    user-select: none;
+}
+.music {      
     background: url('../assets/dashboard_background.jpg') no-repeat center center fixed; 
     -webkit-background-size: contain;
     -moz-background-size: contain;

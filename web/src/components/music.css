@@ -3,15 +3,18 @@
 }
 html, body {
     height: 100%;
+    overscroll-behavior-x: none;
 }
 body {
     margin: 0px;
     padding: 0px;
+
     background-color: #282727;
     color: #fff;
     font: 1em sans-serif;
-    /* touch-action: manipulation; */
+    touch-action: manipulation;
 }
+
 nav {
     background-color: rgb(60, 64, 65);
     padding: 12px;

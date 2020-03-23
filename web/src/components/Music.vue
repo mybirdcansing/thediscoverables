@@ -4,13 +4,16 @@
         <div class="page-content">
             <router-view @playSongToggle="playSongToggle"></router-view>
         </div>
-        <footer class="footer-player">
+        <footer class="footer-player" v-bind:class="{'player-active': showPlayer}">
             <div ref="slideContainer"  class="slidecontainer">
-              <!-- <input type="range" min="1" max="100" value="50" class="slider" id="playSlider"  ref="playSlider">
-               @click="adjustSlider" -->
                 <div ref="playSlider" id="playSlider"></div>
+                <div ref="progressBar" id="progressBar"></div>
             </div>
+
             <audio id="audio-player" controls ref="player" :key="audioSrc" preload="auto" v-bind:src="audioSrc"></audio>
+            <div>
+                <button ref="pausePlayer" @click="playSongToggle(activeSong)">Play/Pause</button>
+            </div>
         </footer>        
     </div>
 </template>
@@ -44,6 +47,7 @@
                 const player = this.$refs.player;
                 const slider = this.$refs.playSlider;
                 const slideContainer = this.$refs.slideContainer;
+                const progressBar = this.$refs.progressBar;
                 const src = `/audio/${encodeURI(song.filename)}`;
                 player.setAttribute('title', `The Discoverables - ${song.title}`);
 
@@ -52,7 +56,8 @@
                     this.$data.activeSong = song;
                     cancelAnimationFrame(this.$data.ticker);
                     requestAnimationFrame(function() {
-                        slider.style.left = '-5px';
+                        slider.style.left = '0px';
+                        progressBar.style.width = '0px';
                     });
                     if (isChromeDesktop() && !player.paused) {
                         player.pause();
@@ -83,6 +88,9 @@
                     return clone;
                 }).filter(song => song.album);
             },
+            showPlayer() {
+                return !this.$data.activeSong.id;
+            },
             ...mapGetters([
                 'songSet',
                 'getSongAlbum'
@@ -92,35 +100,48 @@
             const player = this.$refs.player;
             const slider = this.$refs.playSlider;
             const slideContainer = this.$refs.slideContainer;
+            const progressBar = this.$refs.progressBar;
+
+            document.addEventListener("touchstart", event => {
+                if(event.touches.length > 1) {
+                    event.preventDefault();
+                    event.stopPropagation(); // maybe useless
+                }
+            }, {passive: false});
+
             const tick = function() {
                 if (!isNaN(player.duration) && !player.paused) {
-                    slider.style.left = `${(player.currentTime / player.duration) * 100 }%`;
+                    const x = `${(player.currentTime / player.duration) * 100 }%`;
+                    slider.style.left = x;
+                    progressBar.style.width = x;
                 }
                 this.$data.ticker = requestAnimationFrame(tick);
             }.bind(this);
             
             const moveSlider = function (ev) {
                 cancelAnimationFrame(this.$data.ticker);
-                slider.style.left = `${ev.center.x - 9}px`;
+                // console.log(ev);
+                const x = ev.center.x - slideContainer.offsetLeft;
+                slider.style.left = `${x}px`;
+                progressBar.style.width = `${x}px`;
                 if (ev.isFinal) {
-                    const timeRemaining = ((ev.center.x - 9) / slideContainer.offsetWidth) * player.duration;
-                    player.currentTime = timeRemaining;           
+                    const timeRemaining = (x / slideContainer.offsetWidth) * player.duration;
+                    player.currentTime = timeRemaining;
+                    this.$data.ticker = requestAnimationFrame(tick);  
                 }                
             }.bind(this);
 
             const tappableSlider = new Hammer(slideContainer);
             tappableSlider.on("pan press tap pressup", moveSlider);
 
-            const dragableSlider = new Hammer(slider);
-            dragableSlider.on("pan", moveSlider);
-
             player.addEventListener('playing', function(e) {
-                console.log("playing event bubbled");
                 this.$data.ticker = requestAnimationFrame(tick);
             }.bind(this));
 
             const handlePause = function(e) {
-                slider.style.left = `${(player.currentTime / player.duration) * 100}%`;
+                const x = `${(player.currentTime / player.duration) * 100 }%`;
+                slider.style.left = x;
+                progressBar.style.width = x;
                 // if the player is still paused on the next animation frame, cancel the ticker
                 requestAnimationFrame(function() {
                     if (player.paused) {
@@ -134,7 +155,7 @@
             player.addEventListener('ended', function() {
                 cancelAnimationFrame(this.$data.ticker);                
                 const index = this.queue.findIndex(song => song.id === this.$data.activeSong.id);
-                const nextIndex = (this.songSet.length > index) ? index + 1 : 0;
+                const nextIndex = (this.queue.length > (index + 1)) ? index + 1 : 0;
                 this.playSongToggle(this.queue[nextIndex]);            
             }.bind(this));            
         } 
@@ -153,32 +174,52 @@
     
     .footer-player {
         position: fixed;
+        text-align: center;
         left: 0;
         bottom: 0;
         width: 100%;
-        padding: 0px 0;
-        height: 50px;
+        padding: 0 35px 0 35px;
+        height: 60px;
         background-color: #909090;
     }
 
     .slidecontainer {
-        position: absolute;
+        position: relative;
         width: 100%;
-        height: 5px;
+        margin-left: auto;
+        margin-right: auto;
+        height: 10px;
         background: #d3d3d3;
         cursor: pointer;
+        border-radius: 15px; 
+
     }
 
     #playSlider {
         position: absolute;
+        margin-left: -9.5px;
+        margin-top: -4px;
+        
         width: 18px;
         height: 18px;
+        left: 0px;
         border-radius: 50%; 
         background: #4CAF50;
         cursor: pointer;
-        top: -6px;
         transition-timing-function: linear;
-        left: -5px;
+        z-index: 100;
+    }
+
+    #progressBar{
+        position: absolute;
+        width: 0px;
+        height: 10px;
+        border-radius: 15px; 
+        background: blueviolet;
+        cursor: pointer;
+        top: 0px;
+        left: 0px;
+
     }
 
     .activePlaySlider {
@@ -187,6 +228,8 @@
         height: 36px;
         top: -12px;
     }
-
+    .player-active {
+        display: none;
+    }
 
 </style>

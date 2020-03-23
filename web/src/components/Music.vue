@@ -6,8 +6,9 @@
         </div>
         <footer class="footer-player" v-bind:class="{'player-active': showPlayer}">
             <div ref="slideContainer"  class="slidecontainer">
-                <div ref="playSlider" id="playSlider"></div>
-                <div ref="progressBar" id="progressBar"></div>
+                <div ref="progressBar" id="progressBar">
+                    <div ref="playSlider" id="playSlider"></div>
+                </div>
             </div>
 
             <audio id="audio-player" controls ref="player" :key="audioSrc" preload="auto" v-bind:src="audioSrc"></audio>
@@ -23,12 +24,11 @@
     import Navbar from './Navbar.vue';
     import { mapGetters } from 'vuex';
     import Hammer from 'hammerjs';
-
+    let ticker = null;
     export default {
         name: "Music",
         data: function () {
             return {
-                ticker: null,
                 audioSrc: 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA',
                 activeSong: {id:null}
             }
@@ -48,9 +48,8 @@
                 slider.style.transition = '';
                 if (this.$data.activeSong.id !== song.id) {
                     this.$data.activeSong = song;
-                    cancelAnimationFrame(this.$data.ticker);
+                    cancelAnimationFrame(ticker);
                     requestAnimationFrame(function() {
-                        slider.style.left = '0px';
                         progressBar.style.width = '0px';
                     });
                     
@@ -103,36 +102,34 @@
             const slider = this.$refs.playSlider;
             const slideContainer = this.$refs.slideContainer;
             const progressBar = this.$refs.progressBar;
-            let isMovingSlider = false;
-            document.addEventListener("touchstart", event => {
-                if(event.touches.length > 1) {
-                    event.preventDefault();
-                    event.stopPropagation(); // maybe useless
-                }
-            }, {passive: false});
+            let sliderIsBeingMoved = false;
 
             const tick = function() {
-                if (!isNaN(player.duration) && !player.paused && !isMovingSlider) {
+                if (!isNaN(player.duration) && !player.paused && !sliderIsBeingMoved) {
                     const x = `${(player.currentTime / player.duration) * 100 }%`;
-                    slider.style.left = x;
                     progressBar.style.width = x;
                 }
-                this.$data.ticker = requestAnimationFrame(tick);
+                ticker = requestAnimationFrame(tick);
             }.bind(this);
             
             const moveSlider = function (ev) {
-                cancelAnimationFrame(this.$data.ticker);
-                isMovingSlider = true;
-                const x = ev.center.x - slideContainer.offsetLeft;
+                cancelAnimationFrame(ticker);
+                sliderIsBeingMoved = true;
                 slider.classList.add("activePlaySlider");
-                slider.style.left = `${x}px`;
-                progressBar.style.width = `${x}px`;
+                const xPos = ev.center.x - slideContainer.offsetLeft;
+                progressBar.style.width = `${xPos}px`;
                 if (ev.isFinal) {
-                    const timeRemaining = (x / slideContainer.offsetWidth) * player.duration;
+                    const timeRemaining = (xPos / slideContainer.offsetWidth) * player.duration;
                     player.currentTime = timeRemaining;
-                    this.$data.ticker = requestAnimationFrame(tick);
-                    slider.classList.remove("activePlaySlider");
-                    isMovingSlider = false;
+                    ticker = requestAnimationFrame(tick);
+                    if (ev.pointerType === "mouse") {
+                        setTimeout(function() {
+                            slider.classList.remove("activePlaySlider");
+                        }, 100);
+                    } else {
+                        slider.classList.remove("activePlaySlider");
+                    }
+                    sliderIsBeingMoved = false;
                 }                
             }.bind(this);
 
@@ -140,17 +137,16 @@
             tappableSlider.on("pan press tap pressup", moveSlider);
 
             player.addEventListener('playing', function(e) {
-                this.$data.ticker = requestAnimationFrame(tick);
+                ticker = requestAnimationFrame(tick);
             }.bind(this));
 
             const handlePause = function(e) {
                 const x = `${(player.currentTime / player.duration) * 100 }%`;
-                slider.style.left = x;
                 progressBar.style.width = x;
                 // if the player is still paused on the next animation frame, cancel the ticker
                 requestAnimationFrame(function() {
                     if (player.paused) {
-                        cancelAnimationFrame(this.$data.ticker);
+                        cancelAnimationFrame(ticker);
                     }
                 }.bind(this))
             }.bind(this);
@@ -158,7 +154,7 @@
             player.addEventListener('waiting', handlePause);
             player.addEventListener('stalled', handlePause);
             player.addEventListener('ended', function() {
-                cancelAnimationFrame(this.$data.ticker);                
+                cancelAnimationFrame(ticker);                
                 const index = this.queue.findIndex(song => song.id === this.$data.activeSong.id);
                 const nextIndex = (this.queue.length > (index + 1)) ? index + 1 : 0;
                 this.playSongToggle(this.queue[nextIndex]);            
@@ -183,7 +179,7 @@
         left: 0;
         bottom: 0;
         width: 100%;
-        padding: 0 40px 0 40px;
+        padding: 0 44px 0 44px;
         height: 60px;
         background-color: #909090;
     }
@@ -196,22 +192,21 @@
         height: 10px;
         background: #d3d3d3;
         cursor: pointer;
-        border-radius: 15px; 
+        border-radius: 15px;
+        overflow:visible;
 
     }
 
     #playSlider {
-        position: absolute;
-        margin-left: -9px;
+        position: relative;
+        margin-right: -9px;
         margin-top: -4px;
-        
         width: 18px;
         height: 18px;
-        left: 0px;
+        float: right;
         border-radius: 50%; 
         background: #4CAF50;
         cursor: pointer;
-        transition-timing-function: linear;
         z-index: 100;
     }
 

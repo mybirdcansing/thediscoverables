@@ -4,14 +4,13 @@
         <div class="page-content">
             <router-view @playSongToggle="playSongToggle"></router-view>
         </div>
-        <footer class="footer-player" v-bind:class="{'player-active': showPlayer}">
-            <div ref="slideContainer"  class="slidecontainer">
+        <footer class="footer" v-bind:class="{'player-active': showPlayer}">
+            <audio id="audio-player" controls ref="player" :key="audioSrc" preload="auto" v-bind:src="audioSrc"></audio>
+            <div ref="slideContainer"  class="slideContainer">
                 <div ref="progressBar" id="progressBar">
-                    <div ref="playSlider" id="playSlider"></div>
+                    <div ref="playSlider" class="playSlider"></div>
                 </div>
             </div>
-
-            <audio id="audio-player" controls ref="player" :key="audioSrc" preload="auto" v-bind:src="audioSrc"></audio>
             <div>
                 <button ref="pausePlayer" @click="playSongToggle(activeSong)">Play/Pause</button>
             </div>
@@ -30,7 +29,7 @@
         data: function () {
             return {
                 audioSrc: 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA',
-                activeSong: {id:null}
+                activeSong: { id: null }
             }
         },
         components: {
@@ -44,22 +43,19 @@
                 const progressBar = this.$refs.progressBar;
                 const src = `/audio/${encodeURI(song.filename)}`;
                 player.setAttribute('title', `The Discoverables - ${song.title}`);
-
-                slider.style.transition = '';
                 if (this.$data.activeSong.id !== song.id) {
                     this.$data.activeSong = song;
                     cancelAnimationFrame(ticker);
-                    requestAnimationFrame(function() {
-                        progressBar.style.width = '0px';
-                    });
+                    progressBar.style.width = '0px';
                     
-                    const isChromeDesktop = function() {
+                    function isChromeDesktop() {
                         const ua = navigator.userAgent;
                         const isChrome = /Chrome/i.test(ua);
                         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|mobile|CriOS/i.test(ua);
                         return ((!isMobile && isChrome));
-                    };
-
+                    }
+                    // Chrome on Mac has a bit of a stutter when changing tracks.
+                    // a slight timeout makes it better
                     if (isChromeDesktop() && !player.paused) {
                         player.pause();
                         setTimeout(function() {
@@ -90,7 +86,7 @@
                 }).filter(song => song.album);
             },
             showPlayer() {
-                return !this.$data.activeSong.id;
+                return this.$data.activeSong.id !== null;
             },
             ...mapGetters([
                 'songSet',
@@ -122,13 +118,7 @@
                     const timeRemaining = (xPos / slideContainer.offsetWidth) * player.duration;
                     player.currentTime = timeRemaining;
                     ticker = requestAnimationFrame(tick);
-                    if (ev.pointerType === "mouse") {
-                        setTimeout(function() {
-                            slider.classList.remove("activePlaySlider");
-                        }, 100);
-                    } else {
-                        slider.classList.remove("activePlaySlider");
-                    }
+                    slider.classList.remove("activePlaySlider");
                     sliderIsBeingMoved = false;
                 }                
             }.bind(this);
@@ -141,15 +131,14 @@
             }.bind(this));
 
             const handlePause = function(e) {
-                const x = `${(player.currentTime / player.duration) * 100 }%`;
-                progressBar.style.width = x;
+                progressBar.style.width = `${(player.currentTime / player.duration) * 100}%`;
                 // if the player is still paused on the next animation frame, cancel the ticker
                 requestAnimationFrame(function() {
                     if (player.paused) {
                         cancelAnimationFrame(ticker);
                     }
-                }.bind(this))
-            }.bind(this);
+                })
+            };
             player.addEventListener('pause', handlePause);
             player.addEventListener('waiting', handlePause);
             player.addEventListener('stalled', handlePause);
@@ -163,19 +152,13 @@
     }
 </script>
 <style scoped>
-
-    audio::-webkit-media-controls-panel  {
-        background-color: #909090; 
-    }
     #audio-player {
-        width: 0;
-        height: 0;
-        margin-left: -3000px;
+        display: none;
     } 
     
-    .footer-player {
-        position: fixed;
-        text-align: center;
+    .footer {
+        display: none;
+        position: fixed;       
         left: 0;
         bottom: 0;
         width: 100%;
@@ -184,20 +167,19 @@
         background-color: #909090;
     }
 
-    .slidecontainer {
+    .slideContainer {
         position: relative;
+        height: 10px;
         width: 100%;
         margin-left: auto;
         margin-right: auto;
-        height: 10px;
+        border-radius: 15px;
         background: #d3d3d3;
         cursor: pointer;
-        border-radius: 15px;
-        overflow:visible;
-
+        overflow: visible;
     }
 
-    #playSlider {
+    .playSlider {
         position: relative;
         margin-right: -9px;
         margin-top: -4px;
@@ -208,14 +190,16 @@
         background: #4CAF50;
         cursor: pointer;
         z-index: 100;
+        transition: all 0.1s;
     }
 
-    #playSlider.activePlaySlider {
+    .playSlider.activePlaySlider {
         box-shadow: 0 3px 0 rgb(75, 84, 79);
         width: 36px;
         height: 36px;
         margin-left: -18px;
-        margin-top: -12px;        
+        margin-top: -12px;
+        transition: all 0.1s;
       
     }
 
@@ -232,7 +216,7 @@
     }
 
     .player-active {
-        display: none;
+        display: block;
     }
 
 </style>

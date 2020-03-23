@@ -23,12 +23,6 @@
     import Navbar from './Navbar.vue';
     import { mapGetters } from 'vuex';
     import Hammer from 'hammerjs';
-    const isChromeDesktop = function() {
-        const ua = navigator.userAgent;
-        const isChrome = /Chrome/i.test(ua);
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|mobile|CriOS/i.test(ua);
-        return ((!isMobile && isChrome));
-    }
 
     export default {
         name: "Music",
@@ -59,6 +53,14 @@
                         slider.style.left = '0px';
                         progressBar.style.width = '0px';
                     });
+                    
+                    const isChromeDesktop = function() {
+                        const ua = navigator.userAgent;
+                        const isChrome = /Chrome/i.test(ua);
+                        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|mobile|CriOS/i.test(ua);
+                        return ((!isMobile && isChrome));
+                    };
+
                     if (isChromeDesktop() && !player.paused) {
                         player.pause();
                         setTimeout(function() {
@@ -101,7 +103,7 @@
             const slider = this.$refs.playSlider;
             const slideContainer = this.$refs.slideContainer;
             const progressBar = this.$refs.progressBar;
-
+            let isMovingSlider = false;
             document.addEventListener("touchstart", event => {
                 if(event.touches.length > 1) {
                     event.preventDefault();
@@ -110,7 +112,7 @@
             }, {passive: false});
 
             const tick = function() {
-                if (!isNaN(player.duration) && !player.paused) {
+                if (!isNaN(player.duration) && !player.paused && !isMovingSlider) {
                     const x = `${(player.currentTime / player.duration) * 100 }%`;
                     slider.style.left = x;
                     progressBar.style.width = x;
@@ -120,14 +122,17 @@
             
             const moveSlider = function (ev) {
                 cancelAnimationFrame(this.$data.ticker);
-                // console.log(ev);
+                isMovingSlider = true;
                 const x = ev.center.x - slideContainer.offsetLeft;
+                slider.classList.add("activePlaySlider");
                 slider.style.left = `${x}px`;
                 progressBar.style.width = `${x}px`;
                 if (ev.isFinal) {
                     const timeRemaining = (x / slideContainer.offsetWidth) * player.duration;
                     player.currentTime = timeRemaining;
-                    this.$data.ticker = requestAnimationFrame(tick);  
+                    this.$data.ticker = requestAnimationFrame(tick);
+                    slider.classList.remove("activePlaySlider");
+                    isMovingSlider = false;
                 }                
             }.bind(this);
 
@@ -178,7 +183,7 @@
         left: 0;
         bottom: 0;
         width: 100%;
-        padding: 0 35px 0 35px;
+        padding: 0 40px 0 40px;
         height: 60px;
         background-color: #909090;
     }
@@ -197,7 +202,7 @@
 
     #playSlider {
         position: absolute;
-        margin-left: -9.5px;
+        margin-left: -9px;
         margin-top: -4px;
         
         width: 18px;
@@ -210,7 +215,16 @@
         z-index: 100;
     }
 
-    #progressBar{
+    #playSlider.activePlaySlider {
+        box-shadow: 0 3px 0 rgb(75, 84, 79);
+        width: 36px;
+        height: 36px;
+        margin-left: -18px;
+        margin-top: -12px;        
+      
+    }
+
+    #progressBar {
         position: absolute;
         width: 0px;
         height: 10px;
@@ -222,12 +236,6 @@
 
     }
 
-    .activePlaySlider {
-        box-shadow: 0 3px 0 #00823F;
-        width: 36px;
-        height: 36px;
-        top: -12px;
-    }
     .player-active {
         display: none;
     }

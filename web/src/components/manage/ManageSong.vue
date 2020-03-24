@@ -25,8 +25,7 @@
                                 <small class="form-text text-muted more-vpadding">Filename: {{song.filename}}</small>
                             </div>
                             <div style="col col-md-4">
-                                <audio controls ref="player" :key="audioSrc">
-                                    <source v-bind:src="audioSrc" type="audio/mpeg">
+                                <audio id="songPlayer" v-bind:src="audioSrc" type="audio/mpeg" ref="songPlayer" :key="audioSrc" preload="auto" controls>
                                 </audio>
                             </div>
                          </div>
@@ -75,10 +74,11 @@
                 reader.onload = function() {
                     this.$data.audioSrc = this.song.fileInput = reader.result;
                 }.bind(this);
-                this.song.filename = file.name.replace(/ |'/g, "_");;
+                this.song.filename = file.name.replace(/ |'/g, "_");
                 reader.readAsDataURL(file);
             },
             submitSong: async function() {
+                // debugger;
                 this.showSavingAlert = true;
                 try {
                     if (this.song.id) {
@@ -126,8 +126,14 @@
                     }
                 }); 
             }
-            this.$watch('audioSrc', () => {
-                this.$refs.player.load();
+            // this.$watch('audioSrc', () => {
+            //     this.$refs.songPlayer.load();
+            // });
+
+            this.$refs.songPlayer.addEventListener('durationchange', (ev) => {
+                debugger;
+                this.song.duration = this.$refs.songPlayer.duration;
+                console.log(this.song.duration);
             });
         }
     }

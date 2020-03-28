@@ -15,12 +15,7 @@ body {
     touch-action: manipulation;
 }
 
-nav {
-    background-color: rgb(60, 64, 65);
-    padding: 12px;
-    position: fixed;
-    width: 100%;
-}
+
 h4 {
     margin: 6px 0px 6px 0px;
 }
@@ -28,21 +23,10 @@ img {
     -webkit-user-drag: element;
     user-select: none;
 }
-.music {      
-    background: url('../assets/dashboard_background.jpg') no-repeat center center fixed; 
-    -webkit-background-size: contain;
-    -moz-background-size: contain;
-    -o-background-size: contain;
-    background-size:contain;
-    background-position: top;
-}
 
-.music .banner-outline {
-    padding: 12%;
-}
 
 .page-content {
-    padding: 20px;
+    padding: 16px;
 }
 
 
@@ -91,10 +75,34 @@ a {
 .song-title-cell {
     cursor: default;
 }
+
 /* PHONE */
 @media (max-width: 992px) { 
+    .song-table {
+        max-width: 500px;
+    }
+    .album-artwork {
+        width:50%;
+        text-align: left;
+    }
+    .album-description {
+
+        padding: 0px 12px 20px 12px;
+        width:50%;
+        vertical-align: middle;
+        
+    }
+    .album-description .album-details {
+        font-size: 12px;
+        padding-top: 10px;
+        margin-top: 0px;
+        color: #aaa;
+    }
     .album-list-album-artwork {
         width: 150px;
+    }
+    .album-page-artwork-img {
+        width: 100%;
     }
     .song-list-album-artwork {
         width: 22px;
@@ -107,6 +115,7 @@ a {
         padding-top: 0px;
         margin-top: 0px;
     }
+
     .music {      
         background-position: center 20px;
     }
@@ -127,12 +136,20 @@ a {
 
 
 @media (min-width: 992px) { 
+    .song-table {
+        max-width: 700px;
+    }
     .album-list-album-artwork {
         width: 280px;
     }
+    .album-page-artwork {
+        width: 450px;
+    }
+
     .song-list-album-artwork {
         width: 46px;
     }
+    
     .song-table .song-list-album-cell {
         width: 50px;
     }    

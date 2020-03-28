@@ -1,24 +1,21 @@
 import {CatalogConnector} from '../../connectors/CatalogConnector';
-import { SongConnector } from '../../connectors/SongConnector';
-import { PlaylistConnector } from '../../connectors/PlaylistConnector';
 import { RestConnector } from '../../connectors/RestConnector';
 import { StatusEnum } from '../StatusEnum';
-const catalogConnector = new CatalogConnector();
-const songConnector = new SongConnector();
-const playlistConnector = new PlaylistConnector();
 
 const state = {
     catalogState: StatusEnum.INIT,
     songs: {},
     songList: [],
+    songsWithAlbums: [],
     playlists: {},
-    playlistList: [],
+    playlistList: [],    
     albums: {},
     albumList: [],
-    songQueue: [],
+    songQueue: []
 }
 
 const getters = {
+    songsWithAlbums: (state) => state.songsWithAlbums,
     catalogState: (state) => state.catalogState,
     songSet: (state) => state.songList.map(id => state.songs[id]),
     getSongById: (state) => (id) => state.songs[id],
@@ -26,71 +23,41 @@ const getters = {
     getPlaylistById: (state) => (id) => state.playlists[id],
     albumSet: (state) => state.albumList.map(id => state.albums[id]),
     getAlbumById: (state) => (id) => state.albums[id],
-    getPlaylistSongs: (state) => (playlist) => playlist.songs.map(songId => state.songs[songId]),    
+    getPlaylistSongs: (state) => (playlist) => playlist.songs.map(id => state.songs[id]),    
     getSongAlbums: (state, getters) => (song) => {
-        // debugger;
-        // const playlistsInAlbums = getters.albumSet.map(album => state.playlists[album.playlist]);
-        // const playlistsWithSong = playlistsInAlbums.filter(playlist => playlist.songs.includes(song.id));
-        // const albumsWithSong = playlistsWithSong.map(playlist => getters.albumSet.filter(album => album.playlist === playlist.id))
-        //     // .map(playlist => getters.albumSet.filter(album => album.playlist = playlist.id));
-        // return albumsWithSong.filter(album => album);
-
         return getters.playlistSet
             .filter(playlist => playlist.songs.includes(song.id))
-            .map(playlist => getters.albumSet.find(album => album.playlist === playlist.id))
-            // .filter(album => album);
+            .map(playlist => getters.albumSet.find(album => album.playlist === playlist.id));
     },
     getSongAlbum: (state, getters) => (song) => {
-        //get the most recent album if the song is in more than one
-        console.log("in getSongAlbum");
-        
-        return getters.getSongAlbums(song)
-            .sort((a, b) => (a.publishDate > b.publishDate) ? 1 : -1)[0]; 
+        //if the song is in more than one album, get the most recent
+        const albums = getters.getSongAlbums(song);
+        return albums.sort((a, b) => (a.publishDate > b.publishDate) ? 1 : -1)[0]; 
     },
+    getAlbumSongs: (state, getters) => (album) => {
+        return getters.getPlaylistSongs(state.playlists[album.playlist]);
+    },
+    homepagePlaylist: (state, getters) => {
+        return getters.playlistSet.find(playlist => playlist.title === 'homepage');        
+    }
 }
 
 const actions = {
-    async fetchCatalog({commit}) {
+    async fetchCatalog({commit, getters}) {
+        commit('SET_CATALOG_STATE', StatusEnum.LOADING);
+        const catalogConnector = new CatalogConnector();
         try {
-            commit('SET_CATALOG_STATE', StatusEnum.LOADING);
             commit('SET_CATALOG', await catalogConnector.get());
+            const songsWithAlbums = getters.songSet.map(song => {
+                const clone = Vue.util.extend({}, song);
+                clone.album = getters.getSongAlbum(song);                    
+                return clone;
+            });         
+            commit('SET_SONGS_WITH_ALBUMS', songsWithAlbums);
         } catch (e) {
             commit('SET_CATALOG_STATE', StatusEnum.ERROR);
             console.error(e);
         }
-    },
-    deleteItem({commit}, options) {   
-        options.categoryList = `${options.handler}List`;
-        options.category = `${options.handler}s`;
-        const connector = new RestConnector(options.handler);
-        return new Promise(async (resolve, reject) => {
-            try {
-                const response = await connector.delete(options.id);
-                commit('DELETE_ITEM', options);
-                resolve(response);
-            } catch (response) {
-                reject(response);
-            }
-        });
-    },
-    updateItem({commit}, options) {
-        return new Promise(async (resolve, reject) => {
-            try {
-                const statusKey = `${options.handler}Updated`;
-                options.categoryList = `${options.handler}List`;
-                options.category = `${options.handler}s`;
-                const connector = new RestConnector(options.handler);
-                const data = await connector.update(options.data);
-                if (data.hasOwnProperty(statusKey) && data[statusKey]) {
-                    commit('UPDATE_ITEM', options);
-                    resolve(data);
-                } else {
-                    reject(data);
-                }
-            } catch(error) {
-                reject(error);
-            }
-        });
     },
     createItem({commit}, options) {
         return new Promise(async (resolve, reject) => {
@@ -116,101 +83,48 @@ const actions = {
                 reject(response);
             }
         });
-    },
-
-
-    updateSong({commit}, song) {
-        return new Promise((resolve, reject) => {
-            songConnector.update(song)
-                .then(function(response) {
-                    if (response.songUpdated) {
-                        commit('UPDATE_ITEM', {
-                            data: song,
-                            categoryList: 'songList',
-                            category: 'songs'
-                        });
-                        resolve(response);
-                    } else {
-                        reject(response);
-                    }
-                })
-                .catch(function(response) {
-                    reject(response);
+    },    
+    updateItem({commit}, options) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const statusKey = `${options.handler}Updated`;
+                options.categoryList = `${options.handler}List`;
+                options.category = `${options.handler}s`;
+                const connector = new RestConnector(options.handler);
+                const data = await connector.update(options.data);
+                if (data.hasOwnProperty(statusKey) && data[statusKey]) {
+                    commit('UPDATE_ITEM', options);
+                    resolve(data);
+                } else {
+                    reject(data);
                 }
-            );
+            } catch(error) {
+                reject(error);
+            }
         });
     },
-    createSong({commit}, song) {
-        return new Promise((resolve, reject) => {
-            songConnector.create(song)
-                .then(function(response) {
-                    if (response.songCreated) {
-                        song.id = response.songId;
-                        commit('CREATE_ITEM', {
-                            data: song,
-                            categoryList: 'songList',
-                            category: 'songs'
-                        });
-                        resolve(response);
-                    } else {
-                        reject(response);
-                    }
-                })
-                .catch(function(response) {
-                    reject(response);
-                }
-            );
+    deleteItem({commit}, options) {   
+        options.categoryList = `${options.handler}List`;
+        options.category = `${options.handler}s`;
+        const connector = new RestConnector(options.handler);
+        return new Promise(async (resolve, reject) => {
+            try {
+                const response = await connector.delete(options.id);
+                commit('DELETE_ITEM', options);
+                resolve(response);
+            } catch (response) {
+                reject(response);
+            }
         });
-    },
-    updatePlaylist({commit}, playlist) {
-        return new Promise((resolve, reject) => {
-            playlistConnector.update(playlist)
-                .then(function(response) {
-                    if (response.playlistUpdated) {
-                        commit('UPDATE_ITEM', {
-                            data: playlist,
-                            categoryList: 'playlistList',
-                            category: 'playlists'
-                        });
-                        resolve(response);
-                    } else {
-                        reject(response);
-                    }
-                })
-                .catch(function(response) {
-                    reject(response);
-                }
-            );
-        });
-    },
-    createPlaylist({commit}, playlist) {
-        return new Promise((resolve, reject) => {
-            playlistConnector.create(playlist)
-                .then(function(response) {
-                    if (response.playlistCreated) {
-                        playlist.id = response.playlistId;
-                        commit('CREATE_ITEM', {
-                            data: playlist,
-                            categoryList: 'playlistList',
-                            category: 'playlists'
-                        });
-                        resolve(response);
-                    } else {
-                        reject(response);
-                    }
-                })
-                .catch(function(response) {
-                    reject(response);
-                }
-            );
-        });
-    },
-
+    }
 }
 
 const mutations = {
     SET_CATALOG_STATE(state, catalogState) {
         state.catalogState = catalogState;
+    },
+    SET_SONGS_WITH_ALBUMS(state, songsWithAlbums) {
+        state.songsWithAlbums = songsWithAlbums;
     },
     SET_CATALOG(state, catalog) {
         Object.keys(catalog).forEach(function(key) {

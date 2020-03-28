@@ -79,7 +79,7 @@
     import FormAlerts from './layout/FormAlerts.vue';
     import DeleteButtonMixin from './layout/DeleteButtonMixin';
     import { StatusEnum } from '../../store/StatusEnum';
-    const artworkFolderPath = '../../../artwork/';
+
     export default {
         name: "ManageAlbum",
         mixins: [
@@ -140,7 +140,7 @@
             ...mapActions([
                 'updateItem',
                 'createItem'
-            ]),
+            ])
         },
         computed: {
             album: function() {
@@ -169,7 +169,7 @@
         },
         mounted() {
             const postLoad = () => {
-                this.setArtworkSrc(artworkFolderPath + this.album.artworkFilename);
+                this.setArtworkSrc('/artwork/large~' + this.album.artworkFilename);
                 if (this.album.playlist) {
                     this.$data.songs = this.getPlaylistSongs(this.getPlaylistById(this.album.playlist));
                 }

@@ -22,11 +22,10 @@
                             <div style="col col-md-8">
                                 <label for="manageSongUpload">Upload an Mp3 file</label>
                                 <input type="file" class="form-control-file" id="manageSongUpload" accept="audio/mp3" @change='processFile'>
-                                <small class="form-text text-muted more-vpadding">Filename: {{song.filename}}</small>
+                                <small class="form-text text-muted more-vpadding">Filename: <span v-text="song.filename"></span></small>
                             </div>
                             <div style="col col-md-4">
-                                <audio id="songPlayer" v-bind:src="audioSrc" type="audio/mpeg" ref="songPlayer" :key="audioSrc" preload="auto" controls>
-                                </audio>
+                                <audio id="songPlayer" ref="songPlayer" preload="auto" controls></audio>
                             </div>
                          </div>
                     </div>
@@ -72,19 +71,19 @@
                 const input = e.target;
                 const reader = new FileReader();
                 reader.onload = function() {
-                    this.$data.audioSrc = this.song.fileInput = reader.result;
+                    this.song.filename = file.name.replace(/ |'/g, "_");
+                    this.$refs.songPlayer.src = this.song.fileInput = reader.result;
                 }.bind(this);
-                this.song.filename = file.name.replace(/ |'/g, "_");
                 reader.readAsDataURL(file);
             },
             submitSong: async function() {
-                // debugger;
                 this.showSavingAlert = true;
                 try {
+                    const payload = { data: this.song, handler: 'song' };
                     if (this.song.id) {
-                        const response = await this.updateSong(this.song);
+                        const response = await this.updateItem(payload);
                     } else {
-                        const response = await this.createSong(this.song);
+                        const response = await this.createItem(payload);
                     }
                     this.errors = [];
                     setTimeout(() => {
@@ -99,12 +98,12 @@
                 this.$router.push('/manager/songs');
             },
             ...mapActions([
-                'updateSong',
-                'createSong'
+                'updateItem',
+                'createItem'
             ]),
         },
         computed: {
-            song: function() {
+            song() {
                 if (this.$route.params.id === "create") {
                     return { id: null, title: null, filename: null, description: null, fileInput: null };
                 } else {
@@ -117,23 +116,24 @@
                 ]),      
         },
         mounted() {
+            const songPlayer = this.$refs.songPlayer;
             if (this.catalogState === StatusEnum.LOADED) {
-                this.$data.audioSrc = "/audio/" + encodeURI(this.song.filename);
+                songPlayer.src = "/audio/" + encodeURI(this.song.filename);
             } else {
                 this.$watch('catalogState', (newState, oldState) => {
                     if (newState === StatusEnum.LOADED) {
-                        this.$data.audioSrc = "/audio/" + encodeURI(this.song.filename);
+                        songPlayer.src = "/audio/" + encodeURI(this.song.filename);
                     }
                 }); 
             }
-            // this.$watch('audioSrc', () => {
-            //     this.$refs.songPlayer.load();
-            // });
+            this.$watch('audioSrc', () => {
+                songPlayer.load();                
+            });
 
-            this.$refs.songPlayer.addEventListener('durationchange', (ev) => {
-                debugger;
-                this.song.duration = this.$refs.songPlayer.duration;
-                console.log(this.song.duration);
+            songPlayer.addEventListener('durationchange', (ev) => {
+                if (!isNaN(ev.target.duration)) {
+                    this.song.duration = ev.target.duration;
+                }                
             });
         }
     }

@@ -1,9 +1,8 @@
 <template>
     <div class="music">
-         <navbar/>
-        <div class="page-content">
-            <router-view @playSongToggle="playSongToggle"></router-view>
-        </div>
+        <navbar/>
+        <router-view @playSongToggle="playSongToggle" @setQueue="setQueue"></router-view>
+        <div class="footer-spacer"></div>
         <footer class="footer" v-bind:class="{'playerActive': showPlayer}">
             <audio id="player" ref="player" :key="audioSrc" :src="audioSrc" preload="auto" controls></audio>
             <div ref="slideContainer"  class="slideContainer">
@@ -25,22 +24,27 @@
     import Navbar from './Navbar.vue';
     import { mapGetters } from 'vuex';
     import Hammer from 'hammerjs';
+    import SongHelperMixin from './SongHelperMixin';
     let ticker = null;
     export default {
         name: "Music",
+        mixins: [SongHelperMixin],
         data: function () {
             return {
                 audioSrc: 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA',
                 activeSong: { id: null },
                 durationString: '00:00',
                 currentTimeString: '00:00',
-
+                queue: [],
             }
         },
         components: {
             Navbar
         },
         methods: {
+            setQueue: function(songs) {
+                this.queue = songs;
+            },
             playSongToggle: function(song) {
                 const player = this.$refs.player;
                 if (this.$data.activeSong.id !== song.id) {
@@ -80,32 +84,10 @@
                     return ((!isMobile && isChrome));
                 }                
             },
-            durationToString: function(duration) {
-                if (isNaN(duration)) {
-                    return '00:00';
-                }
-                const minutes = Math.floor(duration / 60);
-                const seconds = (duration - minutes * 60).toString().substr(0, 2);
-                return `${minutes}:${seconds}`;
-            },
-            currentTimeToString: function(currentTime) {
-                if (isNaN(currentTime)) {
-                    return '00:00';
-                }
-                const minute = parseInt(currentTime / 60) % 60;
-                const seconds = (currentTime % 60).toFixed();
-                return (minute < 10 ? "0" + minute : minute) + ":" + (seconds < 10 ? "0" + seconds : seconds);
-            },
+            
         },
 
         computed: {
-            queue: function() {
-                return this.songSet.map(song => {
-                    const clone = Vue.util.extend({}, song);
-                    clone.album = this.getSongAlbum(song);                    
-                    return clone;
-                }).filter(song => song.album);
-            },
             showPlayer() {
                 return this.$data.activeSong.id !== null;
             },
@@ -115,17 +97,16 @@
                 }
             },
             ...mapGetters([
-                'songSet',
-                'getSongAlbum'
+                'songsWithAlbums',
             ])
         },
-        mounted() {
+        mounted() {          
             const player = this.$refs.player;
             const slider = this.$refs.playSlider;
             const slideContainer = this.$refs.slideContainer;
             const progressBar = this.$refs.progressBar;
 
-            let sliderIsBeingMoved = false;
+            let sliderBeingSlided = false;
             
             player.addEventListener('playing', function(ev) {
                 ticker = requestAnimationFrame(tick);
@@ -135,7 +116,7 @@
                 // if the duration is set, 
                 // and the player isn't paused, 
                 // and the slider isn't being moved,
-                if (!isNaN(player.duration) && !player.paused && !sliderIsBeingMoved) {
+                if (!isNaN(player.duration) && !player.paused && !sliderBeingSlided) {
                     // set the slider's position dynamically
                     const progress = (player.currentTime / player.duration) * 100;
                     progressBar.style.width = `${progress}%`;
@@ -169,15 +150,23 @@
             }
 
             player.addEventListener('ended', () => {
-                cancelAnimationFrame(ticker);                
+                cancelAnimationFrame(ticker);
+                if (this.queue.length === 0) {
+                    return;
+                } 
                 const index = this.queue.findIndex(song => song.id === this.$data.activeSong.id);
+
+                // prevent looping of the queue...?
+                // if (this.queue.length > (index + 1)) {
+                //     return;
+                // }
                 const nextIndex = (this.queue.length > (index + 1)) ? index + 1 : 0;
                 this.playSongToggle(this.queue[nextIndex]);            
             });
 
             (new Hammer(slideContainer)).on("pan press tap pressup", function(ev) {
                 cancelAnimationFrame(ticker);
-                sliderIsBeingMoved = true;
+                sliderBeingSlided = true;
                 slider.classList.add('activePlaySlider');
                 const xPos = ev.center.x - slideContainer.offsetLeft;
                 progressBar.style.width = `${xPos}px`;
@@ -186,7 +175,7 @@
                     player.currentTime = timeRemaining;
                     ticker = requestAnimationFrame(tick);
                     slider.classList.remove('activePlaySlider');
-                    sliderIsBeingMoved = false;
+                    sliderBeingSlided = false;
                 }                
             });
 
@@ -209,7 +198,9 @@
         height: 60px;
         background-color: #909090;
     }
-
+    .footer-spacer {
+        height: 120px;
+    }
     .slideContainer {
         position: relative;
         height: 10px;

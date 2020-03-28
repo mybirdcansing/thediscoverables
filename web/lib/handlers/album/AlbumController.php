@@ -178,13 +178,12 @@ class AlbumController {
 
         // Validate type of file
         if(
-            $fileMimeType == 'image/jpeg'
-            || $fileMimeType == 'image/gif'
-            || $fileMimeType == 'image/png'
+            $fileMimeType === 'image/jpeg'
+            || $fileMimeType === 'image/png'
             ) {
-            //overwrites file with the same name (this is intentional)
-            $options->artworkFilename = str_replace(" ", "_", $options->artworkFilename);
-            file_put_contents('../../../artwork/' . $options->artworkFilename, $fileData);
+            $extention = ($fileMimeType === 'image/png') ? '.png' : '.jpeg';
+            $options->artworkFilename = $options->id . '_artwork' . $extention;
+            file_put_contents('../../../../original_artwork/' . $options->artworkFilename, $fileData);
         }
         else {
             throw new BadMimeTypeException();

@@ -43,13 +43,12 @@ if (isset($uri[5]) && $uri[5] != '') {
 }
 
 $action = null;
-
 switch ($requestMethod) {
     case 'OPTIONS':
         exit;
         break;
     case 'GET':
-         $action = GET_ACTION;
+        $action = GET_ACTION;
         break;
     case 'POST':
     	if ($requestAction == 'delete') {

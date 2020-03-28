@@ -103,10 +103,11 @@
                     return song.id;
                 });
                 try {
-                    if  (this.playlist.id) {
-                        const response = await this.updatePlaylist(this.playlist);
+                    const payload = { data: this.playlist, handler: 'playlist' };
+                    if (this.playlist.id) {
+                        const response = await this.updateItem(payload);
                     } else {
-                        const response = await this.createPlaylist(this.playlist);
+                        const response = await this.createItem(payload);
                     }
                     this.errors = [];
                     setTimeout(() => {
@@ -121,9 +122,9 @@
                 this.$router.push('/manager/playlists');
             },
             ...mapActions([
-                'updatePlaylist',
-                'createPlaylist'
-            ]),
+                'updateItem',
+                'createItem'
+            ])
         },
         created() {
             const setSongLists = () => {

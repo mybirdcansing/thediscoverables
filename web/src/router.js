@@ -41,7 +41,13 @@ const router = new VueRouter({
                     },
                 },
                 { path: '/song/:id', component: Song },
-                { path: '/album/:id', component: Album },
+                { 
+                    path: '/album/:id', 
+                    component: Album,
+                    meta: {
+                        title: `${managerTitlePrefix}: Album`,
+                    },
+                },
             ],
             meta: {
                 title: titlePrefix,

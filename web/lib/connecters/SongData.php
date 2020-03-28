@@ -19,7 +19,8 @@ class SongData
 				song_id,
 				title,
 				filename,
-				description
+                description,
+                duration
 		  	FROM 
 		  		song;";
 
@@ -43,7 +44,8 @@ class SongData
                 song_id,
                 title,
                 filename,
-                description
+                description,
+                duration
 		  	FROM 
 		  		song
 		  	WHERE song_id = ?;
@@ -69,7 +71,8 @@ class SongData
 				song (
                     song_id,
                     title,
-                    description, 
+                    description,
+                    duration,
                     filename,
                     modified_date,
                     modified_by_id,
@@ -82,10 +85,11 @@ class SongData
         try {
             $stmt = $this->dbConnection->prepare($sql);
             $songId = GUID();
-            $stmt->bind_param("ssssss",
+            $stmt->bind_param("sssdsss",
                 $songId,
 				$song->title,
-				$song->description,
+                $song->description,
+                $song->duration,
 				$song->filename,
                 $administrator->id,
                 $administrator->id
@@ -112,6 +116,7 @@ class SongData
                 SET
                     title = ?,
                     description = ?, 
+                    duration = ?,
                     filename = ?,
                     modified_date = now(),
                     modified_by_id = ?
@@ -120,9 +125,10 @@ class SongData
 
         try {
             $stmt = $this->dbConnection->prepare($sql);
-            $stmt->bind_param("sssss",
+            $stmt->bind_param("ssdsss",
                 $song->title,
                 $song->description,
+                $song->duration,
                 $song->filename,
                 $administrator->id,
                 $song->id
@@ -183,7 +189,8 @@ class SongData
 	    $song = new Song();
 	    $song->id = $row["song_id"];
 	    $song->title = $row["title"];
-	    $song->description = $row["description"];
+        $song->description = $row["description"];
+        $song->duration = $row["duration"];
 	    $song->filename = $row["filename"];
 	    return $song;
 	}

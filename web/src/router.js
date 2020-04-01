@@ -45,7 +45,7 @@ const router = new VueRouter({
                     path: '/album/:id', 
                     component: Album,
                     meta: {
-                        title: `${managerTitlePrefix}: Album`,
+                        title: `${titlePrefix}`,
                     },
                 },
             ],

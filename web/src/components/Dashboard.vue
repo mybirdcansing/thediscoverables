@@ -6,24 +6,37 @@
             <h4>Songs</h4>
             <table class="song-table">
                 <tbody>
-                    <tr v-for="song in topSongs" :key="song.id"  @click="playSongToggle(song)">
-                        <td class='song-list-album-cell'>
-                            <div v-if="song.album">
+                    <tr 
+                        v-for="song in topSongs"
+                        :key="song.id"
+                        class="song-list-row"
+                        v-bind:class="{'active-song': activeSong.id === song.id }">
+                        <td class='song-list-album-cell' @click="toggleSong(song)">
+                            <svg 
+                                class="play-button-arrow"
+                                viewBox="-5 -5 34 34"
+                                preserveAspectRatio="xMidYMid meet" 
+                                focusable="false"
+                            >
+                                <path d="M8 5v14l11-7z" fill="white"></path>
+                            </svg>                         
+                            <div v-if="song.album" class="song-list-album-artwork-div">
                                 <img class='song-list-album-artwork' :src="'../artwork/thumbnail~' + song.album.artworkFilename" :alt="song.album.title">
                             </div>
                         </td>
-                        <td class="song-title-cell">
-                            <div class="song-title">{{ song.title }}</div>
-                            <div v-if="song.album" class="album-title" @click="openAlbum(song.album)">{{ song.album.title }}</div>
+                        <td class="song-title-cell" @click.prevent="toggleSong(song)">
+                            <div><span class="song-title">{{ song.title }}</span></div>
+                            <a v-if="song.album" class="album-title" @click="openAlbum(song.album)">{{ song.album.title }}</a>
                         </td>
-                        <td>{{durationToString(song.duration)}}</td>
+
                         <td>
                             ⋮
                         </td>
                     </tr>
+                  
                 </tbody>
             </table>
-            <div><a href="#" class="dashboard-page-link">SHOW ALL</a></div>
+            <div class="block-link"><a href="#" class="dashboard-page-link">SHOW ALL</a></div>
         </div>
         <div class="dashboard-section">
             <h4>Albums</h4>
@@ -42,15 +55,20 @@
     import { mapGetters } from 'vuex';
     import SongHelperMixin from './SongHelperMixin';
     import { StatusEnum } from '../store/StatusEnum';
+
+    const settings = {
+        songLimit: 3,
+        showSongsWithoutAlbums: false,
+    };
+
     export default {
         name: "Dashboard",
         mixins: [SongHelperMixin],
+        props: [
+            "activeSong"
+        ],
         components: {
         },
-        data: function() {
-            return {
-            }
-        }, 
         methods: {
           openAlbum({id}) {
               this.$router.push(`/album/${id}`);
@@ -61,9 +79,7 @@
                 let set;
                 if (this.homepagePlaylist && this.homepagePlaylist.songs.length > 0) {                    
                     set = this.homepagePlaylist.songs.map(id => {
-                        const homepageSongWithAlbum = this.songsWithAlbums.find(song => {
-                            return song.id === id;
-                        });
+                        const homepageSongWithAlbum = this.songsWithAlbums.find(song => song.id === id);
                         if (homepageSongWithAlbum) {
                             return homepageSongWithAlbum;
                         }
@@ -73,9 +89,11 @@
                     set = this.songsWithAlbums;
                 }
                 // only include songs that are in albums
-                set = set.filter(song => song.album);
+                if (!settings.showSongsWithoutAlbums) {
+                    set = set.filter(song => song.album);
+                }
                 // the dashboard should have no more than 4 songs on the song list
-                return (set.length <= 4) ? set : set.slice(0, 4);
+                return (set.length <= settings.songLimit) ? set : set.slice(0, settings.songLimit);
             },
             ...mapGetters([
                 'albumSet',
@@ -87,11 +105,15 @@
             ])
         },
         created() {
-           this.$watch('catalogState', (newState, oldState) => {
+            this.$watch('catalogState', (newState, oldState) => {
                 if (newState === StatusEnum.LOADED) {
                     this.$emit("setQueue", this.topSongs);
                 }
-            });             
+            });     
+            this.$watch('activeSong', (newState, oldState) => {
+                console.log(newState);
+                
+            })
         }
     }
 </script>

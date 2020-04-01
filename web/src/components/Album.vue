@@ -1,7 +1,7 @@
 <template>
     <div class="page-content album" v-if="album">
-        <table>
-            <tr>
+        <table class="album-header">
+            <tr class="album-header">
                 <td class="album-artwork">
                     <img class="album-page-artwork-img" :src="'../artwork/medium~' + album.artworkFilename" :alt="album.title">
                 </td>
@@ -24,43 +24,50 @@
                 </td>
             </tr>
         </table>
-
+        <div class="block-link"><play-button @play="setQueueAndPlay(songs)" /></div>
         <h4>Songs</h4>
+
         <table class="song-table">
             <tbody>
-                <tr v-for="(song, index) in songs" :key="song.id"  @click="playSongToggle(song)">
-                    <td class='song-list-album-cell'>
+                <tr 
+                    v-for="(song, index) in songs"
+                    :key="song.id"
+                    @click="toggleSong(song)"          
+                    v-bind:class="{'active-song': activeSong.id === song.id }"
+                    >
+                    <td class='song-table-index-cell'>
                         {{index+1}}
                     </td>
-                    <td class="song-title-cell">
+                    <td class='song-table-cell'>
                         <div class="song-title">{{ song.title }}</div>
                     </td>
                     <td>{{durationToString(song.duration)}}</td>
-                    <td>
+                    <td class='song-table-cell'>
                         ⋮
                     </td>
                 </tr>
             </tbody>
         </table>   
+ 
     </div>
 </template>
 <script>
     import { mapGetters } from 'vuex';
     import SongHelperMixin from './SongHelperMixin';
     import { StatusEnum } from '../store/StatusEnum';
+    import PlayButton from './layout/PlayButton.vue';
+
     export default {
         name: "Album",
-        mixins: [SongHelperMixin],        
+        mixins: [SongHelperMixin],
+        props: [
+            "activeSong"
+        ],        
         components: {
-            
+            PlayButton
         },
         methods: {
 
-        },
-        data: function() {
-            return {
-
-            }
         },
         computed: {
             ...mapGetters([
@@ -95,6 +102,21 @@
                     return new Date(this.album.publishDate).getFullYear();
                 }
             }
+        },
+        mounted() {
+            const setTitle = () => {
+                this.$el.ownerDocument.title = `${this.$router.currentRoute.meta.title}: ${this.album.title}`;
+            };
+
+            if (this.album) {
+                setTitle();
+            } else {
+                this.$watch('album', (newState, oldState) => {
+                    if (newState) {
+                        setTitle();
+                    }
+                });             
+            }
         }
     }
 </script>
@@ -102,5 +124,18 @@
 <style scoped>
     .page-content.album {
         margin-top:16px;
+    }
+    .song-table-index-cell {
+        padding: 10px 4px 4px 14px;
+        text-align: center;
+    }
+    .song-table-cell {
+        padding: 10px 12px 4px 0px;
+    }    
+    .album-header { 
+        margin-left: 20px;
+    }
+    .album-header .album-artwork img{
+        margin-left: -4px;
     }
 </style>

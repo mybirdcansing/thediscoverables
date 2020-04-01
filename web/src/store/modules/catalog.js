@@ -1,6 +1,7 @@
 import {CatalogConnector} from '../../connectors/CatalogConnector';
 import { RestConnector } from '../../connectors/RestConnector';
 import { StatusEnum } from '../StatusEnum';
+import QueuePositionEnum from '../QueuePositionEnum';
 
 const state = {
     catalogState: StatusEnum.INIT,
@@ -11,7 +12,8 @@ const state = {
     playlistList: [],    
     albums: {},
     albumList: [],
-    songQueue: []
+    queue: [],
+    activeSongQueueIndex: -1
 }
 
 const getters = {
@@ -39,6 +41,14 @@ const getters = {
     },
     homepagePlaylist: (state, getters) => {
         return getters.playlistSet.find(playlist => playlist.title === 'homepage');        
+    },
+    getQueue: (state) =>  state.queue,
+    activeStateSong: (state) => {
+        if (state.activeSongQueueIndex !== -1 && state.queue.length < state.activeSongQueueIndex) {
+            return state.queue[state.activeSongQueueIndex];
+        } else {
+            return {};
+        }
     }
 }
 
@@ -116,7 +126,11 @@ const actions = {
                 reject(response);
             }
         });
-    }
+    },
+    addToStateQueue ({commit}, payload) {
+        commit('ADD_TO_QUEUE', payload);
+    },
+
 }
 
 const mutations = {
@@ -144,6 +158,42 @@ const mutations = {
         state[obj.category][obj.data.id] = obj.data;
         state[obj.categoryList].push(obj.data.id);
     },
+    ADD_TO_QUEUE(state, payload) {
+        let queue = state.queue;
+        let indexOfFirstSongAdded;
+        const activeIndex = state.activeSongQueueIndex;
+        if (activeIndex === -1) {
+            payload.position = QueuePositionEnum.START;            
+        } else if (
+            payload.position === QueuePositionEnum.NEXT
+            && queue.length === activeIndex + 1 
+        ) {
+            payload.position = QueuePositionEnum.END;
+        }
+
+        switch (payload.position) {
+            case QueuePositionEnum.START:
+                queue = [].concat(payload.songs, queue);
+                if (activeIndex > -1) {
+                    activeIndex += payload.songs.length;
+                }
+                indexOfFirstSongAdded = 0;
+                break;
+            case QueuePositionEnum.NEXT:
+                const head = queue.slice(0, activeIndex + 1);
+                const tail = queue.slice(activeIndex + 1);
+                queue = [].concat(head, payload.songs, tail);
+                indexOfFirstSongAdded = activeIndex + 1;
+                break;
+            case QueuePositionEnum.END:
+                indexOfFirstSongAdded = queue.length;
+                queue = queue.concat(payload.songs);
+                break;
+            default:
+                break;
+        }
+        return indexOfFirstSongAdded;
+    }
 }
 
 

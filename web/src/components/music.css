@@ -8,13 +8,17 @@ html, body {
 body {
     margin: 0px;
     padding: 0px;
-
-    background-color: #282727;
+    background-color: rgba(40, 39, 39, 1);
     color: #fff;
     font: 1em sans-serif;
     touch-action: manipulation;
 }
-
+table, tr {
+    border-spacing: 0px;    
+}
+table {
+    margin-bottom: 10px;
+}
 
 h4 {
     margin: 6px 0px 6px 0px;
@@ -26,7 +30,7 @@ img {
 
 
 .page-content {
-    padding: 16px;
+    padding: 20px 0 100px 0;
 }
 
 
@@ -34,6 +38,13 @@ img {
     margin-bottom: 30px;
 }
 
+.page-content .block-link {
+    margin: 20px 20px 20px 20px;
+}
+
+.page-content h4, .page-content h2 {
+    margin: 20px 20px 20px 20px;
+}
 a {
     color: #fff;
     text-decoration: none;
@@ -44,53 +55,84 @@ a {
   overflow-x: scroll;
   overflow-y: hidden;
   white-space: nowrap;
+  margin: 0px 20px 0 20px;
 }
 
 .card {
   display: inline-block;
 }
-.album {
+.album.card {
     cursor: pointer;
  }
  .album-title {
      text-align: left;
-     margin: 8px 5px;
+     margin: 8px 0px 0px 0px;
  }
 .song-table .song-title {
-    padding: 4px;
+    padding: 0px;
 }
+
 
 .song-table {
     width: 100%;
-    padding: 6px;
+    padding: 0px;
 }
 .dashboard-page-link {
     font-weight: 500;
     text-transform: uppercase;
     color: #909090;
 } 
-.song-table .album-title {
+.song-list-row:hover .play-button-arrow {
+    display: block;
+}
+.song-list-row .play-button-arrow {
+    display: none;
+    position: absolute;
+    background-color: rgba(40, 39, 39, 0.5);
+}
+.active-song {
+    
+    background-color: rgba(30, 29, 29, 1);
+}
+ 
+.song-list-album-cell {
+    cursor: pointer;
+    text-align: left;
+    padding: 10px 20px 16px 20px;
+}
+.song-title {
+    cursor: pointer;
+    font-weight: 500;
+
+}
+.song-table td {
+    padding-bottom: 1px;
+}
+a {
     color: #909090;
+    cursor: pointer;
 }
-.song-title-cell {
-    cursor: default;
+a:hover {
+    text-decoration: underline;
+    color: #eee;
 }
+
+
 
 /* PHONE */
 @media (max-width: 992px) { 
     .song-table {
-        max-width: 500px;
+      
     }
     .album-artwork {
         width:50%;
         text-align: left;
     }
-    .album-description {
 
-        padding: 0px 12px 20px 12px;
+    .album-description {
+        padding: 0px 12px 20px 16px;
         width:50%;
         vertical-align: middle;
-        
     }
     .album-description .album-details {
         font-size: 12px;
@@ -98,6 +140,7 @@ a {
         margin-top: 0px;
         color: #aaa;
     }
+
     .album-list-album-artwork {
         width: 150px;
     }
@@ -105,10 +148,14 @@ a {
         width: 100%;
     }
     .song-list-album-artwork {
-        width: 22px;
-    }  
+        width: 36px;
+    }
+    .song-list-row .play-button-arrow {
+        width: 36px;
+        height: 36px; 
+    }      
     .song-table .song-list-album-cell {
-        width: 30px;
+        width: 42px;
     }
     .song-table .album-title {
         font-size: 13px;
@@ -125,17 +172,18 @@ a {
         text-overflow: ellipsis;
         white-space: nowrap;        
     }
-    .dashboard-page-link {
-        padding: 10px;
-    }
+
     .card {
-        padding: 10px 10px;
+        padding: 0px 20px 10px 0;
     }
      
 }
 
 
 @media (min-width: 992px) { 
+    .music {      
+        background-position: center -60px;
+    }    
     .song-table {
         max-width: 700px;
     }
@@ -149,13 +197,15 @@ a {
     .song-list-album-artwork {
         width: 46px;
     }
-    
+    .song-list-row .play-button-arrow {
+        width: 46px;
+        height: 46px; 
+    }      
     .song-table .song-list-album-cell {
         width: 50px;
-    }    
-    .music {      
-        background-position: center -60px;
     }
+    
+
     .album-title, .song-title, .dashboard-page-link {
         font-size: 20px;
     }

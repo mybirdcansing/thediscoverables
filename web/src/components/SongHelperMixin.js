@@ -16,8 +16,12 @@ export default {
             const seconds = (currentTime % 60).toFixed();
             return (minute < 10 ? "0" + minute : minute) + ":" + (seconds < 10 ? "0" + seconds : seconds);
         },
-        playSongToggle(song) {
-            this.$emit("playSongToggle", song);            
+        toggleSong(song) {
+            this.$emit("toggleSong", song);            
+        },
+        setQueueAndPlay(songs) {
+            this.$emit("setQueueAndPlay", songs);  
         }
-    }
+    },
+    
 };    

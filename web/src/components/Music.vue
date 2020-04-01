@@ -1,17 +1,22 @@
 <template>
     <div class="music">
         <navbar/>
-        <router-view @playSongToggle="playSongToggle" @setQueue="setQueue"></router-view>
+        <router-view 
+            @toggleSong="toggleSong"
+            @setQueue="setQueue"
+            @setQueueAndPlay="setQueueAndPlay"
+            :activeSong="activeSong"
+        ></router-view>
         <div class="footer-spacer"></div>
         <footer class="footer" v-bind:class="{'playerActive': showPlayer}">
             <audio id="player" ref="player" :key="audioSrc" :src="audioSrc" preload="auto" controls></audio>
-            <div ref="slideContainer"  class="slideContainer">
+            <div ref="slideContainer"  id="slideContainer">
                 <div ref="progressBar" id="progressBar">
                     <div ref="playSlider" class="playSlider"></div>
                 </div>
             </div>
             <div>
-                <button ref="pausePlayer" @click="playSongToggle(activeSong)">Play/Pause</button>
+                <button ref="pausePlayer" @click="toggleSong(activeSong)">Play/Pause</button>
                 <span v-text="currentTimeString"></span> | <span v-text="durationString"></span> | 
                 <span v-text="activeSong.title"></span> | <span v-text="songAlbumTitle"></span>
             </div>
@@ -22,7 +27,7 @@
 <script>
     import "./music.css";
     import Navbar from './Navbar.vue';
-    import { mapGetters } from 'vuex';
+    import { mapGetters, mapActions } from 'vuex';
     import Hammer from 'hammerjs';
     import SongHelperMixin from './SongHelperMixin';
     let ticker = null;
@@ -31,7 +36,7 @@
         mixins: [SongHelperMixin],
         data: function () {
             return {
-                audioSrc: 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA',
+                audioSrc: '', //data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA
                 activeSong: { id: null },
                 durationString: '00:00',
                 currentTimeString: '00:00',
@@ -42,22 +47,37 @@
             Navbar
         },
         methods: {
+
             setQueue: function(songs) {
                 this.queue = songs;
             },
-            playSongToggle: function(song) {
+            setQueueAndPlay: function(songs) {
+                this.queue = songs;
+                this.$refs.player.pause();
+                this.activeSong = { id: null };
+                this.toggleSong(songs[0]);
+            },
+            toggleSong: function(song) {
                 const player = this.$refs.player;
-                if (this.$data.activeSong.id !== song.id) {
+                if (this.activeSong.id !== song.id) {
                     const progressBar = this.$refs.progressBar;
+                    const slideContainer = this.$refs.slideContainer;
                     cancelAnimationFrame(ticker);
-                    this.$data.activeSong = song;
+                    player.pause();
+
+                    const spans = slideContainer.getElementsByTagName('span');
+                    for (let i = 0; i < spans.length; i++) {
+                        slideContainer.removeChild(spans[i]);
+                    }
+
+                    this.activeSong = song;
                     player.setAttribute('title', `The Discoverables - ${song.title}`);
                     requestAnimationFrame(function() {
                         progressBar.style.width = '0px';
                     });
                     const src = `/audio/${encodeURI(song.filename)}`;
                     if (isChromeDesktop() && !player.paused) {
-                        player.pause();
+                        
                         // Chrome on Mac has a bit of a stutter when changing tracks.
                         // a slight timeout makes it better
                         setTimeout(function() {
@@ -66,7 +86,7 @@
                             player.play();
                         }, 1000);
                     } else {
-                        player.pause();
+                        
                         player.src = src;
                         player.load();
                         player.play();
@@ -89,16 +109,19 @@
 
         computed: {
             showPlayer() {
-                return this.$data.activeSong.id !== null;
+                return this.activeSong.id !== null;
             },
             songAlbumTitle() {
-                if (this.$data.activeSong.album) {
-                    return this.$data.activeSong.album.title;
+                if (this.activeSong.album) {
+                    return this.activeSong.album.title;
                 }
             },
             ...mapGetters([
                 'songsWithAlbums',
             ])
+        },
+        created() {
+
         },
         mounted() {          
             const player = this.$refs.player;
@@ -120,7 +143,6 @@
                     // set the slider's position dynamically
                     const progress = (player.currentTime / player.duration) * 100;
                     progressBar.style.width = `${progress}%`;
-
                 }
                 ticker = requestAnimationFrame(tick);
             }
@@ -132,14 +154,48 @@
             player.addEventListener('durationchange', (ev) => {
                 this.$data.durationString = this.durationToString(player.duration);
             });
-            
+
+            player.addEventListener('progress', handleProgress, false);
+            player.addEventListener('loadedmetadata', handleProgress, false);           
+
+
+        
+            function handleProgress() {
+                let ranges = [];
+                for(let i = 0; i < player.buffered.length; i ++)
+                {
+                    ranges.push([
+                        player.buffered.start(i),
+                        player.buffered.end(i)
+                    ]);
+                }
+                
+                //get the current collection of spans inside the slide container
+                const spans = slideContainer.getElementsByTagName('span');
+                
+                //then add or remove spans so we have the same number as time ranges
+                while(spans.length < player.buffered.length) {
+                    const span = document.createElement('span');
+                    slideContainer.appendChild(span);
+                }
+
+                while(spans.length > player.buffered.length) {
+                    slideContainer.removeChild(slideContainer.lastChild);
+                }
+                
+                for(let i = 0; i < player.buffered.length; i ++) {
+                    const pdp = (100 / player.duration);
+                    spans[i].style.left = Math.round(pdp * ranges[i][0]) + '%';
+                    spans[i].style.width = Math.round(pdp * (ranges[i][1] - ranges[i][0])) + '%';
+                }
+            }
+
             player.addEventListener('pause', handlePause);
 
-            // I have to find a way to test these
-            player.addEventListener('waiting', handlePause);
-            player.addEventListener('stalled', handlePause);
+            // I have to find a way to test this
+            // player.addEventListener('stalled', handlePause);
 
-            function handlePause(e) {
+            function handlePause(ev) {
                 progressBar.style.width = `${(player.currentTime / player.duration) * 100}%`;
                 // if the player is still paused on the next animation frame, cancel the ticker
                 requestAnimationFrame(function() {
@@ -154,14 +210,13 @@
                 if (this.queue.length === 0) {
                     return;
                 } 
-                const index = this.queue.findIndex(song => song.id === this.$data.activeSong.id);
-
+                const index = this.queue.findIndex(song => song.id === this.activeSong.id);
                 // prevent looping of the queue...?
                 // if (this.queue.length > (index + 1)) {
                 //     return;
                 // }
                 const nextIndex = (this.queue.length > (index + 1)) ? index + 1 : 0;
-                this.playSongToggle(this.queue[nextIndex]);            
+                this.toggleSong(this.queue[nextIndex]);            
             });
 
             (new Hammer(slideContainer)).on("pan press tap pressup", function(ev) {
@@ -182,7 +237,7 @@
         } 
     }
 </script>
-<style scoped>
+<style>
 
     #player {
         display: none;
@@ -201,18 +256,34 @@
     .footer-spacer {
         height: 120px;
     }
-    .slideContainer {
+
+
+    #slideContainer {
         position: relative;
         height: 10px;
         width: 100%;
         margin-left: auto;
         margin-right: auto;
         margin-bottom: 8px;
-        border-radius: 15px;
+        /* border-radius: 15px; */
         background: #d3d3d3;
+        box-shadow:inset 0 0 0 1px #ddd, inset 0 0 0 2px rgb(202, 203, 201);
         cursor: pointer;
         overflow: visible;
     }
+  
+    #slideContainer span {
+        position:absolute;
+        left:0;
+        top:0;
+        display:inline-block;
+        height:10px;
+        background:#6c0;
+        box-shadow:inset 0 0 0 1px #ddd, inset 0 0 0 2px rgb(81, 82, 81);
+        /* border-top-left-radius: 15px; 
+        border-bottom-left-radius:15px;  */
+        z-index: 80;
+    }  
 
     .playSlider {
         position: relative;
@@ -239,16 +310,20 @@
     }
 
     #progressBar {
-        position: absolute;
+        position: relative;
+        display:block;
         width: 0px;
         height: 10px;
-        border-radius: 15px; 
+        /* border-radius: 15px;  */
         background: blueviolet;
         cursor: pointer;
         top: 0px;
         left: 0px;
+        z-index: 90;
 
     }
+
+	    
 
     .playerActive {
         display: block;

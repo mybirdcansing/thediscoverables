@@ -1,4 +1,11 @@
+import { StatusEnum } from '../store/StatusEnum';
 export default {
+    data: function () {
+        return {
+
+            
+        };
+    },
     methods: {
         durationToString: function(duration) {
             if (isNaN(duration)) {
@@ -21,7 +28,11 @@ export default {
         },
         setQueueAndPlay(songs) {
             this.$emit("setQueueAndPlay", songs);  
-        }
+        },
     },
-    
+    computed: {
+        loading() {
+            return this.loadingState === StatusEnum.LOADING;
+        }
+    }
 };    

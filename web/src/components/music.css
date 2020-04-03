@@ -50,6 +50,13 @@ a {
     text-decoration: none;
 }
 
+#airPlay {
+    position: absolute;
+    left: 8px;
+    top: 15px;
+    display: none;
+}
+
 .scrolling-wrapper {
   overflow: hidden;
   overflow-x: scroll;
@@ -82,16 +89,59 @@ a {
     text-transform: uppercase;
     color: #909090;
 } 
-.song-list-row:hover .play-button-arrow {
+
+
+.song-list-row:hover .play-button-arrow,
+.song-list-row.active-song.paused:hover .play-button-arrow {
     display: block;
+    opacity: .9;
+
 }
+
+.song-list-row.active-song.paused .play-button-arrow {
+    display: block;
+    opacity: .7;
+}
+
+.song-list-row.active-song.playing:hover .play-button-arrow,
+.song-list-row.active-song.loading:hover .play-button-arrow {
+    display: none;
+}
+
 .song-list-row .play-button-arrow {
     display: none;
     position: absolute;
     background-color: rgba(40, 39, 39, 0.5);
 }
+
+.song-list-row.active-song.playing .pause {
+    display: block;
+}
+.song-list-row.active-song.playing:hover .pause {
+    opacity: .9;
+}
+
+.song-list-row.active-song.loading .pause {
+    display:none;
+}
+.song-list-row .pause {
+    display: none;
+    opacity: .7;
+}
+.song-list-row .pause {
+    position: absolute;
+    display: none;
+}
+
+.song-list-row .spinner {
+    position: absolute;
+    display: none;
+}
+.song-list-row .spinner.active {
+    display: inline-block;
+}
+
 .active-song {
-    
     background-color: rgba(30, 29, 29, 1);
 }
  
@@ -121,9 +171,7 @@ a:hover {
 
 /* PHONE */
 @media (max-width: 992px) { 
-    .song-table {
-      
-    }
+
     .album-artwork {
         width:50%;
         text-align: left;
@@ -150,10 +198,19 @@ a:hover {
     .song-list-album-artwork {
         width: 36px;
     }
+
     .song-list-row .play-button-arrow {
         width: 36px;
         height: 36px; 
-    }      
+    }
+    .song-list-row .spinner {
+        width: 36px;
+        height: 36px;
+    }
+    .song-list-row .pause {
+        width: 36px;
+        height: 36px;
+    }
     .song-table .song-list-album-cell {
         width: 42px;
     }
@@ -200,7 +257,15 @@ a:hover {
     .song-list-row .play-button-arrow {
         width: 46px;
         height: 46px; 
-    }      
+    }    
+    .song-list-row .spinner {
+        width: 46px;
+        height: 46px;
+    }
+    .song-list-row .pause {
+        width: 46px;
+        height: 46px;
+    }   
     .song-table .song-list-album-cell {
         width: 50px;
     }

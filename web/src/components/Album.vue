@@ -61,7 +61,9 @@
         name: "Album",
         mixins: [SongHelperMixin],
         props: [
-            "activeSong"
+            "activeSong",
+            "loadingState",
+            "playing"
         ],        
         components: {
             PlayButton

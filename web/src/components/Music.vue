@@ -6,9 +6,11 @@
             @setQueue="setQueue"
             @setQueueAndPlay="setQueueAndPlay"
             :activeSong="activeSong"
+            :loadingState="loadingState"
+            :playing="playing"
         ></router-view>
         <div class="footer-spacer"></div>
-        <footer class="footer" v-bind:class="{'playerActive': showPlayer}">
+        <footer class="footer" ref="footer" v-bind:class="{'playerActive': showPlayer}">
             <audio id="player" ref="player" :key="audioSrc" :src="audioSrc" preload="auto" controls></audio>
             <div ref="slideContainer"  id="slideContainer">
                 <div ref="progressBar" id="progressBar">
@@ -18,7 +20,12 @@
             <div>
                 <button ref="pausePlayer" @click="toggleSong(activeSong)">Play/Pause</button>
                 <span v-text="currentTimeString"></span> | <span v-text="durationString"></span> | 
-                <span v-text="activeSong.title"></span> | <span v-text="songAlbumTitle"></span>
+                <span v-text="activeSong.title"></span> | <span v-text="songAlbumTitle"></span> |
+                <span ref="airPlay" id="airPlay">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path d="M6 22h12l-6-6zM21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4v-2H3V5h18v12h-4v2h4c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z" fill="white"/>
+                    </svg>
+                </span>
             </div>
         </footer>        
     </div>
@@ -30,7 +37,10 @@
     import { mapGetters, mapActions } from 'vuex';
     import Hammer from 'hammerjs';
     import SongHelperMixin from './SongHelperMixin';
+    import { StatusEnum } from '../store/StatusEnum';
+
     let ticker = null;
+    let playPromise;
     export default {
         name: "Music",
         mixins: [SongHelperMixin],
@@ -41,6 +51,8 @@
                 durationString: '00:00',
                 currentTimeString: '00:00',
                 queue: [],
+                loadingState: StatusEnum.INIT,
+                playing: false
             }
         },
         components: {
@@ -53,24 +65,36 @@
             },
             setQueueAndPlay: function(songs) {
                 this.queue = songs;
-                this.$refs.player.pause();
+                // this.$refs.player.pause();
                 this.activeSong = { id: null };
                 this.toggleSong(songs[0]);
             },
             toggleSong: function(song) {
                 const player = this.$refs.player;
                 if (this.activeSong.id !== song.id) {
+                    this.activeSong = song;
+                    this.loadingState = StatusEnum.LOADING;
+
                     const progressBar = this.$refs.progressBar;
                     const slideContainer = this.$refs.slideContainer;
                     cancelAnimationFrame(ticker);
-                    player.pause();
+                    
+                    if (playPromise !== undefined) {
+                        playPromise.then(_ => {
+                            player.pause();
+                        })
+                        .catch(er => {
+                            this.playing = false;
+                        });
+                    } else {
+                        player.pause();
+                    }
 
                     const spans = slideContainer.getElementsByTagName('span');
                     for (let i = 0; i < spans.length; i++) {
                         slideContainer.removeChild(spans[i]);
                     }
 
-                    this.activeSong = song;
                     player.setAttribute('title', `The Discoverables - ${song.title}`);
                     requestAnimationFrame(function() {
                         progressBar.style.width = '0px';
@@ -83,18 +107,25 @@
                         setTimeout(function() {
                             player.src = src;
                             player.load();
-                            player.play();
+                            playPromise = player.play();
                         }, 1000);
                     } else {
                         
                         player.src = src;
                         player.load();
-                        player.play();
+                        playPromise = player.play();
                     }
-                } else if (!player.paused) {
-                    player.pause();
+                } else if (this.playing) {
+                    if (playPromise !== undefined) {
+                        playPromise.then(_ => {
+                            player.pause();
+                        })
+                        .catch(er => {
+                            this.playing = false;
+                        });
+                    }
                 } else {
-                    player.play();
+                    playPromise = player.play();
                 }
                 
                 function isChromeDesktop() {
@@ -128,10 +159,35 @@
             const slider = this.$refs.playSlider;
             const slideContainer = this.$refs.slideContainer;
             const progressBar = this.$refs.progressBar;
+            const airPlay = this.$refs.airPlay;
+            const footer = this.$refs.airPlay.footer;
+            
+            // Detect if AirPlay is available
+            // Mac OS Safari 9+ only
+            if (window.WebKitPlaybackTargetAvailabilityEvent) {
+                player.addEventListener('webkitplaybacktargetavailabilitychanged', function(event) {
+                    switch (event.availability) {
+                        case "available":
+                            airPlay.style.display = 'inline-block';
+                        break;
+
+                        default:
+                        airPlay.style.display = 'none';
+                    }
+                    
+                    airPlay.addEventListener('click', function() {
+                        player.webkitShowPlaybackTargetPicker();
+                    });
+                });
+            } else {
+                airPlay.style.display = 'none';
+            }
 
             let sliderBeingSlided = false;
             
-            player.addEventListener('playing', function(ev) {
+            player.addEventListener('playing', (ev) => {
+                this.loadingState = StatusEnum.LOADED;
+                this.playing = true;
                 ticker = requestAnimationFrame(tick);
             });
 
@@ -144,6 +200,7 @@
                     const progress = (player.currentTime / player.duration) * 100;
                     progressBar.style.width = `${progress}%`;
                 }
+
                 ticker = requestAnimationFrame(tick);
             }
 
@@ -158,12 +215,9 @@
             player.addEventListener('progress', handleProgress, false);
             player.addEventListener('loadedmetadata', handleProgress, false);           
 
-
-        
             function handleProgress() {
                 let ranges = [];
-                for(let i = 0; i < player.buffered.length; i ++)
-                {
+                for(let i = 0; i < player.buffered.length; i ++) {
                     ranges.push([
                         player.buffered.start(i),
                         player.buffered.end(i)
@@ -184,26 +238,27 @@
                 }
                 
                 for(let i = 0; i < player.buffered.length; i ++) {
-                    const pdp = (100 / player.duration);
-                    spans[i].style.left = Math.round(pdp * ranges[i][0]) + '%';
-                    spans[i].style.width = Math.round(pdp * (ranges[i][1] - ranges[i][0])) + '%';
+                    const durationPercent = (100 / player.duration);
+                    spans[i].style.left = Math.round(durationPercent * ranges[i][0]) + '%';
+                    spans[i].style.width = Math.round(durationPercent * (ranges[i][1] - ranges[i][0])) + '%';
                 }
+            }
+
+            const handlePause =  (ev) => {
+                progressBar.style.width = `${(player.currentTime / player.duration) * 100}%`;
+                // if the player is still paused on the next animation frame, cancel the ticker
+                requestAnimationFrame(() => {
+                    if (player.paused) {
+                        this.playing = false;                      
+                        cancelAnimationFrame(ticker);
+                    }
+                });
             }
 
             player.addEventListener('pause', handlePause);
 
             // I have to find a way to test this
             // player.addEventListener('stalled', handlePause);
-
-            function handlePause(ev) {
-                progressBar.style.width = `${(player.currentTime / player.duration) * 100}%`;
-                // if the player is still paused on the next animation frame, cancel the ticker
-                requestAnimationFrame(function() {
-                    if (player.paused) {
-                        cancelAnimationFrame(ticker);
-                    }
-                });
-            }
 
             player.addEventListener('ended', () => {
                 cancelAnimationFrame(ticker);
@@ -239,10 +294,10 @@
 </script>
 <style>
 
-    #player {
+    audio {
         display: none;
     } 
-    
+
     .footer {
         display: none;
         position: fixed;       
@@ -254,20 +309,17 @@
         background-color: #909090;
     }
     .footer-spacer {
-        height: 120px;
+        height: 20px;
     }
-
 
     #slideContainer {
         position: relative;
         height: 10px;
         width: 100%;
-        margin-left: auto;
-        margin-right: auto;
-        margin-bottom: 8px;
-        /* border-radius: 15px; */
+        margin: 6px auto 12px auto;
+        border-radius: 2px;
         background: #d3d3d3;
-        box-shadow:inset 0 0 0 1px #ddd, inset 0 0 0 2px rgb(202, 203, 201);
+        box-shadow:inset 0 0 0 1px rgb(157, 154, 154), inset 0 0 0 2px rgb(202, 203, 201);
         cursor: pointer;
         overflow: visible;
     }
@@ -278,15 +330,15 @@
         top:0;
         display:inline-block;
         height:10px;
-        background:#6c0;
-        box-shadow:inset 0 0 0 1px #ddd, inset 0 0 0 2px rgb(81, 82, 81);
-        /* border-top-left-radius: 15px; 
-        border-bottom-left-radius:15px;  */
+        background: #b6b6b6;
+        /* box-shadow:inset 0 0 0 1px #ddd, inset 0 0 0 2px rgb(81, 82, 81); */
+        border-radius: 2px;  
         z-index: 80;
     }  
 
     .playSlider {
         position: relative;
+        display: none;
         margin-right: -9px;
         margin-top: -4px;
         width: 18px;
@@ -301,29 +353,26 @@
 
     .playSlider.activePlaySlider {
         box-shadow: 0 3px 0 rgb(75, 84, 79);
+        display: block;
         width: 36px;
         height: 36px;
         margin-left: -18px;
         margin-top: -12px;
         transition: all 0.1s;
-      
     }
 
     #progressBar {
-        position: relative;
+        position: absolute;
         display:block;
         width: 0px;
         height: 10px;
-        /* border-radius: 15px;  */
-        background: blueviolet;
+        border-radius: 2px;
+        background: rgb(114, 105, 123);
         cursor: pointer;
         top: 0px;
         left: 0px;
         z-index: 90;
-
     }
-
-	    
 
     .playerActive {
         display: block;

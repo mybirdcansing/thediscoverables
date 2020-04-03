@@ -10,16 +10,62 @@
                         v-for="song in topSongs"
                         :key="song.id"
                         class="song-list-row"
-                        v-bind:class="{'active-song': activeSong.id === song.id }">
+                        v-bind:class="{
+                            'active-song': isActiveSong(song),
+                            'loading': isActiveSong(song) && loading,
+                            'playing': isActiveSong(song) && playing,
+                            'paused': isActiveSong(song) && !playing 
+                        }">
                         <td class='song-list-album-cell' @click="toggleSong(song)">
                             <svg 
-                                class="play-button-arrow"
-                                viewBox="-5 -5 34 34"
-                                preserveAspectRatio="xMidYMid meet" 
-                                focusable="false"
-                            >
+                                class="play-button-arrow" xmlns="http://www.w3.org/2000/svg" 
+                                viewBox="-5 -5 34 34" 
+                                preserveAspectRatio="xMidYMid meet">
                                 <path d="M8 5v14l11-7z" fill="white"></path>
-                            </svg>                         
+                            </svg>
+
+     						<svg class='pause' xmlns="http://www.w3.org/2000/svg" 
+                                viewBox="-5 -5 34 34" 
+                                preserveAspectRatio="xMidYMid meet">
+                                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"  fill="white"/></svg>								
+                            <svg class="spinner" v-bind:class="{'active': isActiveSong(song) && isLoading}"
+                                viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg" stroke="#fff">
+                                <g fill="none" fill-rule="evenodd" stroke-width="2">
+                                    <circle cx="22" cy="22" r="1">
+                                        <animate attributeName="r"
+                                            begin="0s" dur="1.8s"
+                                            values="1; 20"
+                                            calcMode="spline"
+                                            keyTimes="0; 1"
+                                            keySplines="0.165, 0.84, 0.44, 1"
+                                            repeatCount="indefinite" />
+                                        <animate attributeName="stroke-opacity"
+                                            begin="0s" dur="1.8s"
+                                            values="1; 0"
+                                            calcMode="spline"
+                                            keyTimes="0; 1"
+                                            keySplines="0.3, 0.61, 0.355, 1"
+                                            repeatCount="indefinite" />
+                                    </circle>
+                                    <circle cx="22" cy="22" r="1">
+                                        <animate attributeName="r"
+                                            begin="-0.9s" dur="1.8s"
+                                            values="1; 20"
+                                            calcMode="spline"
+                                            keyTimes="0; 1"
+                                            keySplines="0.165, 0.84, 0.44, 1"
+                                            repeatCount="indefinite" />
+                                        <animate attributeName="stroke-opacity"
+                                            begin="-0.9s" dur="1.8s"
+                                            values="1; 0"
+                                            calcMode="spline"
+                                            keyTimes="0; 1"
+                                            keySplines="0.3, 0.61, 0.355, 1"
+                                            repeatCount="indefinite" />
+                                    </circle>
+                                </g>
+                            </svg>                            
+    
                             <div v-if="song.album" class="song-list-album-artwork-div">
                                 <img class='song-list-album-artwork' :src="'../artwork/thumbnail~' + song.album.artworkFilename" :alt="song.album.title">
                             </div>
@@ -65,16 +111,25 @@
         name: "Dashboard",
         mixins: [SongHelperMixin],
         props: [
-            "activeSong"
+            "activeSong",
+            "loadingState",
+            "playing"
         ],
         components: {
         },
         methods: {
-          openAlbum({id}) {
-              this.$router.push(`/album/${id}`);
-          }
+            openAlbum({id}) {
+                this.$router.push(`/album/${id}`);
+            },
+            isActiveSong(song) {
+                return this.activeSong.id === song.id;
+            },
+            
         },
         computed: {
+            isLoading() {
+                return this.loadingState == StatusEnum.LOADING;
+            },
             topSongs: function() {
                 let set;
                 if (this.homepagePlaylist && this.homepagePlaylist.songs.length > 0) {                    
@@ -109,11 +164,7 @@
                 if (newState === StatusEnum.LOADED) {
                     this.$emit("setQueue", this.topSongs);
                 }
-            });     
-            this.$watch('activeSong', (newState, oldState) => {
-                console.log(newState);
-                
-            })
+            }); 
         }
     }
 </script>

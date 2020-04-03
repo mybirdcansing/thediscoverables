@@ -79,14 +79,7 @@
                     const slideContainer = this.$refs.slideContainer;
                     cancelAnimationFrame(ticker);
                     
-                    if (playPromise !== undefined) {
-                        playPromise.then(_ => {
-                            player.pause();
-                        })
-                        .catch(er => {
-                            this.playing = false;
-                        });
-                    } else {
+                    if (playPromise === undefined) {
                         player.pause();
                     }
 

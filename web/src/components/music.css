@@ -78,7 +78,9 @@ a {
 .song-table .song-title {
     padding: 0px;
 }
-
+.song-title-cell {
+    vertical-align: middle;
+}
 
 .song-table {
     width: 100%;
@@ -107,7 +109,10 @@ a {
 .song-list-row.active-song.loading:hover .play-button-arrow {
     display: none;
 }
-
+.song-list-row.active-song .song-list-index,
+.song-list-row:hover .song-list-index {
+    opacity: 0;
+}
 .song-list-row .play-button-arrow {
     display: none;
     position: absolute;
@@ -144,11 +149,11 @@ a {
 .active-song {
     background-color: rgba(30, 29, 29, 1);
 }
- 
+
 .song-list-album-cell {
     cursor: pointer;
     text-align: left;
-    padding: 10px 20px 16px 20px;
+    padding: 6px 20px 16px 20px;
 }
 .song-title {
     cursor: pointer;
@@ -198,19 +203,14 @@ a:hover {
     .song-list-album-artwork {
         width: 36px;
     }
-
-    .song-list-row .play-button-arrow {
+    .song-list-row {
+        height: 36px; 
+    }
+    .song-list-row svg {
         width: 36px;
         height: 36px; 
     }
-    .song-list-row .spinner {
-        width: 36px;
-        height: 36px;
-    }
-    .song-list-row .pause {
-        width: 36px;
-        height: 36px;
-    }
+  
     .song-table .song-list-album-cell {
         width: 42px;
     }
@@ -223,6 +223,7 @@ a:hover {
     .music {      
         background-position: center 20px;
     }
+
     .album-title, .song-title, .dashboard-page-link {
         font-size: 14px;
         overflow: hidden;
@@ -269,7 +270,6 @@ a:hover {
     .song-table .song-list-album-cell {
         width: 50px;
     }
-    
 
     .album-title, .song-title, .dashboard-page-link {
         font-size: 20px;

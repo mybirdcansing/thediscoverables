@@ -43,4 +43,4 @@ dist
 index.html
 web/audio
 original_artwork
-web/artwork
+web/artwork/*.jpg

@@ -59,7 +59,6 @@
             Navbar
         },
         methods: {
-
             setQueue: function(songs) {
                 this.queue = songs;
             },
@@ -79,7 +78,7 @@
                     const slideContainer = this.$refs.slideContainer;
                     cancelAnimationFrame(ticker);
                     
-                    if (playPromise === undefined) {
+                    if (this.playing) {
                         player.pause();
                     }
 
@@ -94,7 +93,6 @@
                     });
                     const src = `/audio/${encodeURI(song.filename)}`;
                     if (isChromeDesktop() && !player.paused) {
-                        
                         // Chrome on Mac has a bit of a stutter when changing tracks.
                         // a slight timeout makes it better
                         setTimeout(function() {
@@ -103,17 +101,16 @@
                             playPromise = player.play();
                         }, 1000);
                     } else {
-                        
                         player.src = src;
                         player.load();
                         playPromise = player.play();
                     }
                 } else if (this.playing) {
                     if (playPromise !== undefined) {
-                        playPromise.then(_ => {
+                        playPromise.then(() => {
                             player.pause();
                         })
-                        .catch(er => {
+                        .catch(() => {
                             this.playing = false;
                         });
                     }
@@ -144,9 +141,6 @@
                 'songsWithAlbums',
             ])
         },
-        created() {
-
-        },
         mounted() {          
             const player = this.$refs.player;
             const slider = this.$refs.playSlider;
@@ -167,7 +161,6 @@
                         default:
                         airPlay.style.display = 'none';
                     }
-                    
                     airPlay.addEventListener('click', function() {
                         player.webkitShowPlaybackTargetPicker();
                     });
@@ -177,7 +170,7 @@
             }
 
             let sliderBeingSlided = false;
-            
+
             player.addEventListener('playing', (ev) => {
                 this.loadingState = StatusEnum.LOADED;
                 this.playing = true;
@@ -193,7 +186,6 @@
                     const progress = (player.currentTime / player.duration) * 100;
                     progressBar.style.width = `${progress}%`;
                 }
-
                 ticker = requestAnimationFrame(tick);
             }
 
@@ -253,7 +245,7 @@
             // I have to find a way to test this
             // player.addEventListener('stalled', handlePause);
 
-            player.addEventListener('ended', () => {
+            player.addEventListener('ended', function () {
                 cancelAnimationFrame(ticker);
                 if (this.queue.length === 0) {
                     return;
@@ -265,7 +257,7 @@
                 // }
                 const nextIndex = (this.queue.length > (index + 1)) ? index + 1 : 0;
                 this.toggleSong(this.queue[nextIndex]);            
-            });
+            }.bind(this));
 
             (new Hammer(slideContainer)).on("pan press tap pressup", function(ev) {
                 cancelAnimationFrame(ticker);
@@ -310,9 +302,8 @@
         height: 10px;
         width: 100%;
         margin: 6px auto 12px auto;
-        border-radius: 2px;
         background: #d3d3d3;
-        box-shadow:inset 0 0 0 1px rgb(157, 154, 154), inset 0 0 0 2px rgb(202, 203, 201);
+        box-shadow:outset 0 0 0 1px rgb(157, 154, 154), outset 0 0 0 2px rgb(202, 203, 201);
         cursor: pointer;
         overflow: visible;
     }
@@ -322,16 +313,12 @@
         left:0;
         top:0;
         display:inline-block;
-        height:10px;
         background: #b6b6b6;
-        /* box-shadow:inset 0 0 0 1px #ddd, inset 0 0 0 2px rgb(81, 82, 81); */
-        border-radius: 2px;  
         z-index: 80;
     }  
-
-    .playSlider {
+    #slideContainer:hover .playSlider {
         position: relative;
-        display: none;
+        opacity: 0;
         margin-right: -9px;
         margin-top: -4px;
         width: 18px;
@@ -341,17 +328,20 @@
         background: #4CAF50;
         cursor: pointer;
         z-index: 100;
-        transition: all 0.1s;
+    }
+    
+    #slideContainer:hover .playSlider {
+        opacity: 1;
     }
 
     .playSlider.activePlaySlider {
         box-shadow: 0 3px 0 rgb(75, 84, 79);
-        display: block;
+        opacity: 1;
         width: 36px;
         height: 36px;
         margin-left: -18px;
         margin-top: -12px;
-        transition: all 0.1s;
+        transition: all 0;
     }
 
     #progressBar {
@@ -359,7 +349,6 @@
         display:block;
         width: 0px;
         height: 10px;
-        border-radius: 2px;
         background: rgb(114, 105, 123);
         cursor: pointer;
         top: 0px;

@@ -29,6 +29,10 @@ export default {
         setQueueAndPlay(songs) {
             this.$emit("setQueueAndPlay", songs);  
         },
+        isActiveSong(song) {
+            return this.activeSong.id === song.id;
+        },      
+
     },
     computed: {
         loading() {

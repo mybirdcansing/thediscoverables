@@ -26,29 +26,14 @@
         </table>
         <div class="block-link"><play-button @play="setQueueAndPlay(songs)" /></div>
         <h4>Songs</h4>
-
-        <table class="song-table">
-            <tbody>
-                <tr 
-                    v-for="(song, index) in songs"
-                    :key="song.id"
-                    @click="toggleSong(song)"          
-                    v-bind:class="{'active-song': activeSong.id === song.id }"
-                    >
-                    <td class='song-table-index-cell'>
-                        {{index+1}}
-                    </td>
-                    <td class='song-table-cell'>
-                        <div class="song-title">{{ song.title }}</div>
-                    </td>
-                    <td>{{durationToString(song.duration)}}</td>
-                    <td class='song-table-cell'>
-                        ⋮
-                    </td>
-                </tr>
-            </tbody>
-        </table>   
- 
+            <song-list 
+                :playing="playing"
+                :loadingState="loadingState"
+                :activeSong="activeSong"
+                :songs="songs" 
+                @toggleSong="toggleSong"                
+                bullet="index"
+            />
     </div>
 </template>
 <script>
@@ -56,7 +41,7 @@
     import SongHelperMixin from './SongHelperMixin';
     import { StatusEnum } from '../store/StatusEnum';
     import PlayButton from './layout/PlayButton.vue';
-
+    import SongList from './layout/SongList.vue';
     export default {
         name: "Album",
         mixins: [SongHelperMixin],
@@ -66,7 +51,8 @@
             "playing"
         ],        
         components: {
-            PlayButton
+            PlayButton,
+            SongList
         },
         methods: {
 
@@ -119,6 +105,13 @@
                     }
                 });             
             }
+        },
+        created() {
+            this.$watch('catalogState', (newState, oldState) => {
+                if (newState === StatusEnum.LOADED) {
+                    this.$emit("setQueue", this.songs);
+                }
+            }); 
         }
     }
 </script>
@@ -127,13 +120,6 @@
     .page-content.album {
         margin-top:16px;
     }
-    .song-table-index-cell {
-        padding: 10px 4px 4px 14px;
-        text-align: center;
-    }
-    .song-table-cell {
-        padding: 10px 12px 4px 0px;
-    }    
     .album-header { 
         margin-left: 20px;
     }

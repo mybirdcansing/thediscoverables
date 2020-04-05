@@ -1,10 +1,19 @@
 <template>
-    <div class="page-content">
+    <div class="page-content dashboard">
         <h2>The Discoverables</h2>
         <div class='banner-outline'></div>
         <div class="dashboard-section">
             <h4>Songs</h4>
-            <table class="song-table">
+            <song-list 
+                :playing="playing"
+                :loadingState="loadingState"
+                :activeSong="activeSong"
+                :songs="topSongs" 
+                @toggleSong="toggleSong"
+                @openAlbum="openAlbum"
+                bullet="artwork"
+            />
+            <!-- <table class="song-table">
                 <tbody>
                     <tr 
                         v-for="song in topSongs"
@@ -28,7 +37,7 @@
                                 viewBox="-5 -5 34 34" 
                                 preserveAspectRatio="xMidYMid meet">
                                 <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"  fill="white"/></svg>								
-                            <svg class="spinner" v-bind:class="{'active': isActiveSong(song) && isLoading}"
+                            <svg class="spinner" v-bind:class="{'active': isActiveSong(song) && loading}"
                                 viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg" stroke="#fff">
                                 <g fill="none" fill-rule="evenodd" stroke-width="2">
                                     <circle cx="22" cy="22" r="1">
@@ -71,7 +80,7 @@
                             </div>
                         </td>
                         <td class="song-title-cell" @click.prevent="toggleSong(song)">
-                            <div><span class="song-title">{{ song.title }}</span></div>
+                            <div class="song-title">{{ song.title }}</div>
                             <a v-if="song.album" class="album-title" @click="openAlbum(song.album)">{{ song.album.title }}</a>
                         </td>
 
@@ -81,7 +90,7 @@
                     </tr>
                   
                 </tbody>
-            </table>
+            </table> -->
             <div class="block-link"><a href="#" class="dashboard-page-link">SHOW ALL</a></div>
         </div>
         <div class="dashboard-section">
@@ -101,7 +110,7 @@
     import { mapGetters } from 'vuex';
     import SongHelperMixin from './SongHelperMixin';
     import { StatusEnum } from '../store/StatusEnum';
-
+    import SongList from './layout/SongList.vue';
     const settings = {
         songLimit: 3,
         showSongsWithoutAlbums: false,
@@ -116,20 +125,16 @@
             "playing"
         ],
         components: {
+            SongList
         },
         methods: {
             openAlbum({id}) {
                 this.$router.push(`/album/${id}`);
             },
-            isActiveSong(song) {
-                return this.activeSong.id === song.id;
-            },
-            
+           
         },
         computed: {
-            isLoading() {
-                return this.loadingState == StatusEnum.LOADING;
-            },
+
             topSongs: function() {
                 let set;
                 if (this.homepagePlaylist && this.homepagePlaylist.songs.length > 0) {                    

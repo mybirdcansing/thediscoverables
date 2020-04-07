@@ -1,6 +1,6 @@
 import {CatalogConnector} from '../../connectors/CatalogConnector';
 import { RestConnector } from '../../connectors/RestConnector';
-import { StatusEnum } from '../StatusEnum';
+import StatusEnum from '../StatusEnum';
 import QueuePositionEnum from '../QueuePositionEnum';
 
 const state = {

@@ -6,6 +6,7 @@ Vue.use(VueRouter);
 import Music from './components/Music.vue';
 import Dashboard from './components/Dashboard.vue';
 import Song from './components/Song.vue';
+import Songs from './components/Songs.vue';
 import Album from './components/Album.vue';
 import store from './store/store';
 
@@ -40,7 +41,20 @@ const router = new VueRouter({
                         title: `${titlePrefix}: Music`,
                     },
                 },
-                { path: '/song/:id', component: Song },
+                { 
+                    path: '/songs',
+                    component: Songs,
+                    meta: {
+                        title: `${titlePrefix}: Songs`,
+                    },
+                },                
+                { 
+                    path: '/song/:id',
+                    component: Song,
+                    meta: {
+                        title: `${titlePrefix}`,
+                    },
+                },
                 { 
                     path: '/album/:id', 
                     component: Album,

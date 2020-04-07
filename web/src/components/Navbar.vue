@@ -2,8 +2,8 @@
     <div>
         <nav>
             <router-link to="/">
-            <img src="../assets/logo.jpeg" alt="The Discoverables" class="band-logo" />
-            <!-- Music -->
+                <img src="../assets/logo.jpeg" alt="The Discoverables" class="band-logo" />
+                <!-- Music -->
             </router-link>
             <div v-if='isDevelopment' style="float:right;">
                 <router-link to="/manager">Manager</router-link>

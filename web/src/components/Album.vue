@@ -39,7 +39,7 @@
 <script>
     import { mapGetters } from 'vuex';
     import SongHelperMixin from './SongHelperMixin';
-    import { StatusEnum } from '../store/StatusEnum';
+    import StatusEnum from '../store/StatusEnum';
     import PlayButton from './layout/PlayButton.vue';
     import SongList from './layout/SongList.vue';
     export default {

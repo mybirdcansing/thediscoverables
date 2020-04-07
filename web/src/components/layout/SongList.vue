@@ -73,10 +73,6 @@
                         </svg>
                     </div>
                     <div v-else class="song-list-album-artwork-div">
-                        <!-- <svg class='song-list-album-artwork song-list-index'> 
-                            <rect x="12" y="12"  width="15" height="15"
-                            style="stroke:white;stroke-width:2;fill-opacity:0;stroke-opacity:.7" />                            
-                        </svg> -->
                        <svg class='song-list-album-artwork song-list-listen-icon' xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
                             viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
                             <path d="M196.267,409.6h-34.133c-4.71,0-8.533,3.823-8.533,8.533s3.823,8.533,8.533,8.533h34.133c4.71,0,8.533-3.823,8.533-8.533
@@ -117,12 +113,12 @@
                 <td class="song-title-cell" @click.prevent="toggleSong(song)">
                     <div class="song-title">{{ song.title }}</div>
                     <a 
-                        v-if="bullet === 'artwork' && song.album" 
+                        v-if="showAlbumLink && song.album" 
                         class="album-title" 
                         @click="openAlbum(song.album)">{{ song.album.title }}</a>
                 </td>
                 <td>
-                    ⋮
+                    {{durationToString(song.duration)}}
                 </td>
             </tr>
             
@@ -140,7 +136,8 @@
             "loadingState",
             "playing",
             "songs",
-            "bullet"
+            "bullet",
+            "showAlbumLink"
         ],
     }
 </script>

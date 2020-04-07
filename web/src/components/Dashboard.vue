@@ -11,15 +11,16 @@
                 :songs="topSongs" 
                 @toggleSong="toggleSong"
                 @openAlbum="goToAlbum"
+                showAlbumLink="true"
                 bullet="artwork"
             />
 
-            <div class="block-link"><router-link to="/songs">ALL SONGS</router-link></div>
+            <div class="block-link"><router-link to="/songs">SHOW ALL</router-link></div>
         </div>
         <div class="dashboard-section">
             <h4>Albums</h4>
             <div class="scrolling-wrapper">
-                <div class="album card" v-for="album in albumSet" :key="album.id"  @click="openAlbum(album)">
+                <div class="album card" v-for="album in albumSet" :key="album.id"  @click="goToAlbum(album)">
                     <div>
                         <img class='album-list-album-artwork' :src="'../artwork/medium~' + album.artworkFilename" :alt="album.title">
                     </div>

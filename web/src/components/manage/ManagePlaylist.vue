@@ -77,7 +77,7 @@
     import FormButtons from './layout/FormButtons.vue';
     import FormAlerts from './layout/FormAlerts.vue';
     import DeleteButtonMixin from './layout/DeleteButtonMixin';
-    import { StatusEnum } from '../../store/StatusEnum';
+    import StatusEnum from '../../store/StatusEnum';
     import draggable from "vuedraggable";
     export default {
         name: "ManagePlaylist",

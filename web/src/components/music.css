@@ -172,7 +172,9 @@ a:hover {
     color: #eee;
 }
 
-
+.song-list-listen-icon {
+    opacity: .2;
+}
 
 /* PHONE */
 @media (max-width: 992px) { 

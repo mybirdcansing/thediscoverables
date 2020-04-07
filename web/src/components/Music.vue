@@ -37,7 +37,7 @@
     import { mapGetters, mapActions } from 'vuex';
     import Hammer from 'hammerjs';
     import SongHelperMixin from './SongHelperMixin';
-    import { StatusEnum } from '../store/StatusEnum';
+    import StatusEnum from '../store/StatusEnum';
 
     let ticker = null;
     let playPromise;
@@ -64,7 +64,6 @@
             },
             setQueueAndPlay: function(songs) {
                 this.queue = songs;
-                // this.$refs.player.pause();
                 this.activeSong = { id: null };
                 this.toggleSong(songs[0]);
             },
@@ -148,26 +147,6 @@
             const progressBar = this.$refs.progressBar;
             const airPlay = this.$refs.airPlay;
             const footer = this.$refs.airPlay.footer;
-            
-            // Detect if AirPlay is available
-            // Mac OS Safari 9+ only
-            if (window.WebKitPlaybackTargetAvailabilityEvent) {
-                player.addEventListener('webkitplaybacktargetavailabilitychanged', function(event) {
-                    switch (event.availability) {
-                        case "available":
-                            airPlay.style.display = 'inline-block';
-                        break;
-
-                        default:
-                        airPlay.style.display = 'none';
-                    }
-                    airPlay.addEventListener('click', function() {
-                        player.webkitShowPlaybackTargetPicker();
-                    });
-                });
-            } else {
-                airPlay.style.display = 'none';
-            }
 
             let sliderBeingSlided = false;
 
@@ -274,6 +253,32 @@
                 }                
             });
 
+            // Detect if AirPlay is available
+            // Mac OS Safari 9+ only
+            if (window.WebKitPlaybackTargetAvailabilityEvent) {
+                player.addEventListener('webkitplaybacktargetavailabilitychanged', function(event) {
+                    switch (event.availability) {
+                        case "available":
+                            airPlay.style.display = 'inline-block';
+                        break;
+
+                        default:
+                        airPlay.style.display = 'none';
+                    }
+                    airPlay.addEventListener('click', function() {
+                        player.webkitShowPlaybackTargetPicker();
+                    });
+                });
+            } else {
+                airPlay.style.display = 'none';
+            }
+
+            document.addEventListener("keydown", function(e) {
+                e = e || window.event;
+                if (e.keyCode == 32 && this.activeSong.id) {
+                    this.toggleSong(this.activeSong)
+                }
+            }.bind(this));
         } 
     }
 </script>

@@ -46,7 +46,7 @@
     import FormAlerts from './layout/FormAlerts.vue';
     import FormButtons from './layout/FormButtons.vue';
     import DeleteButtonMixin from './layout/DeleteButtonMixin';
-    import { StatusEnum } from '../../store/StatusEnum';
+    import StatusEnum from '../../store/StatusEnum';
     export default {
         name: "ManageSong",
         mixins: [DeleteButtonMixin],

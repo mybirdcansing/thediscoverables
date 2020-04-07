@@ -1,11 +1,6 @@
-import { StatusEnum } from '../store/StatusEnum';
+import StatusEnum from '../store/StatusEnum';
 export default {
-    data: function () {
-        return {
 
-            
-        };
-    },
     methods: {
         durationToString: function(duration) {
             if (isNaN(duration)) {
@@ -24,7 +19,10 @@ export default {
             return (minute < 10 ? "0" + minute : minute) + ":" + (seconds < 10 ? "0" + seconds : seconds);
         },
         toggleSong(song) {
-            this.$emit("toggleSong", song);            
+            this.$emit("toggleSong", song);
+        },
+        openAlbum(album) {
+            this.$emit('openAlbum', album);
         },
         setQueueAndPlay(songs) {
             this.$emit("setQueueAndPlay", songs);  
@@ -32,7 +30,6 @@ export default {
         isActiveSong(song) {
             return this.activeSong.id === song.id;
         },      
-
     },
     computed: {
         loading() {

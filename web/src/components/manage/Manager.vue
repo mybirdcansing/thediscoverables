@@ -14,7 +14,7 @@
     import "./manage.css";
     import ManagerNavbar from './layout/ManagerNavbar.vue';
     import { mapActions, mapGetters } from 'vuex';
-    import { StatusEnum } from '../../store/StatusEnum';
+    import StatusEnum from '../../store/StatusEnum';
 
     export default {
         name: "Manager",

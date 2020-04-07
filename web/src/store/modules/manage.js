@@ -1,6 +1,6 @@
 import {UserConnector} from '../../connectors/UserConnector';
 import {RestConnector} from '../../connectors/RestConnector';
-import {StatusEnum} from '../StatusEnum';
+import StatusEnum from '../StatusEnum';
 
 const state = {
     manageState: StatusEnum.INIT,

@@ -12,21 +12,34 @@
         <div class="footer-spacer"></div>
         <footer class="footer" ref="footer" v-bind:class="{'playerActive': showPlayer}">
             <audio id="player" ref="player" :key="audioSrc" :src="audioSrc" preload="auto" controls></audio>
-            <div ref="slideContainer"  id="slideContainer">
-                <div ref="progressBar" id="progressBar">
-                    <div ref="playSlider" class="playSlider"></div>
-                </div>
-            </div>
-            <div>
-                <button ref="pausePlayer" @click="toggleSong(activeSong)">Play/Pause</button>
-                <span v-text="currentTimeString"></span> | <span v-text="durationString"></span> | 
-                <span v-text="activeSong.title"></span> | <span v-text="songAlbumTitle"></span> |
-                <span ref="airPlay" id="airPlay">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                        <path d="M6 22h12l-6-6zM21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4v-2H3V5h18v12h-4v2h4c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z" fill="white"/>
-                    </svg>
-                </span>
-            </div>
+            <table id="player-table">
+                <tr>
+                    <td class="player-hspace"></td>
+                    <td>
+                        <div ref="slideContainer"  id="slideContainer">
+                            <div ref="progressBar" id="progressBar">
+                                <div ref="playSlider" class="playSlider"></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="player-hspace"></td>
+                </tr>
+                <tr>
+                    <td colspan="3" >                                   
+                        <div>
+                            <button ref="pausePlayer" @click="toggleSong(activeSong)">Play/Pause</button>
+                            <span v-text="currentTimeString"></span> | <span v-text="durationString"></span> | 
+                            <span v-text="activeSong.title"></span> | <span v-text="songAlbumTitle"></span> |
+                            <span ref="airPlay" id="airPlay">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                    <path d="M6 22h12l-6-6zM21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4v-2H3V5h18v12h-4v2h4c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z" fill="white"/>
+                                </svg>
+                            </span>
+                        </div>
+                    </td>
+
+                </tr>
+            </table>
         </footer>        
     </div>
 </template>
@@ -39,15 +52,15 @@
     import SongHelperMixin from './SongHelperMixin';
     import StatusEnum from '../store/StatusEnum';
 
-    let ticker = null;
+    let ticker;
     let playPromise;
     export default {
         name: "Music",
         mixins: [SongHelperMixin],
         data: function () {
             return {
-                audioSrc: '', //data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA
-                activeSong: { id: null },
+                audioSrc: '',
+                activeSong: { },
                 durationString: '00:00',
                 currentTimeString: '00:00',
                 queue: [],
@@ -64,7 +77,7 @@
             },
             setQueueAndPlay: function(songs) {
                 this.queue = songs;
-                this.activeSong = { id: null };
+                this.activeSong = { };
                 this.toggleSong(songs[0]);
             },
             toggleSong: function(song) {
@@ -126,10 +139,9 @@
             },
             
         },
-
         computed: {
             showPlayer() {
-                return this.activeSong.id !== null;
+                return this.activeSong.id;
             },
             songAlbumTitle() {
                 if (this.activeSong.album) {
@@ -284,19 +296,28 @@
 </script>
 <style>
 
-    audio {
+    audio#player {
         display: none;
+        position: absolute;
+        left:-2000px;
     } 
-
+    
     .footer {
         display: none;
         position: fixed;       
         left: 0;
         bottom: 0;
         width: 100%;
-        padding: 0 44px 0 44px;
-        height: 60px;
+        /* padding: 0 44px 0 44px; */
+        padding:0;
+        height: 77px;
         background-color: #909090;
+    }
+    #player-table {
+        width: 100%;
+    }
+    #player-table .player-hspace {
+        width: 40px;
     }
     .footer-spacer {
         height: 20px;

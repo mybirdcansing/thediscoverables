@@ -10,36 +10,83 @@
             :playing="playing"
         ></router-view>
         <div class="footer-spacer"></div>
+        <audio id="player" ref="player" :key="audioSrc" :src="audioSrc" preload="auto"></audio>
         <footer class="footer" ref="footer" v-bind:class="{'playerActive': showPlayer}">
-            <audio id="player" ref="player" :key="audioSrc" :src="audioSrc" preload="auto" controls></audio>
-            <table id="player-table">
-                <tr>
-                    <td class="player-hspace"></td>
-                    <td>
-                        <div ref="slideContainer"  id="slideContainer">
-                            <div ref="progressBar" id="progressBar">
-                                <div ref="playSlider" class="playSlider"></div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="player-hspace"></td>
-                </tr>
-                <tr>
-                    <td colspan="3" >                                   
-                        <div>
-                            <button ref="pausePlayer" @click="toggleSong(activeSong)">Play/Pause</button>
-                            <span v-text="currentTimeString"></span> | <span v-text="durationString"></span> | 
-                            <span v-text="activeSong.title"></span> | <span v-text="songAlbumTitle"></span> |
-                            <span ref="airPlay" id="airPlay">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                                    <path d="M6 22h12l-6-6zM21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4v-2H3V5h18v12h-4v2h4c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z" fill="white"/>
-                                </svg>
+            
+            <div id="slideContainerContainer">
+                <div ref="slideContainer"  id="slideContainer">
+                    <div ref="progressBar" id="progressBar">
+                        <div ref="playSlider" class="playSlider"></div>
+                    </div>
+                </div>
+            </div>
+            <div id="timeDisplay">
+                <table> 
+                    <tr>
+                        <!-- <td ></td> -->
+                        <td class="title-cell">
+                            <span class="song-time">{{currentTimeString}} / {{durationString}}</span>
+                            <span class="song-title">{{activeSong.title}}</span> 
+                            <span v-if="activeSong.album">
+                                • 
+                                <router-link class="album-title" 
+                                    :to="'/album/' + activeSong.album.id">
+                                {{activeSong.album.title}}</router-link>
+                              
                             </span>
-                        </div>
-                    </td>
+                        </td>
+                    </tr>
+                </table>     
+            </div>
+            <div id="playerControls">
+                <table>
+                    <tr>
+                        <td @click="playPrevious"
+                            class="previous" 
+                            v-bind:class="{
+                                'first-song-active': songIndex === 0,
+                            }">
+                            <img src="../assets/previous-icon.svg" alt="Next" />
+                        </td>                        
+                        <td id="playerToggle"
+                                @click="toggleSong(activeSong)"
+                                v-bind:class="{
+                                'loading': loading,
+                                'playing': playing,
+                                'paused': !playing 
+                            }">
+                                <img src="../assets/play-icon.svg" alt="Play" class="play">
+                                <img src="../assets/pause-icon.svg" alt="Pause" class="pause">
+                                <img src="../assets/spinner-icon.svg" alt="Loading" class="spinner">
+                        </td>
+                        <td 
+                            @click="playNext(false)"
+                            class="next" 
+                            v-bind:class="{
+                                'last-song-active': queue.length === songIndex + 1,
+                            }">
+                            <img src="../assets/next-icon.svg" alt="Next" />
+                        </td>
+                        <td v-if="!isIOS" class="volume-cell">
+        
+                            <img src="../assets/volume_down.svg" alt="volume down" />
+                            <input @input="setVolume" ref="playerVolumeSlider" type="range" min="0" max="100">
+                            <img src="../assets/volume_up.svg" alt="volume up" />
+                            &nbsp; &nbsp;
+                        </td>
+                    </tr>
+                </table>
+     
 
-                </tr>
-            </table>
+   
+            
+                <span ref="airPlay" id="airPlay">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path d="M6 22h12l-6-6zM21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4v-2H3V5h18v12h-4v2h4c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z" fill="white"/>
+                    </svg>
+                </span>
+
+            </div>
         </footer>        
     </div>
 </template>
@@ -75,10 +122,31 @@
             setQueue: function(songs) {
                 this.queue = songs;
             },
+            setVolume(ev) {
+                this.$refs.player.volume = ev.target.value / 100;
+            },           
             setQueueAndPlay: function(songs) {
                 this.queue = songs;
                 this.activeSong = { };
                 this.toggleSong(songs[0]);
+            },
+            playPrevious: function() {
+                if (this.queue.length === 0 || this.songIndex < 1) {
+                    return;
+                } 
+                this.toggleSong(this.queue[this.songIndex - 1]);
+            },
+            playNext: function(loop) {
+                const queueLength = this.queue.length;
+                if (queueLength === 0) {
+                    return;
+                } 
+                // prevent looping?
+                if (queueLength === (this.songIndex + 1) && !loop) {
+                    return;
+                }
+                const nextIndex = (queueLength > (this.songIndex + 1)) ? this.songIndex + 1 : 0;
+                this.toggleSong(this.queue[nextIndex]);
             },
             toggleSong: function(song) {
                 const player = this.$refs.player;
@@ -128,8 +196,8 @@
                     }
                 } else {
                     playPromise = player.play();
-                }
-                
+                }                                
+
                 function isChromeDesktop() {
                     const ua = navigator.userAgent;
                     const isChrome = /Chrome/i.test(ua);
@@ -140,17 +208,22 @@
             
         },
         computed: {
+            songIndex: function() {
+                if (!this.queue) return 0;
+                return this.queue.findIndex(song => song.id === this.activeSong.id);
+            },            
             showPlayer() {
                 return this.activeSong.id;
             },
-            songAlbumTitle() {
-                if (this.activeSong.album) {
-                    return this.activeSong.album.title;
-                }
+            loading() {
+                return this.loadingState === StatusEnum.LOADING;
             },
             ...mapGetters([
                 'songsWithAlbums',
-            ])
+            ]),
+            isIOS() {
+                return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            }
         },
         mounted() {          
             const player = this.$refs.player;
@@ -160,31 +233,34 @@
             const airPlay = this.$refs.airPlay;
             const footer = this.$refs.airPlay.footer;
 
+            if (this.$refs.playerVolumeSlider) {
+                this.$refs.playerVolumeSlider.value = player.volume * 100;
+            }
+
             let sliderBeingSlided = false;
 
-            player.addEventListener('playing', (ev) => {
+            player.addEventListener('playing', () => {
                 this.loadingState = StatusEnum.LOADED;
                 this.playing = true;
                 ticker = requestAnimationFrame(tick);
             });
 
             function tick() {
-                // if the duration is set, 
-                // and the player isn't paused, 
+                // if the duration is set, and the player isn't paused, 
                 // and the slider isn't being moved,
+                // set the slider's position dynamically
                 if (!isNaN(player.duration) && !player.paused && !sliderBeingSlided) {
-                    // set the slider's position dynamically
                     const progress = (player.currentTime / player.duration) * 100;
                     progressBar.style.width = `${progress}%`;
                 }
                 ticker = requestAnimationFrame(tick);
             }
 
-            player.addEventListener('timeupdate', (ev) => {
+            player.addEventListener('timeupdate', () => {
                 this.$data.currentTimeString = this.currentTimeToString(player.currentTime);
             });
 
-            player.addEventListener('durationchange', (ev) => {
+            player.addEventListener('durationchange', () => {
                 this.$data.durationString = this.durationToString(player.duration);
             });
 
@@ -220,7 +296,7 @@
                 }
             }
 
-            const handlePause =  (ev) => {
+            player.addEventListener('pause', () => {
                 progressBar.style.width = `${(player.currentTime / player.duration) * 100}%`;
                 // if the player is still paused on the next animation frame, cancel the ticker
                 requestAnimationFrame(() => {
@@ -229,26 +305,20 @@
                         cancelAnimationFrame(ticker);
                     }
                 });
-            }
-
-            player.addEventListener('pause', handlePause);
+            });
 
             // I have to find a way to test this
-            // player.addEventListener('stalled', handlePause);
+            player.addEventListener('stalled', () => {
+                this.loadingState = StatusEnum.LOADING;
+            });
+     
+            player.addEventListener('waiting', () => {
+                this.loadingState = StatusEnum.LOADING;
+            });
 
-            player.addEventListener('ended', function () {
-                cancelAnimationFrame(ticker);
-                if (this.queue.length === 0) {
-                    return;
-                } 
-                const index = this.queue.findIndex(song => song.id === this.activeSong.id);
-                // prevent looping of the queue...?
-                // if (this.queue.length > (index + 1)) {
-                //     return;
-                // }
-                const nextIndex = (this.queue.length > (index + 1)) ? index + 1 : 0;
-                this.toggleSong(this.queue[nextIndex]);            
-            }.bind(this));
+            player.addEventListener('ended', () => {
+                this.playNext(true);
+            });
 
             (new Hammer(slideContainer)).on("pan press tap pressup", function(ev) {
                 cancelAnimationFrame(ticker);
@@ -268,8 +338,8 @@
             // Detect if AirPlay is available
             // Mac OS Safari 9+ only
             if (window.WebKitPlaybackTargetAvailabilityEvent) {
-                player.addEventListener('webkitplaybacktargetavailabilitychanged', function(event) {
-                    switch (event.availability) {
+                player.addEventListener('webkitplaybacktargetavailabilitychanged', function(ev) {
+                    switch (ev.availability) {
                         case "available":
                             airPlay.style.display = 'inline-block';
                         break;
@@ -285,18 +355,18 @@
                 airPlay.style.display = 'none';
             }
 
-            document.addEventListener("keydown", function(e) {
-                e = e || window.event;
-                if (e.keyCode == 32 && this.activeSong.id) {
+            document.addEventListener("keydown", (ev) => {
+                ev = ev || window.event;
+                if (ev.keyCode == 32 && this.activeSong.id) {
                     this.toggleSong(this.activeSong)
                 }
-            }.bind(this));
+            });
         } 
     }
 </script>
 <style>
 
-    audio#player {
+    #player {
         display: none;
         position: absolute;
         left:-2000px;
@@ -313,11 +383,90 @@
         height: 77px;
         background-color: #909090;
     }
-    #player-table {
-        width: 100%;
+    .footer table {
+        margin: 0 auto 0 auto;
     }
-    #player-table .player-hspace {
-        width: 40px;
+    #slideContainerContainer,
+    #timeDisplay {
+        width: 100%;
+        padding: 0 40px 2px 40px;
+        min-width: 200px;
+    }
+    #timeDisplay table {
+        width: 100%;
+        height: 20px;
+        font-size: 10pt;
+    }
+
+    #timeDisplay .song-time {
+        text-shadow: -1px -1px 1px rgba(255,255,255,.1), 1px 1px 1px rgba(0,0,0,.5);
+    }
+
+    #timeDisplay .title-cell {
+   
+        text-align: center;
+        white-space: nowrap;
+        position: relative;
+        overflow: hidden;
+        max-width: 200px;
+    }
+    #timeDisplay .title-cell .song-title {
+        cursor: text;
+        font-weight: 550;
+    }
+    #timeDisplay .title-cell .album-title {
+        color: #eee;
+    }
+
+    #playerControls {
+        padding: 0 30px 0 30px;
+        margin-top: -6px;
+        position: relative;
+    }
+
+    #playerControls img {
+        opacity: .8;
+        cursor:pointer;        
+    }    
+    #playerControls img:hover {
+        opacity: 1;
+    }
+    #playerControls .previous.first-song-active img,
+    #playerControls .next.last-song-active img {
+        opacity: .3;
+        cursor:default;
+    }    
+    #playerControls .volume-cell {
+        white-space: nowrap;
+    } 
+    #playerToggle {
+        width:36px;
+        height:34px;
+    }
+
+
+    #playerToggle.playing .play,
+    #playerToggle.loading .play {
+        display: none;
+    }
+    
+    #playerToggle .spinner,
+    #playerToggle.playing .spinner,
+    #playerToggle.paused .spinner {
+        display: none;
+    }
+    #playerToggle.loading .spinner {
+        display: block;
+    }
+
+    #playerToggle.paused .pause,
+    #playerToggle.loading .pause {
+        display: none;
+    }
+    
+    #playerControls .next, #playerControls .previous {
+        width:36px;
+        height:36px;
     }
     .footer-spacer {
         height: 20px;
@@ -327,7 +476,7 @@
         position: relative;
         height: 10px;
         width: 100%;
-        margin: 6px auto 12px auto;
+        margin: 8px auto 4px auto;
         background: #d3d3d3;
         box-shadow:outset 0 0 0 1px rgb(157, 154, 154), outset 0 0 0 2px rgb(202, 203, 201);
         cursor: pointer;
@@ -342,7 +491,7 @@
         background: #b6b6b6;
         z-index: 80;
     }  
-    #slideContainer:hover .playSlider {
+    #slideContainer .playSlider {
         position: relative;
         opacity: 0;
         margin-right: -9px;
@@ -356,7 +505,7 @@
         z-index: 100;
     }
     
-    #slideContainer:hover .playSlider {
+    #slideContainer .playSlider {
         opacity: 1;
     }
 

@@ -93,27 +93,27 @@ a {
 } 
 
 
-.song-list-row:hover .play-button-arrow,
-.song-list-row.active-song.paused:hover .play-button-arrow {
+.song-list-row:hover .play,
+.song-list-row.active-song.paused:hover .play {
     display: block;
     opacity: .9;
 
 }
 
-.song-list-row.active-song.paused .play-button-arrow {
+.song-list-row.active-song.paused .play {
     display: block;
     opacity: .7;
 }
 
-.song-list-row.active-song.playing:hover .play-button-arrow,
-.song-list-row.active-song.loading:hover .play-button-arrow {
+.song-list-row.active-song.playing:hover .play,
+.song-list-row.active-song.loading:hover .play {
     display: none;
 }
 .song-list-row.active-song .song-list-index,
 .song-list-row:hover .song-list-index {
     opacity: 0;
 }
-.song-list-row .play-button-arrow {
+.song-list-row .play {
     display: none;
     position: absolute;
     background-color: rgba(40, 39, 39, 0.5);
@@ -208,6 +208,7 @@ a:hover {
     .song-list-row {
         height: 36px; 
     }
+    .song-list-row img,
     .song-list-row svg {
         width: 36px;
         height: 36px; 
@@ -257,7 +258,7 @@ a:hover {
     .song-list-album-artwork {
         width: 46px;
     }
-    .song-list-row .play-button-arrow {
+    .song-list-row .play {
         width: 46px;
         height: 46px; 
     }    

@@ -67,25 +67,21 @@
                             }">
                             <img src="../assets/next-icon.svg" alt="Next" />
                         </td>
-                        <td v-if="!isIOS" class="volume-cell">
-        
-                            <img src="../assets/volume_down.svg" alt="volume down" />
-                            <input @input="setVolume" ref="playerVolumeSlider" type="range" min="0" max="100">
-                            <img src="../assets/volume_up.svg" alt="volume up" />
-                            &nbsp; &nbsp;
+                        <td class="volume-cell">
+                            <span v-if="!isIOS">
+                                <img src="../assets/volume_down.svg" alt="volume down" />
+                                <input @input="setVolume" ref="playerVolumeSlider" type="range" min="0" max="100">
+                                <img src="../assets/volume_up.svg" alt="volume up" />
+                            </span>
+                            <span v-else ref="airPlay" id="airPlay">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                    <path d="M6 22h12l-6-6zM21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4v-2H3V5h18v12h-4v2h4c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z" fill="white"/>
+                                </svg>
+                            </span>
+                                &nbsp; &nbsp;
                         </td>
                     </tr>
                 </table>
-     
-
-   
-            
-                <span ref="airPlay" id="airPlay">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                        <path d="M6 22h12l-6-6zM21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4v-2H3V5h18v12h-4v2h4c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z" fill="white"/>
-                    </svg>
-                </span>
-
             </div>
         </footer>        
     </div>
@@ -230,8 +226,6 @@
             const slider = this.$refs.playSlider;
             const slideContainer = this.$refs.slideContainer;
             const progressBar = this.$refs.progressBar;
-            const airPlay = this.$refs.airPlay;
-            const footer = this.$refs.airPlay.footer;
 
             if (this.$refs.playerVolumeSlider) {
                 this.$refs.playerVolumeSlider.value = player.volume * 100;
@@ -337,22 +331,25 @@
 
             // Detect if AirPlay is available
             // Mac OS Safari 9+ only
-            if (window.WebKitPlaybackTargetAvailabilityEvent) {
-                player.addEventListener('webkitplaybacktargetavailabilitychanged', function(ev) {
-                    switch (ev.availability) {
-                        case "available":
-                            airPlay.style.display = 'inline-block';
-                        break;
-
-                        default:
-                        airPlay.style.display = 'none';
-                    }
-                    airPlay.addEventListener('click', function() {
-                        player.webkitShowPlaybackTargetPicker();
+            const airPlay = this.$refs.airPlay;
+            if (airPlay) {
+                if (window.WebKitPlaybackTargetAvailabilityEvent) {
+                    player.addEventListener('webkitplaybacktargetavailabilitychanged', function(ev) {
+                        switch (ev.availability) {
+                            case "available":
+                                airPlay.style.display = 'inline-block';
+                            break;
+    
+                            default:
+                            airPlay.style.display = 'none';
+                        }
+                        airPlay.addEventListener('click', function() {
+                            player.webkitShowPlaybackTargetPicker();
+                        });
                     });
-                });
-            } else {
-                airPlay.style.display = 'none';
+                } else {
+                    airPlay.style.display = 'none';
+                }
             }
 
             document.addEventListener("keydown", (ev) => {
@@ -403,7 +400,6 @@
     }
 
     #timeDisplay .title-cell {
-   
         text-align: center;
         white-space: nowrap;
         position: relative;

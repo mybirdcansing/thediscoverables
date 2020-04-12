@@ -50,12 +50,6 @@ a {
     text-decoration: none;
 }
 
-#airPlay {
-    position: absolute;
-    left: 8px;
-    top: 15px;
-    display: none;
-}
 
 .scrolling-wrapper {
   overflow: hidden;

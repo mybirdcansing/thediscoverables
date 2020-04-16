@@ -1,19 +1,21 @@
 <template>
     <div class="page-content songs">
-        <h2>The Discoverables</h2>
-        <h4>All Songs</h4>
-        <div class="block-link"><play-button @play="setQueueAndPlay(songsWithAlbums)" /></div>
-            <song-list 
-                :playing="playing"
-                :loadingState="loadingState"
-                :activeSong="activeSong"
-                :songs="songsWithAlbums" 
-                @toggleSong="toggleSong"
-                @openAlbum="goToAlbum"  
-                showAlbumLink="true"            
-                bullet="artwork"
-            />
-    </div>
+        <div class="all-songs-section">
+            <h2>The Discoverables</h2>
+            <h4>All Songs</h4>
+            <div class="block-link"><play-button @play="setQueueAndPlay(songsWithAlbums)" /></div>
+                <song-list 
+                    :playing="playing"
+                    :loadingState="loadingState"
+                    :activeSong="activeSong"
+                    :songs="songsWithAlbums" 
+                    @toggleSong="toggleSong"
+                    @openAlbum="goToAlbum"  
+                    showAlbumLink="true"            
+                    bullet="artwork"
+                />
+        </div>
+    </div> 
 </template>
 <script>
     import { mapGetters } from 'vuex';

@@ -1,31 +1,33 @@
 <template>
-    <div class="page-content album" v-if="album">
-        <table class="album-header">
-            <tr class="album-header">
-                <td class="album-artwork">
-                    <img class="album-page-artwork-img" :src="'../artwork/medium~' + album.artworkFilename" :alt="album.title">
-                </td>
-                <td class="album-description">
-                    <div>
-                        {{album.title}}
-                    </div>
-                    <div class="album-details">
-                        <!-- 
-                        <span v-if="songCount === 1">Single</span>
-                        <span v-if="songCount <= 6">EP</span>
-                        <span v-if="songCount > 6">Album</span> 
-                        • 
-                        -->
-                        <router-link to="/">The Discoverables</router-link> • {{publishYear}}
-                    </div>
-                    <div class="album-details">
-                        {{songCount}} songs • {{totalMinutes}} minutes
-                    </div>
-                </td>
-            </tr>
-        </table>
-        <div class="block-link"><play-button @play="setQueueAndPlay(songs)" /></div>
-        <h4>Songs</h4>
+    <div class="page-content" v-if="album">
+        <div class="album-section">
+            <h2 class='band-name'>The Discoverables</h2>
+            <table class="album-header">
+                <tr class="album-header">
+                    <td class="album-artwork">
+                        <img class="album-page-artwork-img" :src="'../artwork/medium~' + album.artworkFilename" :alt="album.title">
+                    </td>
+                    <td class="album-description">
+                        <div>
+                            {{album.title}}
+                        </div>
+                        <div class="album-details">
+                            <!-- 
+                            <span v-if="songCount === 1">Single</span>
+                            <span v-if="songCount <= 6">EP</span>
+                            <span v-if="songCount > 6">Album</span> 
+                            • 
+                            -->
+                            <router-link to="/">The Discoverables</router-link> • {{publishYear}}
+                        </div>
+                        <div class="album-details">
+                            {{songCount}} songs • {{totalMinutes}} minutes
+                        </div>
+                    </td>
+                </tr>
+            </table>
+            <div class="block-link"><play-button @play="setQueueAndPlay(songs)" /></div>
+            <h4 class="album-page-songs-title">Songs</h4>
             <song-list 
                 :playing="playing"
                 :loadingState="loadingState"
@@ -34,6 +36,7 @@
                 @toggleSong="toggleSong"                
                 bullet="index"
             />
+        </div>
     </div>
 </template>
 <script>
@@ -117,13 +120,14 @@
 </script>
 
 <style scoped>
-    .page-content.album {
-        margin-top:16px;
-    }
+    
     .album-header { 
-        margin-left: 20px;
+        margin:19px 20px 6px 20px;
+      
     }
-    .album-header .album-artwork img{
+
+    .album-header .album-artwork img {
         margin-left: -4px;
+        margin-right: 20px;
     }
 </style>

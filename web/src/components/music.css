@@ -8,7 +8,7 @@ html, body {
 body {
     margin: 0px;
     padding: 0px;
-    background-color: rgba(40, 39, 39, 1);
+    background-color: rgb(38, 38, 38);    
     color: #fff;
     font: 1em sans-serif;
     touch-action: manipulation;
@@ -30,9 +30,12 @@ img {
 
 
 .page-content {
-    padding: 20px 0 100px 0;
+    padding: 0 0 100px 0;
 }
 
+.band-name {
+    color: rgba(255, 255, 255, 0.8);
+}
 
 .dashboard-section {
     margin-bottom: 30px;
@@ -57,8 +60,12 @@ a {
   overflow-y: hidden;
   white-space: nowrap;
   margin: 0px 20px 0 20px;
+  -ms-overflow-style: none;
 }
 
+.scrolling-wrapper::-webkit-scrollbar {
+    display: none;
+}
 .card {
   display: inline-block;
 }
@@ -69,7 +76,7 @@ a {
      text-align: left;
      margin: 8px 0px 0px 0px;
  }
-.song-table .song-title {
+.song-title {
     padding: 0px;
 }
 .song-title-cell {
@@ -110,16 +117,14 @@ a {
 .song-list-row .play {
     display: none;
     position: absolute;
-    background-color: rgba(40, 39, 39, 0.5);
+    opacity: .5;
 }
-
 .song-list-row.active-song.playing .pause {
     display: block;
 }
 .song-list-row.active-song.playing:hover .pause {
     opacity: .9;
 }
-
 .song-list-row.active-song.loading .pause {
     display:none;
 }
@@ -131,7 +136,6 @@ a {
     position: absolute;
     display: none;
 }
-
 .song-list-row .spinner {
     position: absolute;
     display: none;
@@ -139,20 +143,21 @@ a {
 .song-list-row .spinner.active {
     display: inline-block;
 }
-
 .active-song {
-    background-color: rgba(30, 29, 29, 1);
+    background-color: #1a1a1a;
+    background-color: radial-gradient(crimson, skyblue);
 }
-
 .song-list-album-cell {
     cursor: pointer;
     text-align: left;
-    padding: 6px 20px 16px 20px;
+    padding: 0 20px 0 20px;
+}
+h4.album-page-songs-title {
+    margin-bottom: 8px;
 }
 .song-title {
     cursor: pointer;
     font-weight: 500;
-
 }
 .song-table td {
     padding-bottom: 1px;
@@ -171,11 +176,13 @@ a:hover {
 }
 
 /* PHONE */
-@media (max-width: 992px) { 
-
+@media (max-width: 892px) { 
     .album-artwork {
         width:50%;
         text-align: left;
+    }
+    .band-name {
+        font-size: large;
     }
 
     .album-description {
@@ -191,13 +198,14 @@ a:hover {
     }
 
     .album-list-album-artwork {
-        width: 150px;
+        width: 160px;
     }
     .album-page-artwork-img {
         width: 100%;
     }
     .song-list-album-artwork {
         width: 36px;
+        height: 36px;
     }
     .song-list-row {
         height: 36px; 
@@ -213,8 +221,8 @@ a:hover {
     }
     .song-table .album-title {
         font-size: 13px;
-        padding-top: 0px;
-        margin-top: 0px;
+        padding-top: 0;
+        margin-top: 0;
     }
 
     .music {      
@@ -233,17 +241,25 @@ a:hover {
     }
      
 }
-
-
-@media (min-width: 992px) { 
+@media (min-width: 692px) { 
+    .album-list-album-artwork {
+        width: 200px;
+        margin-right: 12px;
+    }
+}
+@media (min-width: 892px) { 
     .music {      
         background-position: center -60px;
-    }    
-    .song-table {
-        max-width: 700px;
+    }
+    .dashboard-section,
+    .album-section,
+    .all-songs-section {
+        margin: 0 auto;
+        width: 900px;
     }
     .album-list-album-artwork {
         width: 280px;
+        margin-right: 20px;
     }
     .album-page-artwork {
         width: 450px;
@@ -251,6 +267,8 @@ a:hover {
 
     .song-list-album-artwork {
         width: 46px;
+        height: 46px;
+
     }
     .song-list-row .play {
         width: 46px;
@@ -267,10 +285,10 @@ a:hover {
     .song-table .song-list-album-cell {
         width: 50px;
     }
-
-    .album-title, .song-title, .dashboard-page-link {
-        font-size: 20px;
+    .song-list-album-cell {
+        padding-top: 5px;
     }
+
     .dashboard-page-link {
         font-size: 14px;
         font-weight: 500;

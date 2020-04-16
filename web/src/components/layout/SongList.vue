@@ -21,7 +21,7 @@
                 </div>
                 <div v-else-if="bullet === 'index'" class="song-list-album-artwork-div">
                     <svg class='song-list-album-artwork song-list-index'>
-                        <text x="12" y="22" fill="white">{{index+1}}</text>
+                        <text x="16" y="27" fill="white">{{index+1}}</text>
                     </svg>
                 </div>
                 <div v-else class="song-list-album-artwork-div">
@@ -29,7 +29,7 @@
                 </div>                                      
             </td>
             <td class="song-title-cell">
-                <div class="song-title" @click="toggleSong(song)">{{ song.title }}</div>
+                <div @click="toggleSong(song)" class="song-title">{{ song.title }}</div>
                 <a @click.prevent="openAlbum(song.album)"
                     v-if="showAlbumLink && song.album" 
                     class="album-title">{{ song.album.title }}</a>

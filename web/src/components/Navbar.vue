@@ -2,9 +2,9 @@
     <div>
         <nav>
             <router-link to="/">
-                <img src="../assets/logo.jpeg" alt="The Discoverables" class="band-logo" />
-                <!-- Music -->
+                <img src="../assets/logo.jpeg" alt="The Discoverables" class="band-logo" />           
             </router-link>
+           
             <div v-if='isDevelopment' style="float:right;">
                 <router-link to="/manager">Manager</router-link>
             </div>
@@ -31,21 +31,23 @@
 
 <style scoped>
     #nav-spacer {
-        height:29px;
+        height:46px
     }
+
+
     .band-logo {
         position: relative;
 
         width:34px;
         border-radius: 50%;
     }
-
     nav {
         background-color: rgb(60, 64, 65);
         
-        padding:7px 24px 3px 10px;
+        padding:7px 24px 3px 16px;
         position: fixed;
         width: 100%;
+
 
     }
 </style>

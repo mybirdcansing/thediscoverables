@@ -12,12 +12,12 @@ export default {
     },
     methods: {
         confirmDeleteItem(item) {
-            this.$data.itemToDelete = item;
-            this.$data.showDeleteModal = true;    
+            this.itemToDelete = item;
+            this.showDeleteModal = true;    
         },
         closeDeleteItemModal() {
-            this.$data.showDeleteModal = false;
-            this.$data.itemToDelete = null;
+            this.showDeleteModal = false;
+            this.itemToDelete = null;
         },
         submitDelete(handler) {
             this.deleteItem({

@@ -1,8 +1,8 @@
 <template>
-    <div class="page-content dashboard">
-        <h2>The Discoverables</h2>
-        <div class='banner-outline'></div>
-        <div class="dashboard-section">
+    <div class="page-content">        
+        <div class='immersive-header'><div class='header-image'></div></div>
+        <div class="dashboard-section top-songs">
+        <h2 class='band-name'>The Discoverables</h2>
             <h4>Songs</h4>
             <song-list 
                 :playing="playing"
@@ -97,17 +97,58 @@
 </script>
 
 <style scoped>
-.music .page-content {      
-    background: url('../assets/dashboard_background.jpg') no-repeat center center fixed; 
-    -webkit-background-size: contain;
-    -moz-background-size: contain;
-    -o-background-size: contain;
-    background-size:contain;
-    background-position: top;
+
+.immersive-header {
+   
+    width: 100%;
+    background: linear-gradient(360deg, rgba(38, 38, 38, 1) 8.98%, rgba(38, 38, 38, 0) 100%) ; 
+
 }
 
-.music .banner-outline {
-    padding: 12%;
+.band-name {
+    position: absolute;
+    top:45px;
+    color:rgba(0, 0, 0, 0.55);
 }
+
+.header-image {
+    background-image: url('../assets/xx-large-adam_bay3.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position-x: center;
+    position: relative;
+    width: 100%;
+    height: 400px;
+
+    z-index: -1;
+}
+@media (max-width: 592px) { 
+    .header-image {
+        height: 200px;
+    }
+    .top-songs {
+        margin-top: -30px;
+    }    
+}
+
+@media (max-width: 892px) { 
+    .header-image {
+        height: 300px;
+    }
+    .top-songs {
+        margin-top: -30px;
+    }    
+}
+
+@media (min-width: 892px) { 
+    .header-image {
+        height: 650px;
+    }
+   .top-songs {
+        margin-top: -60px;
+    } 
+}
+
+
 
 </style>

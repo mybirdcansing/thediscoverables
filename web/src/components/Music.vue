@@ -168,7 +168,7 @@
                         progressBar.style.width = '0px';
                     });
                     const src = `/audio/${encodeURI(song.filename)}`;
-                    if (isChromeDesktop() && !player.paused) {
+                    if (this.isChromeDesktop && !player.paused) {
                         // Chrome on Mac has a bit of a stutter when changing tracks.
                         // a slight timeout makes it better
                         setTimeout(function() {
@@ -194,12 +194,7 @@
                     playPromise = player.play();
                 }                                
 
-                function isChromeDesktop() {
-                    const ua = navigator.userAgent;
-                    const isChrome = /Chrome/i.test(ua);
-                    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|mobile|CriOS/i.test(ua);
-                    return ((!isMobile && isChrome));
-                }                
+               
             },
             
         },
@@ -218,8 +213,26 @@
                 'songsWithAlbums',
             ]),
             isIOS() {
-                return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-            }
+                const ua = navigator.userAgent;
+                const iOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+                if (iOS) {
+                    return true;
+                }
+                if (ua.indexOf('Macintosh') > -1) {
+                    try {
+                        document.createEvent("TouchEvent");
+                        return true;
+                    } catch (e) {}
+                }
+
+                return false;
+            },
+            isChromeDesktop() {
+                const ua = navigator.userAgent;
+                const isChrome = /Chrome/i.test(ua);
+                const isMobile = /Android|webOS|BlackBerry|IEMobile|Opera Mini|Mobile|mobile|CriOS/i.test(ua) || this.isIOS;
+                return ((!isMobile && isChrome));
+            } 
         },
         mounted() {          
             const player = this.$refs.player;
@@ -251,11 +264,11 @@
             }
 
             player.addEventListener('timeupdate', () => {
-                this.$data.currentTimeString = this.currentTimeToString(player.currentTime);
+                this.currentTimeString = this.currentTimeToString(player.currentTime);
             });
 
             player.addEventListener('durationchange', () => {
-                this.$data.durationString = this.durationToString(player.duration);
+                this.durationString = this.durationToString(player.duration);
             });
 
             player.addEventListener('progress', handleProgress, false);
@@ -381,23 +394,23 @@
         background-color: #909090;
     }
     .footer table {
-        margin: 0 auto 0 auto;
+        margin: 0 auto;
     }
-    #slideContainerContainer,
-    #timeDisplay {
+    #slideContainerContainer, #timeDisplay {
         width: 100%;
         padding: 0 40px 2px 40px;
         min-width: 200px;
     }
+
     #timeDisplay table {
         width: 100%;
         height: 20px;
-        font-size: 10pt;
+        
     }
-
+/* 
     #timeDisplay .song-time {
         text-shadow: -1px -1px 1px rgba(255,255,255,.1), 1px 1px 1px rgba(0,0,0,.5);
-    }
+    } */
 
     #timeDisplay .title-cell {
         text-align: center;
@@ -440,7 +453,6 @@
         height:34px;
     }
 
-
     #playerToggle.playing .play,
     #playerToggle.loading .play {
         display: none;
@@ -460,7 +472,8 @@
         display: none;
     }
     
-    #playerControls .next, #playerControls .previous {
+    #playerControls .next, 
+    #playerControls .previous {
         width:36px;
         height:36px;
     }

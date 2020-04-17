@@ -107,7 +107,6 @@ class PlaylistController {
         }
         try {
             $playlistId = $this->playlistData->insert($playlist, $this->administrator);
-            error_log("playlistId from handler:" . $playlistId);
             $response['status_code_header'] = 'HTTP/1.1 201 Created';
             $response['body'] = json_encode([
                 "playlistCreated" => true,

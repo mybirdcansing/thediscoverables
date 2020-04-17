@@ -15,7 +15,9 @@ header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
 $input = json_decode(file_get_contents('php://input'));
-if ($input->data) $input = $input->data;
+if (isset($input->data)) {
+	$input = $input->data;
+}
 $user = null;
 
 if ((!isset($input->username) || strlen($input->username) == 0) 

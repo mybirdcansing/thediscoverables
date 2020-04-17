@@ -79,7 +79,7 @@ class SongData
                     created_date,
                     created_by_id
                 )
-			VALUES (?, ?, ?, ?, now(), ?, now(), ?);
+			VALUES (?, ?, ?, ?, ?, now(), ?, now(), ?);
         ";
 
         try {

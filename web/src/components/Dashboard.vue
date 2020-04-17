@@ -124,16 +124,7 @@
 }
 @media (max-width: 592px) { 
     .header-image {
-        height: 200px;
-    }
-    .top-songs {
-        margin-top: -30px;
-    }    
-}
-
-@media (max-width: 892px) { 
-    .header-image {
-        height: 300px;
+        height: 180px;
     }
     .top-songs {
         margin-top: -30px;

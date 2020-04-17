@@ -12,7 +12,9 @@ class AlbumGateway extends GatewayBase
             'cookies' => $this->cookieJar
         ]);
         $this->assertEquals(200, $response->getStatusCode());
-        return Album::fromJson($response->getBody()->getContents());
+        $album = Album::fromJson($response->getBody()->getContents());
+        $album->playlist = $album->playlist->id;
+        return $album; 
     }
 
     public function createAlbum($album, $expectedStatusCode = 201)

@@ -5,18 +5,18 @@ require_once __dir__ . '/TestBase.php';
 
 final class AlbumTest extends TestBase
 {
-    public function testCreateAlbum()
+    public function testCreateAlbum1()
     {
         $album = $this->fleshedOutAlbum();
         $json = $this->getAlbumGateway()->createAlbum($album);
         $createdAlbum = $this->getAlbumGateway()->getAlbum($json->albumId);
         try {
             $this->assertEquals($album->title, $createdAlbum->title);
-            $this->assertEquals($album->playlist->id, $createdAlbum->playlist->id);
+            $this->assertEquals($album->playlist, $createdAlbum->playlist);
             $this->assertEquals($album->description, $createdAlbum->description);
         } finally {
             $this->getAlbumGateway()->deleteAlbum($createdAlbum);
-            $this->getPlaylistGateway()->deletePlaylist($createdAlbum->playlist->id);
+            $this->getPlaylistGateway()->deletePlaylist($createdAlbum->playlist);
         }
     }
 
@@ -34,7 +34,7 @@ final class AlbumTest extends TestBase
             $this->assertEquals($modifiedAlbum->description, $updatedAlbum->description);
         } finally {
             $this->getAlbumGateway()->deleteAlbum($modifiedAlbum);
-            $this->getPlaylistGateway()->deletePlaylist($modifiedAlbum->playlist->id);
+            $this->getPlaylistGateway()->deletePlaylist($modifiedAlbum->playlist);
         }
     }
 
@@ -50,9 +50,9 @@ final class AlbumTest extends TestBase
         $this->validateErrorMessages($json, 
             [TITLE_TAKEN_CODE => sprintf(TITLE_TAKEN_MESSAGE, $album1->title)]);
 
-        $this->getPlaylistGateway()->deletePlaylist($album2->playlist->id);
+        $this->getPlaylistGateway()->deletePlaylist($album2->playlist);
         $this->getAlbumGateway()->deleteAlbum($album1);
-        $this->getPlaylistGateway()->deletePlaylist($album1->playlist->id);
+        $this->getPlaylistGateway()->deletePlaylist($album1->playlist);
     }
 
     public function testCreateAlbumWithLongTitle()
@@ -61,7 +61,7 @@ final class AlbumTest extends TestBase
         $album->title = '123456789012345678901234567890123456789012345678901234567890123456123456789012345678901234567890123456789012345678901234567890123456123456789012345678901234567890123456789012345678901234567890123456123456789012345678901234567890123456789012345678901234567890123456123456789012345678901234567890123456789012345678901234567890123456123456789012345678901234567890123456789012345678901234567890123456';
         $json = $this->getAlbumGateway()->createAlbum($album, 422);
         $this->validateErrorMessages($json, [TITLE_LONG_CODE => TITLE_LONG_MESSAGE]);
-        $this->getPlaylistGateway()->deletePlaylist($album->playlist->id);
+        $this->getPlaylistGateway()->deletePlaylist($album->playlist);
     }
 
     public function testCreateAlbumWithBlankTitle()
@@ -70,6 +70,6 @@ final class AlbumTest extends TestBase
         $album->title = '';
         $json = $this->getAlbumGateway()->createAlbum($album, 422);
         $this->validateErrorMessages($json, [TITLE_BLANK_CODE => TITLE_BLANK_MESSAGE]);
-        $this->getPlaylistGateway()->deletePlaylist($album->playlist->id);
+        $this->getPlaylistGateway()->deletePlaylist($album->playlist);
     }
 }

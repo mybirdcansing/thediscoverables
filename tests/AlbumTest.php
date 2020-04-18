@@ -5,7 +5,7 @@ require_once __dir__ . '/TestBase.php';
 
 final class AlbumTest extends TestBase
 {
-    public function testCreateAlbum1()
+    public function testCreateAlbum()
     {
         $album = $this->fleshedOutAlbum();
         $json = $this->getAlbumGateway()->createAlbum($album);
@@ -47,8 +47,7 @@ final class AlbumTest extends TestBase
         $album2->title = $album1->title;
         $json = $this->getAlbumGateway()->createAlbum($album2, 409);
 
-        $this->validateErrorMessages($json, 
-            [TITLE_TAKEN_CODE => sprintf(TITLE_TAKEN_MESSAGE, $album1->title)]);
+        $this->validateErrorMessages($json, [TITLE_TAKEN_CODE => sprintf(TITLE_TAKEN_MESSAGE, $album1->title)]);
 
         $this->getPlaylistGateway()->deletePlaylist($album2->playlist);
         $this->getAlbumGateway()->deleteAlbum($album1);

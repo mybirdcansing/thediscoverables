@@ -1,7 +1,10 @@
 <?php
-require_once __DIR__ . '/../../messages.php';
+require_once __dir__ . '/../ControllerBase.php';
+require_once __dir__ . '/../../connecters/PlaylistData.php';
+require_once __dir__ . '/../../connecters/SongData.php';
+require_once __dir__ . '/../../connecters/AlbumData.php';
 
-class AlbumController {
+class AlbumController  extends ControllerBase {
 
     private $db;
     private $action;
@@ -9,17 +12,18 @@ class AlbumController {
     private $albumData;
     private $administrator;
 
-    public function __construct($dbConnection, $action, $albumId, $administrator)
+    public function __construct($db)
     {
-        $this->albumData = new AlbumData($dbConnection);
-        $this->action = $action;
-        $this->albumId = $albumId;
-        $this->administrator = $administrator;
+        parent :: __construct('album', true, $db);
+
+        $this->albumData = new AlbumData($db);
+        $this->action = $this->getActionName();
+        $this->albumId = $this->entityId;
+        $this->administrator = $this->getAdministrator();
     }
 
     public function processRequest()
     {
-
         switch ($this->action) {
             case GET_ACTION:
                 if ($this->albumId) {
@@ -161,8 +165,6 @@ class AlbumController {
 
         return $response;
     }
-
-
 
     private function _handleUpload($options)
     {

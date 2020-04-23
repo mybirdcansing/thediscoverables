@@ -1,7 +1,8 @@
 <?php
-require_once __DIR__ . '/../../messages.php';
+require_once __dir__ . '/../ControllerBase.php';
+require_once __dir__ . '/../../connecters/SongData.php';
 
-class SongController {
+class SongController extends ControllerBase  {
 
     private $db;
     private $action;
@@ -9,12 +10,14 @@ class SongController {
     private $songData;
     private $administrator;
 
-    public function __construct($dbConnection, $action, $songId, $administrator)
+    public function __construct($db)
     {
-        $this->action = $action;
-        $this->songId = $songId;
-        $this->administrator = $administrator;
-        $this->songData = new SongData($dbConnection);
+        parent :: __construct('song', true, $db);
+
+        $this->action = $this->getActionName();
+        $this->songId = $this->entityId;
+        $this->administrator = $this->getAdministrator();
+        $this->songData = new SongData($db);
     }
 
     public function processRequest()

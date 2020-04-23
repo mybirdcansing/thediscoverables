@@ -1,7 +1,7 @@
 <?php
-require_once __DIR__ . '/../../messages.php';
+require_once __dir__ . '/../ControllerBase.php';
 
-class UserController {
+class UserController extends ControllerBase {
 
     private $db;
     private $action;
@@ -9,12 +9,14 @@ class UserController {
     private $userData;
     private $administrator;
 
-    public function __construct($db, $action, $userId = null, $administrator = null)
+    public function __construct($db)
     {
-        $this->action = $action;
-        $this->userId = $userId;
+        parent :: __construct('user', false, $db);
+
+        $this->action = $this->getActionName();
+        $this->userId = $this->entityId;
         $this->userData = new UserData($db);
-        $this->administrator = $administrator;
+        $this->administrator = $this->getAdministrator();
     }
 
     public function processRequest()

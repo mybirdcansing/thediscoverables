@@ -1,5 +1,6 @@
 <?php
 require_once __dir__ . '/../messages.php';
+require_once __dir__ . '/../objects/Configuration.php';
 
 class DataAccess {
 

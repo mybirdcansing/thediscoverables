@@ -1,7 +1,9 @@
 <?php
-require_once __DIR__ . '/../../messages.php';
+require_once __dir__ . '/../ControllerBase.php';
+require_once __dir__ . '/../../connecters/PlaylistData.php';
+require_once __dir__ . '/../../connecters/SongData.php';
 
-class PlaylistController {
+class PlaylistController extends ControllerBase {
 
     private $db;
     private $action;
@@ -11,14 +13,22 @@ class PlaylistController {
     private $songData;
     private $songId;
 
-    public function __construct($dbConnection, $action, $playlistId, $songId, $administrator)
+    public function __construct($db)
     {
-        $this->songData = new SongData($dbConnection);
-        $this->playlistData = new PlaylistData($dbConnection);
-        $this->action = $action;
-        $this->playlistId = $playlistId;
-        $this->songId = $songId;
-        $this->administrator = $administrator;
+        parent :: __construct('playlist', true, $db);
+
+        $this->songData = new SongData($db);
+        $this->playlistData = new PlaylistData($db);
+        $this->action = $this->getActionName();
+        $this->playlistId = $this->entityId;
+        $this->administrator = $this->getAdministrator();
+
+        $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        $uri = explode('/', $uri);
+        if (isset($uri[6]) && $uri[6] != '') {
+            $this->songId = $uri[6];
+        }
+
     }
 
     public function processRequest()

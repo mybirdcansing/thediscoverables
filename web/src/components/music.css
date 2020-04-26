@@ -82,7 +82,10 @@ a {
 .song-title-cell {
     vertical-align: middle;
 }
-
+.song-duration-cell {
+    text-align: right;
+    padding-right: 30px;
+}
 .song-table {
     width: 100%;
     padding: 0px;
@@ -243,7 +246,7 @@ a:hover {
 }
 @media (min-width: 692px) { 
     .album-list-album-artwork {
-        width: 200px;
+        width: 240px;
         margin-right: 12px;
     }
 }

@@ -34,7 +34,7 @@
                     v-if="showAlbumLink && song.album" 
                     class="album-title">{{ song.album.title }}</a>
             </td>
-            <td>{{durationToString(song.duration)}}</td>
+            <td class="song-duration-cell">{{durationToString(song.duration)}}</td>
         </tr>
     </table>
 </template>

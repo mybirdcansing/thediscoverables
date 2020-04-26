@@ -31,6 +31,7 @@ config.json
 ######################
 .DS_Store
 .DS_Store?
+
 ._*
 .Spotlight-V100
 .Trashes
@@ -44,4 +45,3 @@ index.html
 web/audio
 original_artwork
 web/artwork/*.jpg
-.vscode

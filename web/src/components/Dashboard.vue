@@ -112,17 +112,22 @@
 }
 
 .header-image {
-    background-image: url('../assets/xx-large-adam_bay3.jpg');
+    /* background-image: url('../assets/xx-large-adam_bay3.jpg'); */
+    /* background-image: url('../assets/xx-large-splotch.jpg'); */
+    background-image: url('../assets/xx-large-adam_bay5.jpg');
     background-repeat: no-repeat;
     background-size: cover;
     background-position-x: center;
     position: relative;
     width: 100%;
-    height: 400px;
+    height: 350px;
 
     z-index: -1;
 }
-@media (max-width: 592px) { 
+.top-songs {
+    margin-top: -34px;
+}  
+@media (max-width: 542px) { 
     .header-image {
         height: 180px;
     }

@@ -1,4 +1,6 @@
 <?php
+// echo 'hello world';
+
 require_once __dir__ . '/../../connecters/DataAccess.php';
 require_once __dir__ . '/../../connecters/PlaylistData.php';
 require_once __DIR__ . '/../../connecters/SongData.php';
@@ -27,5 +29,6 @@ switch ($_SERVER["REQUEST_METHOD"]) {
 
 // pass the action name and user ID to the PersonController and process the HTTP request:
 $dbConnection = (new DataAccess())->getConnection();
+// echo 'hello world';
 $controller = new CatalogController($dbConnection, $action);
 $controller->processRequest();

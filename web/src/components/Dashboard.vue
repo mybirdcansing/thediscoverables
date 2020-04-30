@@ -113,8 +113,7 @@
 
 .header-image {
     /* background-image: url('../assets/xx-large-adam_bay3.jpg'); */
-    /* background-image: url('../assets/xx-large-splotch.jpg'); */
-    background-image: url('../assets/xx-large-adam_bay5.jpg');
+        background-image: url('../assets/xx-large-adam_bay5.jpg');
     background-repeat: no-repeat;
     background-size: cover;
     background-position-x: center;

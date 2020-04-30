@@ -185,7 +185,7 @@ class AlbumController  extends ControllerBase {
             ) {
             $extention = ($fileMimeType === 'image/png') ? '.png' : '.jpeg';
             $options->artworkFilename = $options->id . '_artwork' . $extention;
-            file_put_contents('../../../../original_artwork/' . $options->artworkFilename, $fileData);
+            file_put_contents('../../../original_artwork/' . $options->artworkFilename, $fileData);
         }
         else {
             throw new BadMimeTypeException();

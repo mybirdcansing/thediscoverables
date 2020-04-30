@@ -264,11 +264,11 @@
             }
 
             player.addEventListener('timeupdate', () => {
-                this.currentTimeString = this.currentTimeToString(player.currentTime);
+                this.currentTimeString = this.ticksToTimeString(player.currentTime);
             });
 
             player.addEventListener('durationchange', () => {
-                this.durationString = this.durationToString(player.duration);
+                this.durationString = this.ticksToTimeString(player.duration);
             });
 
             player.addEventListener('progress', handleProgress, false);

@@ -84,7 +84,7 @@ a {
 }
 .song-duration-cell {
     text-align: right;
-    padding-right: 30px;
+    padding-right: 36px;
 }
 .song-table {
     width: 100%;
@@ -242,7 +242,7 @@ a:hover {
     .card {
         padding: 0px 20px 10px 0;
     }
-     
+
 }
 @media (min-width: 692px) { 
     .album-list-album-artwork {

@@ -42,7 +42,7 @@ Thumbs.db
 node_modules
 dist
 index.html
-web/audio
 original_artwork
+web/audio/*.mp3
 web/artwork/*.jpg
 web/artwork/*.jpeg

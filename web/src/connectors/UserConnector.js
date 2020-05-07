@@ -21,7 +21,6 @@ export class UserConnector extends RestConnector {
     };
 
     requestPasswordReset(username, email) {
-        console.log(`requestPasswordReset ${username}`);
         return this._post({
             username: username, 
             email: email

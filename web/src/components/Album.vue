@@ -7,7 +7,7 @@
                     <td class="album-artwork">
                         <img class="album-page-artwork-img" :src="'../artwork/medium~' + album.artworkFilename" :alt="album.title">
                     </td>
-                    <td class="album-description">
+                    <td class="album-caption">
                         <div>
                             {{album.title}}
                         </div>
@@ -23,6 +23,7 @@
                         <div class="album-details">
                             {{songCount}} songs • {{totalMinutes}} minutes
                         </div>
+
                     </td>
                 </tr>
             </table>
@@ -36,6 +37,9 @@
                 @toggleSong="toggleSong"                
                 bullet="index"
             />
+                        <div class="album-description" v-html="album.description">
+
+                        </div>            
         </div>
     </div>
 </template>

@@ -53,6 +53,11 @@ a {
     text-decoration: none;
 }
 
+.album-section .album-description {
+    margin: 20px;
+    line-height: 1.6em;
+    color:#aaa;
+}
 
 .scrolling-wrapper {
   overflow: hidden;
@@ -113,6 +118,15 @@ a {
 .song-list-row.active-song.loading:hover .play {
     display: none;
 }
+
+.song-list-row.active-song.loading .spinner {
+    display: block;
+}
+
+.song-list-row.active-song.loading {
+    background-color: #474d3e;
+}
+
 .song-list-row.active-song .song-list-index,
 .song-list-row:hover .song-list-index {
     opacity: 0;
@@ -148,7 +162,6 @@ a {
 }
 .active-song {
     background-color: #1a1a1a;
-    background-color: radial-gradient(crimson, skyblue);
 }
 .song-list-album-cell {
     cursor: pointer;
@@ -188,12 +201,12 @@ a:hover {
         font-size: large;
     }
 
-    .album-description {
+    .album-caption {
         padding: 0px 12px 20px 16px;
         width:50%;
         vertical-align: middle;
     }
-    .album-description .album-details {
+    .album-caption .album-details {
         font-size: 12px;
         padding-top: 10px;
         margin-top: 0px;
@@ -211,14 +224,22 @@ a:hover {
         height: 36px;
     }
     .song-list-row {
-        height: 36px; 
+        height: 46px; 
+
     }
     .song-list-row img,
     .song-list-row svg {
         width: 36px;
         height: 36px; 
     }
-  
+    .song-list-row.index .play,
+    .song-list-row.index .spinner,
+    .song-list-row.index .pause {
+        margin-left: 3px;
+        margin-top: 3px;
+    }    
+
+
     .song-table .song-list-album-cell {
         width: 42px;
     }

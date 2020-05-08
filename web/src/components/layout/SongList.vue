@@ -7,7 +7,8 @@
                 'active-song': isActiveSong(song),
                 'loading': isActiveSong(song) && loading,
                 'playing': isActiveSong(song) && playing,
-                'paused': isActiveSong(song) && !playing 
+                'paused': isActiveSong(song) && !playing,
+                'index' : bullet === 'index'
             }">
             <td class='song-list-album-cell' @click="toggleSong(song)">
                 <img src="../../assets/play-icon.svg" alt="Play" class="play">

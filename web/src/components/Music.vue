@@ -390,7 +390,7 @@
         width: 100%;
         /* padding: 0 44px 0 44px; */
         padding:0;
-        height: 77px;
+        height: 87px;
         background-color: #909090;
     }
     .footer table {
@@ -449,8 +449,8 @@
         white-space: nowrap;
     } 
     #playerToggle {
-        width:36px;
-        height:34px;
+        width:46px;
+        height:46px;
     }
 
     #playerToggle.playing .play,
@@ -474,11 +474,11 @@
     
     #playerControls .next, 
     #playerControls .previous {
-        width:36px;
-        height:36px;
+        width:46px;
+        height:46px;
     }
     .footer-spacer {
-        height: 20px;
+        height: 40px;
     }
 
     #slideContainer {

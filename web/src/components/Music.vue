@@ -250,13 +250,7 @@
 
             let sliderBeingSlided = false;
 
-            player.addEventListener('playing', () => {
-                this.loadingState = StatusEnum.LOADED;
-                this.playing = true;
-                ticker = requestAnimationFrame(tick);
-            });
-
-            function tick() {
+            const tick = () => {
                 // if the duration is set, and the player isn't paused, 
                 // and the slider isn't being moved,
                 // set the slider's position dynamically
@@ -267,6 +261,13 @@
                 ticker = requestAnimationFrame(tick);
             }
 
+            player.addEventListener('playing', () => {
+                this.loadingState = StatusEnum.LOADED;
+                this.playing = true;
+                ticker = requestAnimationFrame(tick);
+            });
+
+
             player.addEventListener('timeupdate', () => {
                 this.currentTimeString = this.ticksToTimeString(player.currentTime);
             });
@@ -275,10 +276,7 @@
                 this.durationString = this.ticksToTimeString(this.duration);
             });
 
-            player.addEventListener('progress', handleProgress, false);
-            player.addEventListener('loadedmetadata', handleProgress, false);           
-
-            function handleProgress() {
+            const handleProgress = () => {
                 let ranges = [];
                 for(let i = 0; i < player.buffered.length; i ++) {
                     ranges.push([
@@ -306,6 +304,9 @@
                     spans[i].style.width = Math.round(durationPercent * (ranges[i][1] - ranges[i][0])) + '%';
                 }
             }
+            
+            player.addEventListener('progress', handleProgress, false);
+            player.addEventListener('loadedmetadata', handleProgress, false);           
 
             player.addEventListener('pause', () => {
                 progressBar.style.width = `${(player.currentTime / this.duration) * 100}%`;

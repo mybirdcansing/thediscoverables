@@ -497,7 +497,8 @@
         left:0;
         top:0;
         display:inline-block;
-        background: #b6b6b6;
+        background: #bbbbbb;
+        height: 10px;
         z-index: 80;
     }  
     #slideContainer .playSlider {

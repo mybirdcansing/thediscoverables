@@ -232,7 +232,11 @@
                 const isChrome = /Chrome/i.test(ua);
                 const isMobile = /Android|webOS|BlackBerry|IEMobile|Opera Mini|Mobile|mobile|CriOS/i.test(ua) || this.isIOS;
                 return ((!isMobile && isChrome));
-            } 
+            },
+            duration() {
+                return this.activeSong.duration;
+                // return this.$refs.player.duration;
+            }
         },
         mounted() {          
             const player = this.$refs.player;
@@ -256,8 +260,8 @@
                 // if the duration is set, and the player isn't paused, 
                 // and the slider isn't being moved,
                 // set the slider's position dynamically
-                if (!isNaN(player.duration) && !player.paused && !sliderBeingSlided) {
-                    const progress = (player.currentTime / player.duration) * 100;
+                if (!isNaN(this.duration) && !player.paused && !sliderBeingSlided) {
+                    const progress = (player.currentTime / this.duration) * 100;
                     progressBar.style.width = `${progress}%`;
                 }
                 ticker = requestAnimationFrame(tick);
@@ -268,7 +272,7 @@
             });
 
             player.addEventListener('durationchange', () => {
-                this.durationString = this.ticksToTimeString(player.duration);
+                this.durationString = this.ticksToTimeString(this.duration);
             });
 
             player.addEventListener('progress', handleProgress, false);
@@ -297,14 +301,14 @@
                 }
                 
                 for(let i = 0; i < player.buffered.length; i ++) {
-                    const durationPercent = (100 / player.duration);
+                    const durationPercent = (100 / this.duration);
                     spans[i].style.left = Math.round(durationPercent * ranges[i][0]) + '%';
                     spans[i].style.width = Math.round(durationPercent * (ranges[i][1] - ranges[i][0])) + '%';
                 }
             }
 
             player.addEventListener('pause', () => {
-                progressBar.style.width = `${(player.currentTime / player.duration) * 100}%`;
+                progressBar.style.width = `${(player.currentTime / this.duration) * 100}%`;
                 // if the player is still paused on the next animation frame, cancel the ticker
                 requestAnimationFrame(() => {
                     if (player.paused) {
@@ -327,14 +331,14 @@
                 this.playNext(true);
             });
 
-            (new Hammer(slideContainer)).on("pan press tap pressup", function(ev) {
+            (new Hammer(slideContainer)).on("pan press tap pressup", (ev) => {
                 cancelAnimationFrame(ticker);
                 sliderBeingSlided = true;
                 slider.classList.add('activePlaySlider');
                 const xPos = ev.center.x - slideContainer.offsetLeft;
                 progressBar.style.width = `${xPos}px`;
                 if (ev.isFinal) {
-                    const timeRemaining = (xPos / slideContainer.offsetWidth) * player.duration;
+                    const timeRemaining = (xPos / slideContainer.offsetWidth) * this.duration;
                     player.currentTime = timeRemaining;
                     ticker = requestAnimationFrame(tick);
                     slider.classList.remove('activePlaySlider');

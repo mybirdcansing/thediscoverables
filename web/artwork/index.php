@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../lib/messages.php';
 require_once __DIR__ . '/../lib/objects/Configuration.php';
-include __DIR__ . '/../vendor/gumlet/php-image-resize/lib/ImageResize.php';
+include __DIR__ . '/../../vendor/gumlet/php-image-resize/lib/ImageResize.php';
 use \Gumlet\ImageResize;
 
 header("Access-Control-Allow-Origin: *");

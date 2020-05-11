@@ -2,8 +2,8 @@
 require_once __dir__ . '/../connecters/DataAccess.php';
 require_once __dir__ . '/../connecters/UserData.php';
 require_once __dir__ . '/../objects/AuthCookie.php';
-require_once __dir__ . '/../../vendor/phpmailer/phpmailer/src/PHPMailer.php';
-require_once __dir__ . '/../../vendor/phpmailer/phpmailer/src/SMTP.php';
+require_once __dir__ . '/../../../vendor/phpmailer/phpmailer/src/PHPMailer.php';
+require_once __dir__ . '/../../../vendor/phpmailer/phpmailer/src/SMTP.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
@@ -13,6 +13,11 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+
+$requestMethod = $_SERVER["REQUEST_METHOD"];
+if ($requestMethod === 'OPTIONS') {
+    exit;
+}
 
 $input = json_decode(file_get_contents('php://input'));
 if (isset($input->data)) {

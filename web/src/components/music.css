@@ -30,7 +30,7 @@ img {
 
 
 .page-content {
-    padding: 0 0 100px 0;
+    padding: 0 0 70px 0;
 }
 
 .band-name {
@@ -189,6 +189,175 @@ a:hover {
 
 .song-list-listen-icon {
     opacity: .2;
+}
+
+#player {
+    display: none;
+    position: absolute;
+    left:-2000px;
+} 
+
+.footer {
+    display: none;
+    position: fixed;       
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    /* padding: 0 44px 0 44px; */
+    padding:0;
+    height: 87px;
+    background-color: #909090;
+}
+.footer table {
+    margin: 0 auto;
+}
+#slideContainerContainer, #timeDisplay {
+    width: 100%;
+    padding: 0 40px 2px 40px;
+    min-width: 200px;
+}
+
+#timeDisplay table {
+    width: 100%;
+    height: 20px;
+    
+}
+/* 
+#timeDisplay .song-time {
+    text-shadow: -1px -1px 1px rgba(255,255,255,.1), 1px 1px 1px rgba(0,0,0,.5);
+} */
+
+#timeDisplay .title-cell {
+    text-align: center;
+    white-space: nowrap;
+    position: relative;
+    overflow: hidden;
+    max-width: 200px;
+}
+#timeDisplay .title-cell .song-title {
+    cursor: text;
+    font-weight: 550;
+}
+#timeDisplay .title-cell .album-title {
+    color: #eee;
+}
+
+#playerControls {
+    padding: 0 30px 0 30px;
+    margin-top: -6px;
+    position: relative;
+}
+
+#playerControls img {
+    opacity: .8;
+    cursor:pointer;        
+}    
+#playerControls img:hover {
+    opacity: 1;
+}
+#playerControls .previous.first-song-active img,
+#playerControls .next.last-song-active img {
+    opacity: .3;
+    cursor:default;
+}    
+#playerControls .volume-cell {
+    white-space: nowrap;
+} 
+#playerToggle {
+    width:46px;
+    height:46px;
+}
+
+#playerToggle.playing .play,
+#playerToggle.loading .play {
+    display: none;
+}
+
+#playerToggle .spinner,
+#playerToggle.playing .spinner,
+#playerToggle.paused .spinner {
+    display: none;
+}
+#playerToggle.loading .spinner {
+    display: block;
+}
+
+#playerToggle.paused .pause,
+#playerToggle.loading .pause {
+    display: none;
+}
+
+#playerControls .next, 
+#playerControls .previous {
+    width:46px;
+    height:46px;
+}
+.footer-spacer {
+    height: 20px;
+}
+
+#slideContainer {
+    position: relative;
+    height: 10px;
+    width: 100%;
+    margin: 8px auto 4px auto;
+    background: #d3d3d3;
+    box-shadow:outset 0 0 0 1px rgb(157, 154, 154), outset 0 0 0 2px rgb(202, 203, 201);
+    cursor: pointer;
+    overflow: visible;
+}
+
+#slideContainer span {
+    position:absolute;
+    left:0;
+    top:0;
+    display:inline-block;
+    background: #bbbbbb;
+    height: 10px;
+    z-index: 80;
+}  
+#slideContainer .playSlider {
+    position: relative;
+    opacity: 0;
+    margin-right: -9px;
+    margin-top: -4px;
+    width: 18px;
+    height: 18px;
+    float: right;
+    border-radius: 50%; 
+    background: #4CAF50;
+    cursor: pointer;
+    z-index: 100;
+}
+
+#slideContainer .playSlider {
+    opacity: 1;
+}
+
+.playSlider.activePlaySlider {
+    box-shadow: 0 3px 0 rgb(75, 84, 79);
+    opacity: 1;
+    width: 36px;
+    height: 36px;
+    margin-left: -18px;
+    margin-top: -12px;
+    transition: all 0;
+}
+
+#progressBar {
+    position: absolute;
+    display:block;
+    width: 0px;
+    height: 10px;
+    background: rgb(114, 105, 123);
+    cursor: pointer;
+    top: 0px;
+    left: 0px;
+    z-index: 90;
+}
+
+.playerActive {
+    display: block;
 }
 
 /* PHONE */

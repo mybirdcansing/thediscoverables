@@ -37,6 +37,7 @@ config.json
 .Trashes
 ehthumbs.db
 Thumbs.db
+.vscode
 
 # App files
 node_modules

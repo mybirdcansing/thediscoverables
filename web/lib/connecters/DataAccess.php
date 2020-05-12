@@ -4,10 +4,13 @@ require_once __dir__ . '/../objects/Configuration.php';
 
 class DataAccess {
 
-    private $dbConnection = null;
-    public function __construct()
+	private $dbConnection = null;
+	private $configPath = null;
+
+    public function __construct($configPath = null)
     {
-		mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);	
+		mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+		$this->configPath = $configPath;
 		$this->dbConnection = $this->getConnection();
     }
 
@@ -15,8 +18,12 @@ class DataAccess {
     {
         if (!$this->dbConnection) {
         	try {
-				$settings = (new Configuration())->getSettings();
-				
+				if ($this->configPath == null) {
+					$config = new Configuration();
+				} else {
+					$config = new Configuration($this->configPath);
+				}
+				$settings = $config->getSettings();
 				$this->dbConnection = new mysqli(
 					$settings->dataAccess->DB_HOST, 
 					$settings->dataAccess->DB_USER, 

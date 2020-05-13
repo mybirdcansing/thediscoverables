@@ -26,6 +26,8 @@
 *.sql
 *.sqlite
 config.json
+test_config.json
+
 
 # OS generated files #
 ######################

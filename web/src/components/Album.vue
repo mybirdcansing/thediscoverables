@@ -3,12 +3,12 @@
         <div class="album-section">
             <h2 class='band-name'>The Discoverables</h2>
             <table class="album-header">
-                <tr class="album-header">
+                <tr>
                     <td class="album-artwork">
                         <img class="album-page-artwork-img" :src="'../artwork/medium~' + album.artworkFilename" :alt="album.title">
                     </td>
                     <td class="album-caption">
-                        <div>
+                        <div class="album-title">
                             {{album.title}}
                         </div>
                         <div class="album-details">
@@ -94,7 +94,7 @@
             },
             publishYear: function() {
                 if (this.album && this.album.publishDate) {
-                    return new Date(this.album.publishDate).getFullYear();
+                    return new Date(this.album.publishDate).getUTCFullYear();
                 }
             }
         },

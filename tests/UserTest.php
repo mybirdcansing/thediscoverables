@@ -234,10 +234,7 @@ final class UserTest extends TestBase
         try {
             // request the password update email
             $userToken = $this->getPasswordResetTokenGateway()->getToken($user);
-            
             // can't get the token from the email, so go directly to the database 
-            
-            echo 'yo';
             $dataAccess = new DataAccess($configPath = __dir__ . '/../config/test_config.json');
             $dbConnection = $dataAccess->getConnection();
             $userData = new UserData($dbConnection);

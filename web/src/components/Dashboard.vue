@@ -61,14 +61,14 @@
                 let setlist;
                 if (this.homepagePlaylist && this.homepagePlaylist.songs.length > 0) {                    
                     setlist = this.homepagePlaylist.songs.map(id => {
-                        const homepageSongWithAlbum = this.songsWithAlbums.find(song => song.id === id);
+                        const homepageSongWithAlbum = this.getSongsWithAlbums.find(song => song.id === id);
                         if (homepageSongWithAlbum) {
                             return homepageSongWithAlbum;
                         }
                         return this.$store.state.catalog.songs[id];
                     });
                 } else {
-                    setlist = this.songsWithAlbums;
+                    setlist = this.getSongsWithAlbums;
                 }
                 // only include songs that are in albums
                 if (!settings.showSongsWithoutAlbums) {
@@ -81,7 +81,7 @@
                 'albumSet',
                 'songSet',
                 'homepagePlaylist',
-                'songsWithAlbums',
+                'getSongsWithAlbums',
                 'catalogState',
                 'getSongAlbum',
             ]),

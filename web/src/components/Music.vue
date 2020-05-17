@@ -212,9 +212,6 @@
             loading() {
                 return this.loadingState === StatusEnum.LOADING;
             },
-            ...mapGetters([
-                'songsWithAlbums',
-            ]),
             isIOS() {
                 const ua = navigator.userAgent;
                 const iOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;

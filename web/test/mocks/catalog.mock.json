@@ -1,0 +1,161 @@
+{
+  "songs": {
+    "40BC5597-52D1-4A8C-8DED-30F63B31B779": {
+      "id": "40BC5597-52D1-4A8C-8DED-30F63B31B779",
+      "title": "The Good Old Days",
+      "filename": "The_Good_Old_Days.mp3",
+      "description": null,
+      "fileInput": null,
+      "duration": "249.355875"
+    },
+    "500D2CCD-6BCE-4F84-B8A7-00149503309F": {
+      "id": "500D2CCD-6BCE-4F84-B8A7-00149503309F",
+      "title": "Just Let Go",
+      "filename": "Just_Let_Go_redo_9.mp3",
+      "description": null,
+      "fileInput": null,
+      "duration": "169.584"
+    },
+    "695A9E33-82A2-49CD-976C-EFA88BFF883C": {
+      "id": "695A9E33-82A2-49CD-976C-EFA88BFF883C",
+      "title": "Break My Heart Again",
+      "filename": "Break_My_Heart_Again.mp3",
+      "description": null,
+      "fileInput": null,
+      "duration": "209.406344"
+    },
+    "7CC0291E-04DC-4BF2-B1DD-29A67C9E7837": {
+      "id": "7CC0291E-04DC-4BF2-B1DD-29A67C9E7837",
+      "title": "Come With Me",
+      "filename": "Come_with_Me.mp3",
+      "description": null,
+      "fileInput": null,
+      "duration": "216.320031"
+    },
+    "93828F2D-FC45-44EC-BB3B-1BB9C9AC8989": {
+      "id": "93828F2D-FC45-44EC-BB3B-1BB9C9AC8989",
+      "title": "I Didn't Think Of It",
+      "filename": "I_Didn_t_Think_of_It.mp3",
+      "description": null,
+      "fileInput": null,
+      "duration": "174.315125"
+    },
+    "B79FE359-23F9-4B14-BA32-A1AB40B9F6EB": {
+      "id": "B79FE359-23F9-4B14-BA32-A1AB40B9F6EB",
+      "title": "For The Songs",
+      "filename": "For_the_Songs.mp3",
+      "description": null,
+      "fileInput": null,
+      "duration": "177.737156"
+    },
+    "C63CA8B9-2586-47BC-8EA2-9C18EA690FC5": {
+      "id": "C63CA8B9-2586-47BC-8EA2-9C18EA690FC5",
+      "title": "Running In Place",
+      "filename": "Running_In_Place.mp3",
+      "description": null,
+      "fileInput": null,
+      "duration": "155.966344"
+    },
+    "CE70B738-2C38-4B53-A265-A3E4C755FD02": {
+      "id": "CE70B738-2C38-4B53-A265-A3E4C755FD02",
+      "title": "Jen",
+      "filename": "Jen.mp3",
+      "description": null,
+      "fileInput": null,
+      "duration": "225.636656"
+    },
+    "ED29BFA4-DCE8-40EA-9092-4096EFF08D2B": {
+      "id": "ED29BFA4-DCE8-40EA-9092-4096EFF08D2B",
+      "title": "Highway 99",
+      "filename": "Highway_99_48kHz_11.mp3",
+      "description": null,
+      "fileInput": null,
+      "duration": "216.5517"
+    },
+    "F594ADD6-4843-4F4B-9297-0CE29512D7E3": {
+      "id": "F594ADD6-4843-4F4B-9297-0CE29512D7E3",
+      "title": "It's Hard To Say 200",
+      "filename": "It_s_Hard_to_Say.mp3",
+      "description": null,
+      "fileInput": null,
+      "duration": "192.626969"
+    }
+  },
+  "songList": [
+    "40BC5597-52D1-4A8C-8DED-30F63B31B779",
+    "500D2CCD-6BCE-4F84-B8A7-00149503309F",
+    "695A9E33-82A2-49CD-976C-EFA88BFF883C",
+    "7CC0291E-04DC-4BF2-B1DD-29A67C9E7837",
+    "93828F2D-FC45-44EC-BB3B-1BB9C9AC8989",
+    "B79FE359-23F9-4B14-BA32-A1AB40B9F6EB",
+    "C63CA8B9-2586-47BC-8EA2-9C18EA690FC5",
+    "CE70B738-2C38-4B53-A265-A3E4C755FD02",
+    "ED29BFA4-DCE8-40EA-9092-4096EFF08D2B",
+    "F594ADD6-4843-4F4B-9297-0CE29512D7E3"
+  ],
+  "playlists": {
+    "460DD001-5966-489C-A756-766B2B694497": {
+      "id": "460DD001-5966-489C-A756-766B2B694497",
+      "title": "For The Songs",
+      "description": null,
+      "songs": [
+        "B79FE359-23F9-4B14-BA32-A1AB40B9F6EB",
+        "7CC0291E-04DC-4BF2-B1DD-29A67C9E7837",
+        "F594ADD6-4843-4F4B-9297-0CE29512D7E3",
+        "93828F2D-FC45-44EC-BB3B-1BB9C9AC8989"
+      ]
+    },
+    "7293B63D-7486-4DA1-9D72-1C4567647620": {
+      "id": "7293B63D-7486-4DA1-9D72-1C4567647620",
+      "title": "Running In Place",
+      "description": null,
+      "songs": [
+        "C63CA8B9-2586-47BC-8EA2-9C18EA690FC5",
+        "CE70B738-2C38-4B53-A265-A3E4C755FD02",
+        "40BC5597-52D1-4A8C-8DED-30F63B31B779",
+        "695A9E33-82A2-49CD-976C-EFA88BFF883C"
+      ]
+    },
+    "BDD76023-0FD1-488A-9C2D-9EFCAE72B1C9": {
+      "id": "BDD76023-0FD1-488A-9C2D-9EFCAE72B1C9",
+      "title": "homepage",
+      "description": null,
+      "songs": [
+        "CE70B738-2C38-4B53-A265-A3E4C755FD02",
+        "C63CA8B9-2586-47BC-8EA2-9C18EA690FC5",
+        "7CC0291E-04DC-4BF2-B1DD-29A67C9E7837",
+        "40BC5597-52D1-4A8C-8DED-30F63B31B779",
+        "ED29BFA4-DCE8-40EA-9092-4096EFF08D2B"
+      ]
+    }
+  },
+  "playlistList": [
+    "460DD001-5966-489C-A756-766B2B694497",
+    "7293B63D-7486-4DA1-9D72-1C4567647620",
+    "BDD76023-0FD1-488A-9C2D-9EFCAE72B1C9"
+  ],
+  "albums": {
+    "02FBA97F-B0B5-46F3-9559-43B102021C16": {
+      "id": "02FBA97F-B0B5-46F3-9559-43B102021C16",
+      "title": "Running In Place",
+      "description": "<p>Songs by Adam Cohen, Ben Osheroff</p>\n<p>Production by Ben Osheroff and Adam Cohen</p>\n<p>Musical contributions by Adam Cohen, Ben Osheroff, Ron Tesnow, James Nuckolls, Louise Nalbandian, Shawn Tamborini and Eric Kurtzrock</p>\n<p>Album artwork by Beste Bengisu</p>",
+      "playlist": "7293B63D-7486-4DA1-9D72-1C4567647620",
+      "artworkFilename": "02FBA97F-B0B5-46F3-9559-43B102021C16_artwork.jpeg",
+      "publishDate": "2020-01-01",
+      "fileInput": null
+    },
+    "D28D0B78-CA9B-454D-9FEA-449D0A15A38C": {
+      "id": "D28D0B78-CA9B-454D-9FEA-449D0A15A38C",
+      "title": "For The Songs",
+      "description": "<p>Songs by Adam Cohen</p>\n<p>Production by Adam Cohen and Rick McKay</p>\n<p>Musical contributions by Adam Cohen, Ben Osheroff, Ron Tesnow, Steve Krchniak, James Nuckolls and Eric Kurtzrock</p>\n<p>Album artwork by Beste Bengisu</p>",
+      "playlist": "460DD001-5966-489C-A756-766B2B694497",
+      "artworkFilename": "_artwork.jpeg",
+      "publishDate": "2019-11-15",
+      "fileInput": null
+    }
+  },
+  "albumList": [
+    "02FBA97F-B0B5-46F3-9559-43B102021C16",
+    "D28D0B78-CA9B-454D-9FEA-449D0A15A38C"
+  ]
+}

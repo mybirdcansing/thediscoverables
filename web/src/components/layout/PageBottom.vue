@@ -1,8 +1,13 @@
 <template>
-    <div class="pagebottom">Copyright © 2019 - 2020 The Discoverables</div>
+    <div class="pagebottom">{{copyright}}</div>
 </template>
 <script>
     export default {
         name: "PageBottom",
+        data:function () {
+            return {
+                copyright: "Copyright © 2019 - " + new Date().getFullYear().toString() + " The Discoverables"
+            }
+        }
     }
 </script>

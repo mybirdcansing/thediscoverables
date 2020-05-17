@@ -6,7 +6,7 @@ export class ConnectorBase {
         this.handlerUrl = `${this.handlerBase}${handler}`;
         this.handler = handler;
     }
-      
+
     client() {
         return axios.create({
             baseURL: this.handlerBase,

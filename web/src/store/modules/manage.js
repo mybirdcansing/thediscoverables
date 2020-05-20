@@ -1,6 +1,6 @@
 import {UserConnector} from '../../connectors/UserConnector';
-import {RestConnector} from '../../connectors/RestConnector';
 import StatusEnum from '../StatusEnum';
+import crudActions from '../crud_actions';
 
 const state = {
     manageState: StatusEnum.INIT,
@@ -11,21 +11,22 @@ const state = {
 const userConnector = new UserConnector();
 
 const getters = {
-    getManager: (state) => Object.values(state.users).find(user => state.manager === user.username),
+    manageState: (state) => state.manageState,
     userSet: (state) => state.userList.map(id => state.users[id]),
     getUserById: (state) => (id) => state.users[id],
-    manageState: (state) => state.manageState,
+    getManager: (state) => Object.values(state.users).find(user => state.manager === user.username),
 }
 
 const actions = {
-    fetchData({commit}) {
+    async fetchData({commit}) {
         commit('SET_MANAGE_STATE', StatusEnum.LOADING);
-        userConnector.getAll().then(response => {
+        try {
+            const response = await userConnector.getAll();
             commit('SET_USERS', response);
             commit('SET_MANAGE_STATE', StatusEnum.LOADED);
-        }).catch(data => {
+        } catch (e) {
             commit('SET_MANAGE_STATE', StatusEnum.ERROR);
-        });
+        }        
     },
     logout({commit}) {
         return new Promise(async (resolve, reject) => {
@@ -60,67 +61,8 @@ const actions = {
                 reject(response);
             }
         });        
-    },    
-    deleteItem({commit}, options) {   
-        options.categoryList = `${options.handler}List`;
-        options.category = `${options.handler}s`;
-        const connector = new RestConnector(options.handler);
-        return new Promise(async (resolve, reject) => {
-            try {
-                const response = await connector.delete(options.id);
-                commit('DELETE_ITEM', options);
-                resolve(response);
-            } catch (response) {
-                reject(response);
-            }
-        });
-    },    
-    updateItem({commit}, options) {
-        return new Promise(async (resolve, reject) => {
-            try {
-                const statusKey = `${options.handler}Updated`;
-                options.categoryList = `${options.handler}List`;
-                options.category = `${options.handler}s`;
-                const connector = new RestConnector(options.handler);
-                const data = await connector.update(options.data);
-                if (data.hasOwnProperty(statusKey) && data[statusKey]) {
-                    commit('UPDATE_ITEM', options);
-                    resolve(data);
-                } else {
-                    reject(data);
-                }
-            } catch(error) {
-                reject(error);
-            }
-        });
     },
-    createItem({commit}, options) {
-        return new Promise(
-            async (resolve, reject) => {
-                try {
-                    const dataKey = options.handler + 'Id';
-                    const statusKey = options.handler + 'Created';
-                    options.category = `${options.handler}s`;
-                    options.categoryList = `${options.handler}List`;
-                    const connector = new RestConnector(options.handler);        
-                    const data = await connector.create(options.data);
-                    if (
-                        data.hasOwnProperty(dataKey)
-                        && data.hasOwnProperty(statusKey) 
-                        && data[statusKey]
-                    ) {
-                        options.data.id = data[dataKey];
-                        commit('CREATE_ITEM', options);
-                        resolve(data);
-                    } else {
-                        reject(data);
-                    }
-                } catch(response) {
-                    reject(response);
-                }
-            }
-        );
-    },    
+    ...crudActions
 }
 
 const mutations = {

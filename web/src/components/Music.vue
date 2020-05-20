@@ -238,7 +238,8 @@
                 // return this.$refs.player.duration;
             }
         },
-        mounted() {          
+        mounted() {
+            // debugger;       
             const player = this.$refs.player;
             const slider = this.$refs.playSlider;
             const slideContainer = this.$refs.slideContainer;

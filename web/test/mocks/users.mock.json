@@ -1,0 +1,20 @@
+[
+    {
+      "id": "00000000-0000-0000-0000-000000000000",
+      "username": "adam",
+      "firstName": "Adam",
+      "lastName": "Cohen",
+      "email": "thediscoverables@gmail.com",
+      "password": null,
+      "statusId": "1"
+    },
+    {
+      "id": "7A17876B-8872-4EDA-895C-9A17513135FF",
+      "username": "beno",
+      "firstName": "Ben",
+      "lastName": "Osheroff",
+      "email": "ben.osheroff@gmail.com",
+      "password": null,
+      "statusId": "1"
+    }
+  ]

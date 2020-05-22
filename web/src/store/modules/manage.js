@@ -66,8 +66,8 @@ const actions = {
 }
 
 const mutations = {
-    SET_MANAGER(state, username) {
-        state.manager = username;
+    SET_MANAGE_STATE(state, manageState) {
+        state.manageState = manageState;
     },
     SET_USERS(state, userData) {
         let userList = [];
@@ -79,20 +79,20 @@ const mutations = {
         state.users = users;
         state.userList = userList;
     },
-    DELETE_ITEM(state, obj) {
-        const index = state[obj.categoryList].findIndex((id) => id === obj.id);
-        state[obj.categoryList].splice(index, 1);
-        delete state[obj.category][obj.id];
-    },
-    UPDATE_ITEM(state, obj) {
-        state[obj.category][obj.data.id] = obj.data;
+    SET_MANAGER(state, username) {
+        state.manager = username;
     },
     CREATE_ITEM(state, obj) {
         state[obj.category][obj.data.id] = obj.data;
         state[obj.categoryList].push(obj.data.id);
     },   
-    SET_MANAGE_STATE(state, manageState) {
-        state.manageState = manageState;
+    UPDATE_ITEM(state, obj) {
+        state[obj.category][obj.data.id] = obj.data;
+    },
+    DELETE_ITEM(state, obj) {
+        const index = state[obj.categoryList].findIndex((id) => id === obj.id);
+        state[obj.categoryList].splice(index, 1);
+        delete state[obj.category][obj.id];
     },
 }
 

@@ -345,7 +345,6 @@ describe('getters', () => {
     });
 });
 
-
 describe('mutations', () => {
     describe('manager', () => {
         beforeEach(async () => {
@@ -358,7 +357,71 @@ describe('mutations', () => {
         });
 
         it('SET_USERS', () => {    
+            expect(Object.values(store.state.manage.users)).toEqual(usersData);
+        });
+
+        it('SET_MANAGE_STATE', () => {    
             expect(store.state.manage.manageState).toEqual(StatusEnum.LOADED);
+        });
+
+        it('CREATE_ITEM', () => {
+            const id = '1234';
+            const user = dummyUser(id);
+            const options = {
+                category: "users",
+                categoryList: "userList",
+                data: user
+            };
+            store.commit('manage/CREATE_ITEM', options);
+            const userById = getters['manage/getUserById'](id);
+            expect(user).toEqual(userById);
+        });
+
+        it('UPDATE_ITEM', () => {
+            const id = '12345';
+            const user = dummyUser(id);
+            const options = {
+                category: "users",
+                categoryList: "userList",
+                data: user
+            };
+            store.commit('manage/CREATE_ITEM', options);
+
+            const updatedUser = dummyUser(id);
+            updatedUser.title = 'new title';
+            updatedUser.description = 'new description';
+
+            options.data = updatedUser;
+
+            store.commit('manage/UPDATE_ITEM', options);        
+            const updatedUserById = getters['manage/getUserById'](id);
+            expect(updatedUser).toEqual(updatedUserById);  
+        });
+
+        it('DELETE_ITEM', () => {
+            const id = '3456';
+            const user = dummyUser(id);
+            const options = {
+                category: "users",
+                categoryList: "userList",
+                data: user
+            };
+            store.commit('manage/CREATE_ITEM', options);        
+            const userById = getters['manage/getUserById'](id);
+            expect(user).toEqual(userById);
+
+            const updatedUser = dummyUser(id);
+            updatedUser.title = 'new title';
+            updatedUser.description = 'new description';
+            options.data = updatedUser;
+
+            store.commit('manage/DELETE_ITEM', {
+                category: "users",
+                categoryList: "userList",
+                id: id
+            });        
+            const deletedUserById = getters['manage/getUserById'](id);        
+            expect(deletedUserById).toBeUndefined(); 
         });
     });
 

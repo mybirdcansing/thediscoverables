@@ -19,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/mybirdcansing/thediscoverables/issues"
   },
-  "homepage": "https://github.com/mybirdcansing/thediscoverables#readme"
+  "homepage": "https://github.com/mybirdcansing/thediscoverables#readme",
+  "devDependencies": {
+    "sinon": "^9.0.2"
+  }
 }

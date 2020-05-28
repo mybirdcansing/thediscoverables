@@ -125,13 +125,5 @@
 
 <style scoped>
     
-    .album-header { 
-        margin:19px 20px 6px 20px;
-      
-    }
 
-    .album-header .album-artwork img {
-        margin-left: -4px;
-        margin-right: 20px;
-    }
 </style>

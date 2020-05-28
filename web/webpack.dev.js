@@ -1,4 +1,5 @@
 const common = require("./webpack.common");
+const webpack = require("webpack");
 const merge = require("webpack-merge");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyPlugin = require('copy-webpack-plugin');
@@ -26,6 +27,10 @@ module.exports =  merge(common, {
             template: "./src/main.html",
             filename: "./index.html"
         }),
+        new webpack.EnvironmentPlugin({
+            NODE_ENV: 'development', // use 'development' unless process.env.NODE_ENV is defined
+            DEBUG: false
+          })        
     ],
     module: {
         rules: [

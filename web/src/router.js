@@ -37,6 +37,7 @@ const router = new VueRouter({
                 { 
                     path: '',
                     component: Dashboard,
+                    name: 'dashboard',
                     meta: {
                         title: `${titlePrefix}: Music`,
                     },

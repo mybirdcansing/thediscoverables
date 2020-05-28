@@ -34,7 +34,9 @@ export class ConnectorBase {
     }
 
     rejector(reject, error) {
-        if (process.env.NODE_ENV === "development") {
+        
+        
+        if (process.env.DEBUG) {
             this.logToConsole(error);
         }
         const er = error.response;

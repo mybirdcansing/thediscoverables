@@ -15,9 +15,9 @@
                 bullet="artwork"
             />
 
-            <div class="block-link"><router-link to="/songs">SHOW ALL</router-link></div>
+            <div class="block-link"><router-link class="all-songs-link" to="/songs">SHOW ALL</router-link></div>
         </div>
-        <div class="dashboard-section">
+        <div class="dashboard-section albums">
             <h4>Albums</h4>
             <div class="scrolling-wrapper">
                 <div class="album card" v-for="album in albumSet" :key="album.id"  @click="goToAlbum(album)">
@@ -35,10 +35,7 @@
     import SongHelperMixin from './SongHelperMixin';
     import StatusEnum from '../store/StatusEnum';
     import SongList from './layout/SongList.vue';
-    const settings = {
-        songLimit: 3,
-        showSongsWithoutAlbums: false,
-    };
+
 
     export default {
         name: "Dashboard",
@@ -48,6 +45,15 @@
             "loadingState",
             "playing"
         ],
+        data: function () {
+            return {
+                settings: {
+                    songLimit: 3,
+                    showSongsWithoutAlbums: false,
+                }
+            }
+        },
+
         components: {
             SongList
         },
@@ -59,28 +65,30 @@
         computed: {
             topSongs: function() {
                 let setlist;
-                if (this.homepagePlaylist && this.homepagePlaylist.songs.length > 0) {                    
-                    setlist = this.homepagePlaylist.songs.map(id => {
-                        const homepageSongWithAlbum = this.getSongsWithAlbums.find(song => song.id === id);
+                if (this.homepagePlaylist && this.homepagePlaylist.songs.length > 0) {   
+                    const songsWithAlbums = this.getSongsWithAlbums;                 
+                    setlist = this.homepagePlaylist.songs.map(function(id) {
+                        const homepageSongWithAlbum = songsWithAlbums.find(song => song.id === id);
                         if (homepageSongWithAlbum) {
                             return homepageSongWithAlbum;
                         }
-                        return this.$store.state.catalog.songs[id];
-                    });
+                        return this.getSongById(id);
+                    }.bind(this));
                 } else {
                     setlist = this.getSongsWithAlbums;
                 }
                 // only include songs that are in albums
-                if (!settings.showSongsWithoutAlbums) {
+                if (!this.$data.settings.showSongsWithoutAlbums) {
                     setlist = setlist.filter(song => song.album);
                 }
                 // the dashboard should have no more than 4 songs on the song list
-                return (setlist.length <= settings.songLimit) ? setlist : setlist.slice(0, settings.songLimit);
+                return (setlist.length <= this.$data.settings.songLimit) ? setlist : setlist.slice(0, this.$data.settings.songLimit);
             },
             ...mapGetters([
                 'albumSet',
                 'songSet',
                 'homepagePlaylist',
+                'getSongById',
                 'getSongsWithAlbums',
                 'catalogState',
                 'getSongAlbum',

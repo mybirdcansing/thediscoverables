@@ -14,18 +14,18 @@
                 <img src="../../assets/play-icon.svg" alt="Play" class="play">
                 <img src="../../assets/pause-icon.svg" alt="Pause" class="pause">
                 <img src="../../assets/spinner-icon.svg" alt="Loading" class="spinner">
-                <div v-if="bullet === 'artwork' && song.album" class="song-list-album-artwork-div">
+                <div v-if="bullet === 'artwork' && song.album" class="song-list-bullet">
                     <img :src="'../artwork/thumbnail~' + song.album.artworkFilename" 
                         :alt="song.album.title"
                         class='song-list-album-artwork' 
                     >
                 </div>
-                <div v-else-if="bullet === 'index'" class="song-list-album-artwork-div">
+                <div v-else-if="bullet === 'index'" class="song-list-bullet">
                     <svg class='song-list-album-artwork song-list-index'>
                         <text x="16" y="27" fill="white">{{index+1}}</text>
                     </svg>
                 </div>
-                <div v-else class="song-list-album-artwork-div">
+                <div v-else class="song-list-bullet">
                     <img src="../../assets/headphones-icon.svg" class='song-list-album-artwork song-list-listen-icon'>
                 </div>                                      
             </td>

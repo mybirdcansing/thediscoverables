@@ -30,6 +30,14 @@ describe("Songs", async () => {
         await wrapper.vm.$nextTick();        
         songsComponent = wrapper.findComponent(Songs);
         routerPushStub = sinon.stub(router, 'push');
+
+        allSongs = getters.getSongsWithAlbums;
+        firstSong = allSongs[0];
+        expect(firstSong).toBeTruthy();
+        songRows = wrapper.findAll('.song-list-row');
+        expect(songRows).toBeTruthy();
+        firstRow = songRows.at(0);
+        expect(firstRow).toBeTruthy();        
     });
     after(() => {
         routerPushStub.restore();
@@ -37,16 +45,7 @@ describe("Songs", async () => {
     it("renders Songs component via routing",  () => {
         expect(songsComponent.exists()).toBe(true);
     });
-    
-    before(() => {        
-        allSongs = getters.getSongsWithAlbums;
-        firstSong = allSongs[0];
-        expect(firstSong).toBeTruthy();
-        songRows = wrapper.findAll('.song-list-row');
-        expect(songRows).toBeTruthy();
-        firstRow = songRows.at(0);
-        expect(firstRow).toBeTruthy();
-    });
+
 
     it('song count', () => {
         expect(songRows.length).toBe(allSongs.length);

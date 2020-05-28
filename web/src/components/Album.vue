@@ -12,15 +12,10 @@
                             {{album.title}}
                         </div>
                         <div class="album-details">
-                            <!-- 
-                            <span v-if="songCount === 1">Single</span>
-                            <span v-if="songCount <= 6">EP</span>
-                            <span v-if="songCount > 6">Album</span> 
-                            • 
-                            -->
-                            <router-link to="/">The Discoverables</router-link> • {{publishYear}}
+                            <router-link class="dashboard-link" to="/">The Discoverables</router-link> • 
+                            <span class="publish-year">{{publishYear}}</span>
                         </div>
-                        <div class="album-details">
+                        <div class="album-details count-and-timing">
                             {{songCount}} songs • {{totalMinutes}} minutes
                         </div>
 
@@ -37,9 +32,7 @@
                 @toggleSong="toggleSong"                
                 bullet="index"
             />
-                        <div class="album-description" v-html="album.description">
-
-                        </div>            
+            <div class="album-description" v-html="album.description"></div>            
         </div>
     </div>
 </template>
@@ -102,7 +95,6 @@
             const setTitle = () => {
                 this.$el.ownerDocument.title = `${this.$router.currentRoute.meta.title}: ${this.album.title}`;
             };
-
             if (this.album) {
                 setTitle();
             } else {
@@ -122,8 +114,3 @@
         }
     }
 </script>
-
-<style scoped>
-    
-
-</style>

@@ -34,7 +34,7 @@ describe('SongList', async () => {
         });
         it('bullet', () => {
             expect(wrapper.find(`${activeSongSelector} .song-list-bullet`).text()).toBe('2');
-        })
+        });
 
     });
 });

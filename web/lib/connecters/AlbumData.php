@@ -3,6 +3,7 @@ require_once __dir__ . '/../objects/Album.php';
 require_once __dir__ . '/../objects/User.php';
 require_once __dir__ . '/PlaylistData.php';
 require_once __dir__ . '/../objects/DuplicateTitleException.php';
+require_once __dir__ . '/../objects/Guid.php';
 
 class AlbumData
 {
@@ -91,7 +92,7 @@ class AlbumData
 
         try {
             $stmt = $this->dbConnection->prepare($sql);
-            $albumId = GUID();
+            $albumId = Guid::create();
             $stmt->bind_param("ssssssss",
                 $albumId,
 				$album->title,

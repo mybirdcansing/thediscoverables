@@ -16,7 +16,7 @@ final class UserTest extends TestBase
         $username = $this->uniqueUsername();
         $email = $this->uniqueEmail();
 
-        $password = GUID();
+        $password = Guid::create();
 
         $user = new User();
         $user->username = $username;

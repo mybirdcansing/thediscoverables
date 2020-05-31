@@ -1,4 +1,5 @@
 <?php
+require_once __dir__ . '/../objects/Guid.php';
 require_once __dir__ . '/../objects/User.php';
 require_once __dir__ . '/../objects/DuplicateUsernameException.php';
 require_once __dir__ . '/../objects/DuplicateEmailException.php';
@@ -149,7 +150,7 @@ class UserData
         try {
             $stmt = $this->dbConnection->prepare($sql);
             $hashedPassword = password_hash($user->password, PASSWORD_DEFAULT);
-            $userId = GUID();
+            $userId = Guid::create();
             $stmt->bind_param("ssssssss",
                 $userId,
 				$user->username,
@@ -283,7 +284,7 @@ class UserData
             VALUES (?, ?, DATE_ADD(now(), INTERVAL 2 DAY), now(), ?);
         ";
         try {
-            $token = GUID();
+            $token = Guid::create();
             $stmt = $this->dbConnection->prepare($sql);
             $stmt->bind_param("sss", $token, $user->id, $administrator->id);
             $stmt->execute();

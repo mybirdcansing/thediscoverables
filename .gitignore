@@ -23,7 +23,7 @@
 # Logs and databases #
 ######################
 *.log
-*.sql
+users.sql
 *.sqlite
 config.json
 test_config.json

@@ -1,4 +1,5 @@
 <?php
+require_once __dir__ . '/../objects/Guid.php';
 require_once __dir__ . '/../objects/Song.php';
 require_once __dir__ . '/../objects/User.php';
 require_once __dir__ . '/../objects/DuplicateTitleException.php';
@@ -84,7 +85,7 @@ class SongData
 
         try {
             $stmt = $this->dbConnection->prepare($sql);
-            $songId = GUID();
+            $songId = Guid::create();
             $stmt->bind_param("sssdsss",
                 $songId,
 				$song->title,

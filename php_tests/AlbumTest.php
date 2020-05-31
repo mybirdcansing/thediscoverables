@@ -25,7 +25,7 @@ final class AlbumTest extends TestBase
         $json = $this->getAlbumGateway()->createAlbum($this->fleshedOutAlbum());
         $modifiedAlbum = $this->getAlbumGateway()->getAlbum($json->albumId);
         
-        $modifiedAlbum->title = GUID();
+        $modifiedAlbum->title = Guid::create();
         $modifiedAlbum->description = 'pizza is good';
         $json = $this->getAlbumGateway()->updateAlbum($modifiedAlbum);
         $updatedAlbum = $this->getAlbumGateway()->getAlbum($json->albumId);

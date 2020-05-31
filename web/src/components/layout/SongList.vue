@@ -26,7 +26,9 @@
                     </svg>
                 </div>
                 <div v-else class="song-list-bullet">
-                    <img src="../../assets/headphones-icon.svg" class='song-list-album-artwork song-list-listen-icon'>
+                    <img 
+                        src="../../assets/headphones-icon.svg" 
+                        class='song-list-album-artwork song-list-listen-icon'>
                 </div>                                      
             </td>
             <td class="song-title-cell">

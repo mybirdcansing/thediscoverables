@@ -20,7 +20,7 @@ final class PlaylistTest extends TestBase
     public function testUpdatePlaylist()
     {
         $modifiedPlaylist = $this->getPlaylistGateway()->createPlaylist($this->fleshedOutPlaylist());
-        $modifiedPlaylist->title = GUID();
+        $modifiedPlaylist->title = Guid::create();
         $modifiedPlaylist->description = 'pizza is good';
         $modifiedPlaylist->filename = 'pizza.wav';
         $updatedPlaylist = $this->getPlaylistGateway()->updatePlaylist($modifiedPlaylist);

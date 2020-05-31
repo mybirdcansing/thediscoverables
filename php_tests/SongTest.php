@@ -21,7 +21,7 @@ final class SongTest extends TestBase
     public function testUpdateSong()
     {
         $modifiedSong = $this->getSongGateway()->createSong($this->fleshedOutSong());
-        $modifiedSong->title = GUID();
+        $modifiedSong->title =Guid::create();
         $modifiedSong->description = 'pizza is good';
         $modifiedSong->filename = 'pizza.wav';
         $updatedSong = $this->getSongGateway()->updateSong($modifiedSong);

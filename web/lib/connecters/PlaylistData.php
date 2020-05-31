@@ -1,4 +1,5 @@
 <?php
+require_once __dir__ . '/../objects/Guid.php';
 require_once __dir__ . '/../objects/Playlist.php';
 require_once __dir__ . '/../objects/Song.php';
 require_once __dir__ . '/../objects/User.php';
@@ -134,7 +135,7 @@ class PlaylistData
         try {
             $stmt1 = $this->dbConnection->prepare($sql1);
             $this->dbConnection->autocommit(FALSE);
-            $playlistId = GUID();
+            $playlistId = Guid::create();
             $adminId = $administrator->id;
             $stmt1->bind_param("sssss",
                 $playlistId,
@@ -168,7 +169,7 @@ class PlaylistData
                         $songId = $song;
                     }
                     $stmt2 = $this->dbConnection->prepare($sql2);
-                    $playlistSongId = GUID();
+                    $playlistSongId = Guid::create();
                     $stmt2->bind_param("sssis",
                         $playlistSongId,
                         $songId,
@@ -245,7 +246,7 @@ class PlaylistData
                         $songId = $song;
                     }
                     $stmt3 = $this->dbConnection->prepare($sql3);
-                    $playlistSongId = GUID();
+                    $playlistSongId = Guid::create();
                     $stmt3->bind_param("sssis",
                         $playlistSongId,
                         $songId,
@@ -320,7 +321,7 @@ class PlaylistData
 
         try {
             $stmt = $this->dbConnection->prepare($sql);
-            $playlistSongId = GUID();
+            $playlistSongId = Guid::create();
             $stmt->bind_param("ssss",
                 $playlistSongId,
                 $songId,

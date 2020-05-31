@@ -11,8 +11,8 @@
         ></router-view>
         <PageBottom/>
         <div class="footer-spacer" ref="footerSpacer"></div>
-        <audio id="player" ref="player" :key="audioSrc" :src="audioSrc" preload="auto"></audio>
         <footer class="footer" ref="footer" v-bind:class="{'playerActive': showPlayer}">
+            <audio id="player" ref="player" :key="audioSrc" :src="audioSrc" preload="auto"></audio>
             
             <div id="slideContainerContainer">
                 <div ref="slideContainer"  id="slideContainer">
@@ -70,9 +70,9 @@
                         </td>
                         <td class="volume-cell">
                             <span v-if="!isIOS">
-                                <img src="../assets/volume_down.svg" alt="volume down" />
+                                <img @click="lowerVolume" src="../assets/volume_down.svg" alt="volume down" />
                                 <input @input="setVolume" ref="playerVolumeSlider" type="range" min="0" max="100">
-                                <img src="../assets/volume_up.svg" alt="volume up" />
+                                <img @click="raiseVolume" src="../assets/volume_up.svg" alt="volume up" />
                             </span>
                             <span v-else ref="airPlay" id="airPlay">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
@@ -124,6 +124,18 @@
             setVolume(ev) {
                 this.$refs.player.volume = ev.target.value / 100;
             },           
+            raiseVolume() {
+                let updatedValue = this.$refs.player.volume + 0.1;
+                if (updatedValue > 1) updatedValue = 1
+                this.$refs.player.volume = updatedValue;
+                this.$refs.playerVolumeSlider.value = updatedValue * 100;                
+            },
+            lowerVolume() {
+                let updatedValue = this.$refs.player.volume - 0.1;
+                if (updatedValue < 0) updatedValue = 0
+                this.$refs.player.volume = updatedValue;
+                this.$refs.playerVolumeSlider.value = updatedValue * 100;
+            },
             setQueueAndPlay: function(songs) {
                 this.queue = songs;
                 this.activeSong = { };
@@ -152,28 +164,28 @@
                 if (this.activeSong.id !== song.id) {
                     this.activeSong = song;
                     this.loadingState = StatusEnum.LOADING;
-
-                    const progressBar = this.$refs.progressBar;
-                    const slideContainer = this.$refs.slideContainer;
                     cancelAnimationFrame(ticker);
-                    
+
                     if (this.playing) {
                         player.pause();
                     }
 
+                    const slideContainer = this.$refs.slideContainer;
                     const spans = slideContainer.getElementsByTagName('span');
                     for (let i = 0; i < spans.length; i++) {
                         slideContainer.removeChild(spans[i]);
                     }
 
                     player.setAttribute('title', `The Discoverables - ${song.title}`);
+
                     requestAnimationFrame(function() {
-                        progressBar.style.width = '0px';
-                    });
+                        this.$refs.progressBar.style.width = '0px';
+                    }.bind(this));
+
                     const src = `/audio/${encodeURI(song.filename)}`;
                     if (this.isChromeDesktop && !player.paused) {
                         // Chrome on Mac has a bit of a stutter when changing tracks.
-                        // a slight timeout makes it better
+                        // a timeout makes it better
                         setTimeout(function() {
                             player.src = src;
                             player.load();
@@ -195,15 +207,14 @@
                     }
                 } else {
                     playPromise = player.play();
-                }                                
-
-               
+                }
             },
-            
         },
         computed: {
             songIndex: function() {
-                if (!this.queue) return 0;
+                if (!this.queue) {
+                    return 0;
+                }
                 return this.queue.findIndex(song => song.id === this.activeSong.id);
             },            
             showPlayer() {
@@ -238,8 +249,7 @@
                 // return this.$refs.player.duration;
             }
         },
-        mounted() {
-            // debugger;       
+        mounted() {    
             const player = this.$refs.player;
             const slider = this.$refs.playSlider;
             const slideContainer = this.$refs.slideContainer;

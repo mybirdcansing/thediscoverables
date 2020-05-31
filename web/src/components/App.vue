@@ -14,6 +14,14 @@
         },
         created: function() {
             this.fetchCatalog();
+
+            // disable pinch-zoom gesture
+            document.addEventListener("touchstart", event => {
+                if(event.touches.length > 1) {
+                    event.preventDefault();
+                    event.stopPropagation(); // maybe useless
+                }
+            }, {passive: false});            
         }
     }
 </script>

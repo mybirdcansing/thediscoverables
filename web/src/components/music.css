@@ -283,7 +283,17 @@ a:hover {
 }    
 #playerControls .volume-cell {
     white-space: nowrap;
-} 
+}
+
+#playerControls .volume-cell input {
+    background: #eaeaea;
+    height: 8px;
+    top:-4px;
+    border-radius: 6px;
+    outline: none;
+    -webkit-appearance: none;
+    position: relative;
+}
 #playerToggle {
     width:46px;
     height:46px;

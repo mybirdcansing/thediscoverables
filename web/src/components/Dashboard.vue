@@ -107,7 +107,6 @@
 <style scoped>
 
 .immersive-header {
-   
     width: 100%;
     background: linear-gradient(360deg, rgba(38, 38, 38, 1) 8.98%, rgba(38, 38, 38, 0) 100%) ; 
 

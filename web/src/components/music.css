@@ -299,39 +299,36 @@ a:hover {
 
 input[type=range]::-webkit-slider-thumb {
     -webkit-appearance: none;
-    border: .3px solid rgb(70, 70, 70);
-    height: 25px;
-    width: 10px;
-    border-radius: 3px;
+    border: 1px solid #797979;
+    height: 17px;
+    width: 17px;
+    border-radius: 17px;
     background: #d3d3d3;
     cursor: pointer;
-    margin-top: -2px; 
-    box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d; /* Add cool effects to your sliders! */
+    margin-top: -1px;
+    box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
   }
   
-  /* All the same stuff for Firefox */
+  /* Firefox */
   input[type=range]::-moz-range-thumb {
     box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-    border: 1px solid rgb(121, 121, 121);
-    height: 25px;
-    width: 10px;
-    top:6px;
-    position: relative;
-    border-radius: 3px;
+    border: 1px solid #797979;
+    height: 17px;
+    width: 17px;
+    border-radius: 17px;
     background: #d3d3d3;
     cursor: pointer;
   }
   input[type=range]:focus {
-    outline: none; /* Removes the blue border. You should probably do some kind of focus styling for accessibility reasons though. */
+    outline: none;
   }
-  /* All the same stuff for IE */
+  /* IE */
   input[type=range]::-ms-thumb {
     box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-    border: 1px solid #222;
-    height: 25px;
-    width: 10px;
-    top:6px;
-    border-radius: 3px;
+    border: 1px solid #797979;
+    height: 17px;
+    width: 17px;
+    border-radius: 17px;
     background: #eaeaea;
     cursor: pointer;
   }

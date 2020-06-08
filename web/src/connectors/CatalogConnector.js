@@ -1,7 +1,7 @@
 import { ConnectorBase } from "./ConnectorBase";
 
 export class CatalogConnector extends ConnectorBase {
-	constructor() {
+    constructor() {
         super('catalog');
     }
       

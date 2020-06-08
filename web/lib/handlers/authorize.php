@@ -16,8 +16,8 @@ if(AuthCookie::isValid()) {
             "username" => AuthCookie::getUsername()
     ]);
 } else {
-	header("HTTP/1.1 401 Unauthorized");
-	echo json_encode([
+    header("HTTP/1.1 401 Unauthorized");
+    echo json_encode([
         "authorized" => false,
         "message" => "You do not have permission"
     ]);

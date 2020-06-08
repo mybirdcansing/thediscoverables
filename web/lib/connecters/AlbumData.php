@@ -7,32 +7,32 @@ require_once __dir__ . '/../objects/Guid.php';
 
 class AlbumData
 {
-	private $dbConnection = null;
+    private $dbConnection = null;
 
     function __construct($dbConnection)
     {
         $this->dbConnection = $dbConnection;
     }
 
-	public function findAll()
+    public function findAll()
     {
         $sql = "
             SELECT
-				album_id,
-				title,
+                album_id,
+                title,
                 description,
                 artwork_filename,
                 DATE_FORMAT(publish_date, '%Y-%m-%d') as publish_date,
                 playlist_id
-		  	FROM
-		  		album;";
+              FROM
+                  album;";
 
         try {
-			$stmt = $this->dbConnection->query($sql);
+            $stmt = $this->dbConnection->query($sql);
             $albums = [];
-			while ($row = $stmt->fetch_assoc()) {
-			    $albums[] = $this->rowToAlbum($row);
-			}
+            while ($row = $stmt->fetch_assoc()) {
+                $albums[] = $this->rowToAlbum($row);
+            }
             return $albums;
         } catch (\mysqli_sql_exception $e) {
             error_log($e->getMessage());
@@ -50,32 +50,32 @@ class AlbumData
                 artwork_filename,
                 DATE_FORMAT(publish_date, '%Y-%m-%d') as publish_date,
                 playlist_id
-		  	FROM
-		  		album
-		  	WHERE album_id = ?;
+              FROM
+                  album
+              WHERE album_id = ?;
         ";
 
-		$stmt = $this->dbConnection->prepare($sql);
-		$stmt->bind_param("s", $id);
-		$stmt->execute();
-		$result = $stmt->get_result();
-		if ($result->num_rows == 1) {
-		    $row = $result->fetch_assoc();
-		    $album = $this->rowToAlbum($row);
+        $stmt = $this->dbConnection->prepare($sql);
+        $stmt->bind_param("s", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows == 1) {
+            $row = $result->fetch_assoc();
+            $album = $this->rowToAlbum($row);
             $playlistData = new PlaylistData($this->dbConnection);
             $album->playlist = $playlistData->find($row["playlist_id"]);
-		    return $album;
-		} else {
-			return 0;
-		}
+            return $album;
+        } else {
+            return 0;
+        }
     }
 
     public function insert(Album $album, User $administrator)
     {
 
         $sql = "
-			INSERT INTO
-				album (
+            INSERT INTO
+                album (
                     album_id,
                     title,
                     description,
@@ -87,7 +87,7 @@ class AlbumData
                     created_date,
                     created_by_id
                 )
-			VALUES (?, ?, ?, ?, ?, ?, now(), ?, now(), ?);
+            VALUES (?, ?, ?, ?, ?, ?, now(), ?, now(), ?);
         ";
 
         try {
@@ -95,8 +95,8 @@ class AlbumData
             $albumId = Guid::create();
             $stmt->bind_param("ssssssss",
                 $albumId,
-				$album->title,
-				$album->description,
+                $album->title,
+                $album->description,
                 $album->playlist,
                 $album->artworkFilename,
                 $album->publishDate,
@@ -177,16 +177,16 @@ class AlbumData
         }
     }
 
-	public function rowToAlbum($row)
+    public function rowToAlbum($row)
     {
-	    $album = new Album();
-	    $album->id = $row["album_id"];
-	    $album->title = $row["title"];
+        $album = new Album();
+        $album->id = $row["album_id"];
+        $album->title = $row["title"];
         $album->description = $row["description"];
         $album->artworkFilename = $row['artwork_filename'];
         $album->publishDate = $row['publish_date'];
-	    $album->playlistId  = $row["playlist_id"];
-	    return $album;
-	}
+        $album->playlistId  = $row["playlist_id"];
+        return $album;
+    }
 
 }

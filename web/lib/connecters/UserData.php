@@ -6,36 +6,36 @@ require_once __dir__ . '/../objects/DuplicateEmailException.php';
 
 class UserData
 { 
-	private $dbConnection = null;
+    private $dbConnection = null;
 
     function __construct($dbConnection) 
     {
         $this->dbConnection = $dbConnection;
     }
 
-	public function findAll($activeUsers = true)
+    public function findAll($activeUsers = true)
     {
         $sql = "
             SELECT 
-				user_id,
-				username,
-				first_name,
-				last_name,
-				email,
+                user_id,
+                username,
+                first_name,
+                last_name,
+                email,
                 user_status_id
-		  	FROM 
-		  		user";
+              FROM 
+                  user";
         if ($activeUsers) {
             $sql .= ' WHERE user_status_id = 1';
         } 
         $sql .= ';';
 
         try {
-			$stmt = $this->dbConnection->query($sql);
+            $stmt = $this->dbConnection->query($sql);
             $users = [];
-			while ($row = $stmt->fetch_assoc()) {
-			    $users[] = $this->_rowToUser($row);
-			}
+            while ($row = $stmt->fetch_assoc()) {
+                $users[] = $this->_rowToUser($row);
+            }
             return $users;
         } catch (\mysqli_sql_exception $e) {
             error_log($e->getMessage());
@@ -47,28 +47,28 @@ class UserData
     {
         $sql = "
             SELECT 
-				user_id,
-				username,
-				first_name,
-				last_name,
-				email,
+                user_id,
+                username,
+                first_name,
+                last_name,
+                email,
                 user_status_id
-		  	FROM 
-		  		user
-		  	WHERE user_id = ?;
+              FROM 
+                  user
+              WHERE user_id = ?;
         ";
 
-		$stmt = $this->dbConnection->prepare($sql);
-		$stmt->bind_param("s", $id);
-		$stmt->execute();
-		$result = $stmt->get_result();
-		if ($result->num_rows == 1) {
-		    $row = $result->fetch_assoc();
-		    $user = $this->_rowToUser($row);
-		    return $user;
-		} else {
-			return 0;
-		}   
+        $stmt = $this->dbConnection->prepare($sql);
+        $stmt->bind_param("s", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows == 1) {
+            $row = $result->fetch_assoc();
+            $user = $this->_rowToUser($row);
+            return $user;
+        } else {
+            return 0;
+        }   
     }
 
     public function getByUsername($username, $user_status_id = 1)
@@ -130,21 +130,21 @@ class UserData
     {
 
         $sql = "
-			INSERT INTO 
-				user (
+            INSERT INTO 
+                user (
                     user_id, 
-					username, 
-					email,
-					first_name, 
-					last_name, 
-					password, 
-					user_status_id, 
+                    username, 
+                    email,
+                    first_name, 
+                    last_name, 
+                    password, 
+                    user_status_id, 
                     modified_date,
                     modified_by_id,
                     created_date,
                     created_by_id
                 )
-			VALUES (?, ?, ?, ?, ?, ?, 1, now(), ?, now(), ?);
+            VALUES (?, ?, ?, ?, ?, ?, 1, now(), ?, now(), ?);
         ";
 
         try {
@@ -153,11 +153,11 @@ class UserData
             $userId = Guid::create();
             $stmt->bind_param("ssssssss",
                 $userId,
-				$user->username,
-				$user->email,
-				$user->firstName,
-				$user->lastName,
-				$hashedPassword,
+                $user->username,
+                $user->email,
+                $user->firstName,
+                $user->lastName,
+                $hashedPassword,
                 $administrator->id,
                 $administrator->id
             );
@@ -444,45 +444,45 @@ class UserData
         }    
     }
 
-	public function getAuthenticatedUser($username, $password)
+    public function getAuthenticatedUser($username, $password)
     {
-		$sql = "
-		  	SELECT 
-				user_id,
-				username,
-				first_name,
-				last_name,
-				email,
-				password,
+        $sql = "
+              SELECT 
+                user_id,
+                username,
+                first_name,
+                last_name,
+                email,
+                password,
                 user_status_id
-		  	FROM user 
-		  	WHERE user_status_id = 1 
-		  	AND (username = ? OR email = ?);
-		";
+              FROM user 
+              WHERE user_status_id = 1 
+              AND (username = ? OR email = ?);
+        ";
 
-		$stmt = $this->dbConnection->prepare($sql);
-		$stmt->bind_param("ss", $username, $username);
-		$stmt->execute();
-		$result = $stmt->get_result();
-		if ($result->num_rows == 1) {
-		    $row = $result->fetch_assoc();
+        $stmt = $this->dbConnection->prepare($sql);
+        $stmt->bind_param("ss", $username, $username);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows == 1) {
+            $row = $result->fetch_assoc();
             if (password_verify($password, $row["password"])) {
                 $user = $this->_rowToUser($row);
                 return $user;
             }
-		}
-		return 0;
-	}
+        }
+        return 0;
+    }
 
-	private function _rowToUser($row)
+    private function _rowToUser($row)
     {
-	    $user = new User();
-	    $user->username = $row["username"];
-	    $user->id = $row["user_id"];
-	    $user->email = $row["email"];
-	    $user->firstName = $row["first_name"];
-	    $user->lastName = $row["last_name"];
+        $user = new User();
+        $user->username = $row["username"];
+        $user->id = $row["user_id"];
+        $user->email = $row["email"];
+        $user->firstName = $row["first_name"];
+        $user->lastName = $row["last_name"];
         $user->statusId = $row["user_status_id"];
-	    return $user;
-	}
+        return $user;
+    }
 }

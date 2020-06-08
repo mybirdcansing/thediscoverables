@@ -6,31 +6,31 @@ require_once __dir__ . '/../objects/DuplicateTitleException.php';
 
 class SongData
 { 
-	private $dbConnection = null;
+    private $dbConnection = null;
 
     function __construct($dbConnection) 
     {
         $this->dbConnection = $dbConnection;
     }
 
-	public function findAll()
+    public function findAll()
     {
         $sql = "
             SELECT 
-				song_id,
-				title,
-				filename,
+                song_id,
+                title,
+                filename,
                 description,
                 duration
-		  	FROM 
-		  		song;";
+              FROM 
+                  song;";
 
         try {
-			$stmt = $this->dbConnection->query($sql);
+            $stmt = $this->dbConnection->query($sql);
             $songs = [];
-			while ($row = $stmt->fetch_assoc()) {
-			    $songs[] = $this->rowToSong($row);
-			}
+            while ($row = $stmt->fetch_assoc()) {
+                $songs[] = $this->rowToSong($row);
+            }
             return $songs;
         } catch (\mysqli_sql_exception $e) {
             error_log($e->getMessage());
@@ -47,29 +47,29 @@ class SongData
                 filename,
                 description,
                 duration
-		  	FROM 
-		  		song
-		  	WHERE song_id = ?;
+              FROM 
+                  song
+              WHERE song_id = ?;
         ";
 
-		$stmt = $this->dbConnection->prepare($sql);
-		$stmt->bind_param("s", $id);
-		$stmt->execute();
-		$result = $stmt->get_result();
-		if ($result->num_rows == 1) {
-		    $row = $result->fetch_assoc();
-		    $song = $this->rowToSong($row);
-		    return $song;
-		} else {
-			return 0;
-		}   
+        $stmt = $this->dbConnection->prepare($sql);
+        $stmt->bind_param("s", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows == 1) {
+            $row = $result->fetch_assoc();
+            $song = $this->rowToSong($row);
+            return $song;
+        } else {
+            return 0;
+        }   
     }
 
     public function insert(Song $song, User $administrator)
     {
         $sql = "
-			INSERT INTO 
-				song (
+            INSERT INTO 
+                song (
                     song_id,
                     title,
                     description,
@@ -80,7 +80,7 @@ class SongData
                     created_date,
                     created_by_id
                 )
-			VALUES (?, ?, ?, ?, ?, now(), ?, now(), ?);
+            VALUES (?, ?, ?, ?, ?, now(), ?, now(), ?);
         ";
 
         try {
@@ -88,10 +88,10 @@ class SongData
             $songId = Guid::create();
             $stmt->bind_param("sssdsss",
                 $songId,
-				$song->title,
+                $song->title,
                 $song->description,
                 $song->duration,
-				$song->filename,
+                $song->filename,
                 $administrator->id,
                 $administrator->id
             );
@@ -185,14 +185,14 @@ class SongData
         }    
     }
 
-	public function rowToSong($row)
+    public function rowToSong($row)
     {
-	    $song = new Song();
-	    $song->id = $row["song_id"];
-	    $song->title = $row["title"];
+        $song = new Song();
+        $song->id = $row["song_id"];
+        $song->title = $row["title"];
         $song->description = $row["description"];
         $song->duration = $row["duration"];
-	    $song->filename = $row["filename"];
-	    return $song;
-	}
+        $song->filename = $row["filename"];
+        return $song;
+    }
 }

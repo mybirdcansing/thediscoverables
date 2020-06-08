@@ -9,29 +9,29 @@ require_once __dir__ . '/../objects/DeletePlaylistInAlbumException.php';
 
 class PlaylistData
 {
-	private $dbConnection = null;
+    private $dbConnection = null;
 
     function __construct($dbConnection)
     {
         $this->dbConnection = $dbConnection;
     }
 
-	public function findAll()
+    public function findAll()
     {
         $sql = "
             SELECT
-				playlist_id,
-				title,
-				description
-		  	FROM
-		  		playlist;";
+                playlist_id,
+                title,
+                description
+              FROM
+                  playlist;";
 
         try {
-			$stmt = $this->dbConnection->query($sql);
+            $stmt = $this->dbConnection->query($sql);
             $playlists = [];
-			while ($row = $stmt->fetch_assoc()) {
-			    $playlists[] = $this->_rowToPlaylist($row);
-			}
+            while ($row = $stmt->fetch_assoc()) {
+                $playlists[] = $this->_rowToPlaylist($row);
+            }
             return $playlists;
         } catch (\mysqli_sql_exception $e) {
             error_log($e->getMessage());
@@ -50,15 +50,15 @@ class PlaylistData
         ";
 
         try {
-			$stmt = $this->dbConnection->query($sql);
+            $stmt = $this->dbConnection->query($sql);
             $playlistSongs = [];
-			while ($row = $stmt->fetch_assoc()) {
+            while ($row = $stmt->fetch_assoc()) {
                 $playlistSong = new stdClass();
                 $playlistSong->playlistId = $row["playlist_id"];
                 $playlistSong->songId = $row["song_id"];
                 $playlistSong->orderIndex = $row["order_index"];
-			    $playlistSongs[] = $playlistSong;
-			}
+                $playlistSongs[] = $playlistSong;
+            }
             return $playlistSongs;
         } catch (\mysqli_sql_exception $e) {
             error_log($e->getMessage());
@@ -70,7 +70,7 @@ class PlaylistData
     {
         $sql = "
             SELECT
-            	pl.playlist_id,
+                pl.playlist_id,
                 pl.title AS playlist_title,
                 pl.description AS playlist_description,
                 s.song_id,
@@ -78,11 +78,11 @@ class PlaylistData
                 s.description AS song_description,
                 s.filename AS song_filename
             FROM
-            	playlist pl
+                playlist pl
             left JOIN playlist_song pls ON
-            	pls.playlist_id = pl.playlist_id
+                pls.playlist_id = pl.playlist_id
             left JOIN song s ON
-            	s.song_id = pls.song_id
+                s.song_id = pls.song_id
             WHERE pl.playlist_id = ?;
         ";
         $playlist = null;
@@ -95,9 +95,9 @@ class PlaylistData
                 while ($row = $result->fetch_assoc()) {
                     if ($playlist == null) {
                         $playlist = new Playlist();
-                	    $playlist->id = $row["playlist_id"];
-                	    $playlist->title = $row["playlist_title"];
-                	    $playlist->description = $row["playlist_description"];
+                        $playlist->id = $row["playlist_id"];
+                        $playlist->title = $row["playlist_title"];
+                        $playlist->description = $row["playlist_description"];
                     }
                     if ($row["song_id"]) {
                         $song = new Song();
@@ -119,8 +119,8 @@ class PlaylistData
     public function insert(Playlist $playlist, User $administrator)
     {
         $sql1 = "
-			INSERT INTO
-				playlist (
+            INSERT INTO
+                playlist (
                     playlist_id,
                     title,
                     description,
@@ -129,7 +129,7 @@ class PlaylistData
                     created_date,
                     created_by_id
                 )
-			VALUES (?, ?, ?, now(), ?, now(), ?);
+            VALUES (?, ?, ?, now(), ?, now(), ?);
         ";
 
         try {
@@ -139,8 +139,8 @@ class PlaylistData
             $adminId = $administrator->id;
             $stmt1->bind_param("sssss",
                 $playlistId,
-				$playlist->title,
-				$playlist->description,
+                $playlist->title,
+                $playlist->description,
                 $adminId,
                 $adminId
             );
@@ -355,13 +355,13 @@ class PlaylistData
         }
     }
 
-	private function _rowToPlaylist($row)
+    private function _rowToPlaylist($row)
     {
-	    $playlist = new Playlist();
-	    $playlist->id = $row["playlist_id"];
-	    $playlist->title = $row["title"];
-	    $playlist->description = $row["description"];
-	    return $playlist;
-	}
+        $playlist = new Playlist();
+        $playlist->id = $row["playlist_id"];
+        $playlist->title = $row["title"];
+        $playlist->description = $row["description"];
+        return $playlist;
+    }
 
 }

@@ -15,15 +15,15 @@ class AuthCookie
         // ];
         // 'domain' =>  rawurlencode($domain)),
         // setcookie($settings->LOGIN_COOKIE_NAME, $loginCookie, $params);
-    	setcookie($settings->LOGIN_COOKIE_NAME, $loginCookie, time() + (3600 * 24 * 30), '/');
+        setcookie($settings->LOGIN_COOKIE_NAME, $loginCookie, time() + (3600 * 24 * 30), '/');
         return $loginCookie;
     }
 
     public static function logout() {
         $settings = ((new Configuration())->getSettings())->security;
         if (!isset($_COOKIE[$settings->LOGIN_COOKIE_NAME])) return 0;
-		unset($_COOKIE[$settings->LOGIN_COOKIE_NAME]);
-		setcookie($settings->LOGIN_COOKIE_NAME, '', time() - 3600, '/');
+        unset($_COOKIE[$settings->LOGIN_COOKIE_NAME]);
+        setcookie($settings->LOGIN_COOKIE_NAME, '', time() - 3600, '/');
     }
 
     public static function getUsername() {

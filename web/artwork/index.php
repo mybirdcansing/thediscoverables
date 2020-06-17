@@ -25,8 +25,8 @@ if (!file_exists($originalArtworkPath)) {
     header("HTTP/1.1 404 Not Found");
     exit();
 }
-
-$sizes = ((new Configuration())->getSettings())->artwork->sizes;
+$config = new Configuration(__dir__ . '/sizes.json');
+$sizes = $config->getSettings();
 $dimensions = $sizes->$size;
 
 if (!isset($dimensions)) {

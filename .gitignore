@@ -43,6 +43,7 @@ Thumbs.db
 
 # App files
 node_modules
+vendor
 dist
 index.html
 original_artwork

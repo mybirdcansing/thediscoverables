@@ -225,32 +225,33 @@ final class UserTest extends TestBase
         ]);
     }
 
-    // public function testUpdatePassword() {
-    //     $ts = ((new Configuration())->getSettings())->test;
-    //     // first make a user
-    //     $user = $this->getUserGateway()->createUser($this->fleshedOutUser());
-    //     $updatedPassword = 'UpdatedPassword';
+    public function testUpdatePassword() {
+        // first make a user
+        $user = $this->getUserGateway()->createUser($this->fleshedOutUser());
+        $updatedPassword = 'UpdatedPassword';
 
-    //     try {
-    //         // request the password update email
-    //         $userToken = $this->getPasswordResetTokenGateway()->getToken($user);
-    //         // can't get the token from the email, so go directly to the database 
-    //         $dataAccess = new DataAccess($configPath = __dir__ . '/../config/test_config.json');
-    //         $dbConnection = $dataAccess->getConnection();
-    //         $userData = new UserData($dbConnection);
-    //         $tokens = $userData->getPasswordResetTokens($user->id);
+        try {
+            // request the password update email
+            $userToken = $this->getPasswordResetTokenGateway()->getToken($user);
             
-    //         $tokenData = reset($tokens);
+            // can't get the token from the email, so go directly to the database 
+            $configPath = __dir__ . '/../config/test_config.json';
+            $dataAccess = new DataAccess($configPath);
+            $dbConnection = $dataAccess->getConnection();
+            $userData = new UserData($dbConnection);
+            $tokens = $userData->getPasswordResetTokens($user->id);
+            
+            $tokenData = reset($tokens);
 
-    //         $this->getUserGateway()->resetPassword($user->id, $tokenData->token, $updatedPassword);
-    //         // make sure it's all good
-    //         $authResponse = $this->authenticateUser($user->username, $updatedPassword);
-    //         $this->assertTrue($authResponse->authenticated, 'User was not authenticated.');
+            $this->getUserGateway()->resetPassword($user->id, $tokenData->token, $updatedPassword);
+            // make sure it's all good
+            $authResponse = $this->authenticateUser($user->username, $updatedPassword);
+            $this->assertTrue($authResponse->authenticated, 'User was not authenticated.');
 
-    //     } finally {
-    //         $this->getUserGateway()->deleteUser($user->id);
-    //     }
-    // }
+        } finally {
+            $this->getUserGateway()->deleteUser($user->id);
+        }
+    }
     
     public function testAuthenticateWithInvalidPassword() {
         // first make a user

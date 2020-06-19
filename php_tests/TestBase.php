@@ -20,6 +20,8 @@ class TestBase extends TestCase
     private $_albumGateway;
     private $_passwordResetTokenGateway;
 
+    public $configPath = __dir__ . '/../config/test_config.json';
+
     function authenticateUser($username, $password, $expectedStatusCode = 200)
     {
 		$client = $this->getHandlerClient();
@@ -50,7 +52,7 @@ class TestBase extends TestCase
     {
     	if (!$this->_httpClient) {
     		$this->_httpClient = new Client([
-	            'base_uri' => ((new Configuration())->getSettings())->host->HANDLER_WEB_ROOT,
+	            'base_uri' => ((new Configuration($this->configPath))->getSettings())->test->HANDLER_WEB_ROOT,
 	            'timeout'  => 4.0,
 	            'cookies' => true,
 	            'http_errors' => false
@@ -102,7 +104,7 @@ class TestBase extends TestCase
     function getCookieJar() 
     {
     	if (!$this->_cookieJar) {
-    		$settings = ((new Configuration())->getSettings())->test;
+    		$settings = ((new Configuration($this->configPath))->getSettings())->test;
 	        // login as the test user (see sql/schema.sql)
 	        $json = $this->authenticateUser($settings->TEST_USERNAME, $settings->TEST_PASSWORD);
 	        // set the cookie for future requests

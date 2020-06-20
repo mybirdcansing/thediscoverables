@@ -86,7 +86,11 @@ class SongController extends ControllerBase  {
         if($fileMimeType == 'audio/mpeg') {
             //overwrites file with the same name (this is intentional)
             $options->filename = str_replace(" ", "_", $options->filename);
-            file_put_contents('../../../audio/' . $options->filename, $fileData);
+            $folderPath = '../../../audio';
+            if (!file_exists($folderPath)) {
+                mkdir($folderPath);
+            }            
+            file_put_contents($folderPath . '/' . $options->filename, $fileData);
         }
         else {
             throw new BadMimeTypeException();

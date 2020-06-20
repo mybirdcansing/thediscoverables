@@ -168,7 +168,6 @@ class AlbumController  extends ControllerBase {
 
     private function _handleUpload($options)
     {
-
         // Decode base64 data
         list($type, $data) = explode(';', $options->fileInput);
         list(, $data) = explode(',', $data);
@@ -179,13 +178,14 @@ class AlbumController  extends ControllerBase {
         $fileMimeType = finfo_buffer($finfo, $fileData, FILEINFO_MIME_TYPE);
 
         // Validate type of file
-        if(
-            $fileMimeType === 'image/jpeg'
-            || $fileMimeType === 'image/png'
-            ) {
+        if ($fileMimeType === 'image/jpeg' || $fileMimeType === 'image/png') {
             $extention = ($fileMimeType === 'image/png') ? '.png' : '.jpeg';
             $options->artworkFilename = $options->id . '_artwork' . $extention;
-            file_put_contents('../../../original_artwork/' . $options->artworkFilename, $fileData);
+            $folderPath = '../../../original_artwork';
+            if (!file_exists($folderPath)) {
+                mkdir($folderPath);
+            }
+            file_put_contents($folderPath . '/' . $options->artworkFilename, $fileData);
         }
         else {
             throw new BadMimeTypeException();

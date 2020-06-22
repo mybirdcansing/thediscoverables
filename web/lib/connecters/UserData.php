@@ -128,7 +128,6 @@ class UserData
     }
     public function insert(User $user, User $administrator)
     {
-
         $sql = "
             INSERT INTO 
                 user (

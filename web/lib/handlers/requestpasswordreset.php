@@ -84,7 +84,7 @@ $mail->setFrom($settings->email->FROM_ADDRESS, $settings->email->FROM_NAME);
 $mail->addReplyTo($settings->email->FROM_ADDRESS, $settings->email->FROM_NAME);
 $mail->addAddress($user->email, "$user->firstName $user->lastName");
 $mail->Subject = 'Administration: The Discoverables';
-$link = 'http://' . $settings->host->DOMAIN . '/passwordreset?token=' . $token;
+$link = 'http://' . $_SERVER['SERVER_NAME'] . '/passwordreset?token=' . $token;
 $msg = "<p>Click this <a href=\"$link\">link</a> to update your password for The Discoverables administration site.</p>";
 $msg = $msg . "<a href='" . $link . "'>Update Password</a>";
 $msg = wordwrap($msg, 70);

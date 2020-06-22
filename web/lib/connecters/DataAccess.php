@@ -32,7 +32,7 @@ class DataAccess {
                 $this->dbConnection->set_charset("utf8mb4");
             } catch(Exception $e) {
                 error_log($e->getMessage());
-                exit($e->getMessage());
+                throw $e;
             }
         }
         return $this->dbConnection;

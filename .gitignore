@@ -27,7 +27,7 @@ users.sql
 *.sqlite
 config.json
 test_config.json
-
+adminuser_config.json
 
 # OS generated files #
 ######################

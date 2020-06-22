@@ -1,0 +1,18 @@
+{
+	"dataAccess" : {
+		"DB_HOST": "",
+		"DB_USER": "",
+		"DB_PASSWORD": "",
+		"DB_DATABASE": "thediscoverables"
+	},
+	"security" : {
+		"SECRET_WORD": "",
+		"LOGIN_COOKIE_NAME": ""
+	},
+	"email": {
+		"USER": "",
+		"PASSWORD": "",
+		"FROM_ADDRESS": "",
+		"FROM_NAME": ""
+	}
+}

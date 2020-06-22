@@ -20,7 +20,7 @@ class TestBase extends TestCase
     private $_albumGateway;
     private $_passwordResetTokenGateway;
 
-    public $configPath = __dir__ . '/../config/test_config.json';
+    public $configPath = __dir__ . '/config.json';
 
     function authenticateUser($username, $password, $expectedStatusCode = 200)
     {
@@ -50,9 +50,12 @@ class TestBase extends TestCase
     // factory methods
     function getHandlerClient() 
     {
+        $config = new Configuration($this->configPath);
+        $settings = $config->getSettings();
+        $handlerPath = 'http://' . $settings->test->DOMAIN . '/lib/handlers/';
     	if (!$this->_httpClient) {
     		$this->_httpClient = new Client([
-	            'base_uri' => ((new Configuration($this->configPath))->getSettings())->test->HANDLER_WEB_ROOT,
+	            'base_uri' => $handlerPath,
 	            'timeout'  => 4.0,
 	            'cookies' => true,
 	            'http_errors' => false
@@ -110,7 +113,7 @@ class TestBase extends TestCase
 	        // set the cookie for future requests
 	        $this->_cookieJar = CookieJar::fromArray([
 	            'login' => $json->cookie
-	        ], $settings->TEST_DOMAIN);
+	        ], $settings->DOMAIN);
     	}
     	return $this->_cookieJar;
     }

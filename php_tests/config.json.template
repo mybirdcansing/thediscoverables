@@ -2,14 +2,14 @@
 	"dataAccess" : {
 		"DB_HOST": "0.0.0.0",
 		"DB_USER": "adam",
-		"DB_PASSWORD": "abacadae",
+		"DB_PASSWORD": "[password]",
 		"DB_DATABASE": "thediscoverables"
 	},
     "test" : {
         "DOMAIN": "localhost",
         "TEST_USERNAME": "adam",
-        "TEST_PASSWORD": "abacadae",
+        "TEST_PASSWORD": "[password]",
         "TEST_DOMAIN": "localhost",
-        "TEST_EMAIL" : "ajcohen100@yahoo.com"
+        "TEST_EMAIL" : "[email]"
     }
 }

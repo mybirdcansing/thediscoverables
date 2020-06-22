@@ -10,7 +10,7 @@ http://thediscoverables.com
 * Composer (Php dependency management)
 * npm (node package management)
 
-#### If you'd like to use Docker, the Dockerfile in the setup folder can be used
+#### If you'd like to use Docker, the Dockerfile in the `thediscoverables/docker_env` folder can be used
 
 > thediscoverables/docker_env/Dockerfile 
 [This setup guide might help](https://medium.com/better-programming/php-how-to-run-your-entire-development-environment-in-docker-containers-on-macos-787784e94f9a).

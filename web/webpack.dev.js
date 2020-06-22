@@ -8,13 +8,12 @@ module.exports =  merge(common, {
     mode: "development",
     devServer: {
         proxy: {
-            '/lib/handlers': 'http://[::1]',
-            '/artwork': 'http://[::1]',
-            '/audio': 'http://[::1]',
+            '/lib/handlers': 'http://127.0.0.1:8000',
+            '/artwork': 'http://127.0.0.1:8000',
+            '/audio': 'http://127.0.0.1:8000',
         },
         contentBase: "./dist",
-        historyApiFallback: true,
-        host: '192.168.1.72' // '192.168.1.72' this ip address is set manually in the router
+        historyApiFallback: true
     },
     output: {
         publicPath: '/'
@@ -30,7 +29,7 @@ module.exports =  merge(common, {
         new webpack.EnvironmentPlugin({
             NODE_ENV: 'development', // use 'development' unless process.env.NODE_ENV is defined
             DEBUG: false
-          })        
+          })
     ],
     module: {
         rules: [

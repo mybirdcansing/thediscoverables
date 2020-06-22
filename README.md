@@ -80,25 +80,25 @@ Then update the config.json file
 
 ```javascript
 {
-	"dataAccess" : {
+    "dataAccess" : {
         // if you're using Docker, use the name of the mysql docker container for the host
         "DB_HOST": "[your host]", 
-		"DB_USER": "thediscoverables",
-		"DB_PASSWORD": "[password]",
-		"DB_DATABASE": "thediscoverables"
-	},
-	"security" : {
+        "DB_USER": "thediscoverables",
+        "DB_PASSWORD": "[password]",
+        "DB_DATABASE": "thediscoverables"
+    },
+    "security" : {
         // this is used to protect the authenticaiton cookie
         "SECRET_WORD": "[something secret]", 
-		"LOGIN_COOKIE_NAME": "login"
-	},
+        "LOGIN_COOKIE_NAME": "login"
+    },
     // configuration for PHPMailer https://github.com/PHPMailer/PHPMailer
-	"email": {
-		"USER": "youremail@email.com",
-		"PASSWORD": "[password]",
-		"FROM_ADDRESS": "youremail@email.com",
-		"FROM_NAME": "The Discoverables Support"
-	}
+    "email": {
+        "USER": "youremail@email.com",
+        "PASSWORD": "[password]",
+        "FROM_ADDRESS": "youremail@email.com",
+        "FROM_NAME": "The Discoverables Support"
+    }
 }
 ```
 
@@ -113,11 +113,11 @@ Then update the config.json file
 
 ```javascript
 {
-	"dataAccess" : {
-		"DB_HOST": "0.0.0.0",
-		"DB_USER": "thediscoverables",
-		"DB_PASSWORD": "[password]",
-		"DB_DATABASE": "thediscoverables"
+    "dataAccess" : {
+        "DB_HOST": "0.0.0.0",
+        "DB_USER": "thediscoverables",
+        "DB_PASSWORD": "[password]",
+        "DB_DATABASE": "thediscoverables"
     },
     // this will be used to make the first admin tool user
     "user" : {
@@ -161,11 +161,11 @@ Then update the config.json file
 
 ```javascript
 {
-	"dataAccess" : {
-		"DB_HOST": "0.0.0.0",
-		"DB_USER": "thediscoverables",
-		"DB_PASSWORD": "[password]",
-		"DB_DATABASE": "thediscoverables"
+    "dataAccess" : {
+        "DB_HOST": "0.0.0.0",
+        "DB_USER": "thediscoverables",
+        "DB_PASSWORD": "[password]",
+        "DB_DATABASE": "thediscoverables"
     },
 
     "test" : {

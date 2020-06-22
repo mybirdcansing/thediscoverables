@@ -24,6 +24,10 @@ upload_max_filesize = 32M
 max_file_uploads = 20
 ```
 
+## Mysql configuration
+[mysqld]
+default-authentication-plugin=mysql_native_password
+
 ## Get ready
 
 ### Clone the repository to your environment

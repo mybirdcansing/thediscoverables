@@ -1,8 +1,8 @@
 {
 	"dataAccess" : {
-		"DB_HOST": "",
-		"DB_USER": "",
-		"DB_PASSWORD": "",
+		"DB_HOST": "localhost",
+		"DB_USER": "thediscoverables",
+		"DB_PASSWORD": "[password]",
 		"DB_DATABASE": "thediscoverables"
 	},
 	"security" : {
@@ -10,9 +10,9 @@
 		"LOGIN_COOKIE_NAME": ""
 	},
 	"email": {
-		"USER": "",
-		"PASSWORD": "",
-		"FROM_ADDRESS": "",
-		"FROM_NAME": ""
+		"USER": "emailaddress@gmail.com",
+		"PASSWORD": "[password]",
+		"FROM_ADDRESS": "emailaddress@gmail.com",
+		"FROM_NAME": "The Discoverables Support"
 	}
 }

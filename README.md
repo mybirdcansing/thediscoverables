@@ -6,7 +6,7 @@ http://thediscoverables.com
 * Git
 * A web server
 * MySql 8 or higher
-* Php 7 or higher
+* Php 7.2 or higher
 * Composer (Php dependency management)
 * npm (node package management)
 
@@ -63,10 +63,9 @@ Create a mysql user
 ```sql
 -- replace [password] with a password of your choice
 CREATE USER 'thediscoverables'@'%' IDENTIFIED BY '[password]';
-GRANT ALL PRIVILEGES ON *.* TO 'thediscoverables'@'%';
+GRANT ALL PRIVILEGES ON thediscoverables.* TO 'thediscoverables'@'%';
 ALTER USER 'thediscoverables'@'%' IDENTIFIED WITH mysql_native_password
 BY '[password]'; 
-FLUSH PRIVILEGES;
 ```
 
 Run `thediscoverables/sql/scheme.sql` file on your mysql database

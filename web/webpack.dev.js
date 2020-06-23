@@ -14,7 +14,7 @@ module.exports =  merge(common, {
         },
         contentBase: "./dist",
         historyApiFallback: true,
-        host: '192.168.1.72' // '192.168.1.72' this ip address is set manually in the router
+        host: 'localhost' // '192.168.1.72' this ip address is set manually in the router
     },
     output: {
         publicPath: '/'

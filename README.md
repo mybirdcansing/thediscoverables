@@ -14,7 +14,7 @@ http://thediscoverables.com
 
 > thediscoverables/docker_env/Dockerfile 
 [This setup guide might help](https://medium.com/better-programming/php-how-to-run-your-entire-development-environment-in-docker-containers-on-macos-787784e94f9a).
-You will need to make sure the `vendor` and `config` folders are bound as syblings to the `web` folder.
+You will need to make sure the `vendor` and `config` folders are bound as siblings to the `web` folder.
 
 ## Php configuration
 Settings in `php-config.ini`

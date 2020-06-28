@@ -6,7 +6,7 @@
 		"DB_DATABASE": "thediscoverables"
 	},
     "test" : {
-        "DOMAIN": "localhost",
+        "DOMAIN": "localhost", // us your website runs on a port other than 80, add it here.
         "TEST_USERNAME": "adam",
         "TEST_PASSWORD": "[password]",
         "TEST_DOMAIN": "localhost",

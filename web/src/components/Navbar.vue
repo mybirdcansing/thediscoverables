@@ -6,7 +6,7 @@
             </router-link>
            
             <div v-if='isDevelopment' style="float:right;">
-                <router-link to="/manager">Manager</router-link>
+                <router-link to="/manager">Admin Tool</router-link>
             </div>
         </nav>
         <div id="nav-spacer"></div>

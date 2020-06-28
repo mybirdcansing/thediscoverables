@@ -10,11 +10,11 @@ http://thediscoverables.com
 * Composer (Php dependency management)
 * npm (node package management)
 
-#### If you'd like to use Docker, the Dockerfile in the `thediscoverables/docker_env` folder can be used
+#### If you plan to use Docker, the Dockerfile in the `thediscoverables/docker_env` folder can be used
 
 > thediscoverables/docker_env/Dockerfile 
 [This setup guide might help](https://medium.com/better-programming/php-how-to-run-your-entire-development-environment-in-docker-containers-on-macos-787784e94f9a).
-You will need to make sure the `vendor` and `config` folders are bound as siblings to the `web` folder.
+You will need to make sure the `vendor` and `config` folders are maintained as siblings to the `web` folder in your Docker setup.
 
 ## Php configuration
 Settings in `php-config.ini`
@@ -41,6 +41,12 @@ git clone https://github.com/mybirdcansing/thediscoverables.git
 ```bash
 cd thediscoverables 
 composer update
+```
+Note: you can ignore this error message.
+
+```bash
+[RuntimeException]
+Directory name must not be empty.
 ```
 
 ### Go into the `web` folder and run update on npm
@@ -147,6 +153,28 @@ Run the script
 ./adminuser.php
 ```
 
+# Web server
+
+If you don't want to use port 80 for your web server, you must update the devserver's proxy settings in `web/webpack.dev.js` to inclue the port you're using.
+
+```javascript
+devServer: {
+    proxy: {
+        '/lib/handlers': 'http://[::1]:[your port]',
+        '/artwork': 'http://[::1]:[your port]',
+        '/audio': 'http://[::1]:[your port]',
+    }
+}
+```
+
+If you don't have a web server setup for developemnet, you can use the one that ships with php.
+https://www.php.net/manual/en/features.commandline.webserver.php
+
+Exampele:
+```bash
+cd web
+php -S 127.0.0.1:8000
+```
 
 # Testing
 
@@ -170,7 +198,7 @@ Then update the config.json file
 
     "test" : {
         // domain of the website (these are integration tests)
-        "DOMAIN": "localhost", 
+        "DOMAIN": "localhost", // us your website runs on a port other than 80, add it here.
         // credentials for theadmin tool, 
         // this can be the same user that you created with the `adminuser.php` script
         "TEST_USERNAME": "admin",

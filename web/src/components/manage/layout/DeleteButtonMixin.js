@@ -33,8 +33,6 @@ export default {
                 console.log(data.errorMessages);
             })
         },
-        ...mapActions([
-              'deleteItem'
-        ]),         
+       
     }
 };

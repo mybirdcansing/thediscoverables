@@ -81,13 +81,16 @@
                 try {
                     const payload = { data: this.song, handler: 'song' };
                     if (this.song.id) {
-                        const response = await this.updateItem(payload);
+                        await this.updateItem(payload);
                     } else {
-                        const response = await this.createItem(payload);
+                        await this.createItem(payload);
                     }
                     this.errors = [];
                     setTimeout(() => {
                         this.showSavingAlert = false;
+                        if (!this.song.id) {
+                            this.goToSongsPage();
+                        }
                     }, 1000);
                 } catch(data) {
                     this.showSavingAlert = false;
@@ -99,7 +102,8 @@
             },
             ...mapActions([
                 'updateItem',
-                'createItem'
+                'createItem',
+                'deleteItem'
             ]),
         },
         computed: {

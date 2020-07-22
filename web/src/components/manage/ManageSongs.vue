@@ -45,7 +45,10 @@
         methods: {
             openItem(id) {
                  this.$router.push(`/manager/song/${ id }`);
-            }
+            },
+            ...mapActions([
+                'deleteItem'
+            ]),
         },
         computed: {
             ...mapGetters({

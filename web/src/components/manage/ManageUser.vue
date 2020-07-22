@@ -119,13 +119,16 @@
                 this.showSavingAlert = true;
                 try {
                     if (this.$data.create) {
-                        const response = await this.createItem({ data: this.user, handler: 'user'});
+                        await this.createItem({ data: this.user, handler: 'user'});
                     } else {
-                        const response = await this.updateItem({ data: this.user, handler: 'user'});
+                        await this.updateItem({ data: this.user, handler: 'user'});
                     }
                     this.errors = [];
                     setTimeout(() => {
                         this.showSavingAlert = false;
+                        if (this.$data.create) {
+                            this.goToUsersPage();
+                        }
                     }, 900);
                 } catch(data) {
                     this.showSavingAlert = false;

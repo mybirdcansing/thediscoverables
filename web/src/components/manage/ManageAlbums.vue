@@ -41,13 +41,16 @@
         methods: {
             openItem(id) {
                  this.$router.push(`/manager/album/${ id }`);
-            }          
+            },
+            ...mapActions([
+                'deleteItem'
+            ]),  
         },
         computed: {
             ...mapGetters({
                 allAlbums: 'albumSet',
             })
-        }
+        },
     }
 </script>
 

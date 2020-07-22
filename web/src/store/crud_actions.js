@@ -47,7 +47,7 @@ export default {
             }
         });
     },
-    deleteItem({commit}, options) {   
+    deleteItem({commit}, options) {
         options.categoryList = `${options.handler}List`;
         options.category = `${options.handler}s`;
         const connector = new RestConnector(options.handler);

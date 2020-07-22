@@ -121,13 +121,16 @@
                 try{
                     const payload = { data: this.album, handler: 'album' };
                     if (this.album.id) {
-                        const response = await this.updateItem(payload);
+                        await this.updateItem(payload);
                     } else {
-                        const response = await this.createItem(payload);
+                        await this.createItem(payload);
                     }
                     this.errors = [];
                     setTimeout(() => {
                         this.$data.showSavingAlert = false;
+                        if (!this.album.id) {
+                            this.goToAlbumsPage();
+                        }
                     }, 900);
                 } catch (data) {
                     this.$data.showSavingAlert = false;
@@ -139,7 +142,8 @@
             },
             ...mapActions([
                 'updateItem',
-                'createItem'
+                'createItem',
+                'deleteItem'
             ])
         },
         computed: {

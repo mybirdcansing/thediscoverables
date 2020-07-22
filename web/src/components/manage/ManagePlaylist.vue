@@ -104,15 +104,15 @@
                 });
                 try {
                     const payload = { data: this.playlist, handler: 'playlist' };
-                    if (this.playlist.id) {
-                        await this.updateItem(payload);
-                    } else {
+                    if (this.create) {
                         await this.createItem(payload);
+                    } else {
+                        await this.updateItem(payload);
                     }
                     this.errors = [];
                     setTimeout(() => {
                         this.showSavingAlert = false;
-                        if (!this.playlist.id) {
+                        if (this.create) {
                             this.goToPlaylistsPage();
                         }
                     }, 900);
@@ -154,11 +154,14 @@
         },
         computed: {
             playlist: function() {
-                if (this.$route.params.id === "create") {
+                if (this.create) {
                     return { id: null, title: null, description: null, songs: [] };
                 } else {
                     return Vue.util.extend({}, this.getPlaylistById(this.$route.params.id));
                 }
+            },
+            create: function() {
+                return this.$route.params.id === "create";
             },
             ...mapGetters([
                 'songSet',

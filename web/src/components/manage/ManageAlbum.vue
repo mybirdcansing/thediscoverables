@@ -120,15 +120,15 @@
                 this.$data.showSavingAlert = true;
                 try{
                     const payload = { data: this.album, handler: 'album' };
-                    if (this.album.id) {
-                        await this.updateItem(payload);
-                    } else {
+                    if (this.create) {
                         await this.createItem(payload);
+                    } else {
+                        await this.updateItem(payload);
                     }
                     this.errors = [];
                     setTimeout(() => {
                         this.$data.showSavingAlert = false;
-                        if (!this.album.id) {
+                        if (this.create) {
                             this.goToAlbumsPage();
                         }
                     }, 900);
@@ -148,7 +148,7 @@
         },
         computed: {
             album: function() {
-                if (this.$route.params.id === "create") {
+                if (this.create) {
                     return { 
                         id: null,
                         title: null,
@@ -161,6 +161,9 @@
                 } else { 
                     return Vue.util.extend({}, this.getAlbumById(this.$route.params.id)); 
                 }
+            },
+            create() {
+                return this.$route.params.id === "create";
             },
             ...mapGetters([
                 'playlistSet',

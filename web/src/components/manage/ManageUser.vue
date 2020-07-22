@@ -129,6 +129,7 @@
                         if (this.$data.create) {
                             this.goToUsersPage();
                         }
+                            
                     }, 900);
                 } catch(data) {
                     this.showSavingAlert = false;

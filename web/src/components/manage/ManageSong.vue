@@ -80,15 +80,15 @@
                 this.showSavingAlert = true;
                 try {
                     const payload = { data: this.song, handler: 'song' };
-                    if (this.song.id) {
-                        await this.updateItem(payload);
-                    } else {
+                    if (this.create) {
                         await this.createItem(payload);
+                    } else {
+                        await this.updateItem(payload);
                     }
                     this.errors = [];
                     setTimeout(() => {
                         this.showSavingAlert = false;
-                        if (!this.song.id) {
+                        if (this.create) {
                             this.goToSongsPage();
                         }
                     }, 1000);
@@ -108,11 +108,14 @@
         },
         computed: {
             song() {
-                if (this.$route.params.id === "create") {
+                if (this.create) {
                     return { id: null, title: null, filename: null, description: null, fileInput: null };
                 } else {
                     return Vue.util.extend({}, this.getSongById(this.$route.params.id));
                 }
+            },
+            create() {
+                return this.$route.params.id === "create"
             },
             ...mapGetters([
                 'catalogState',

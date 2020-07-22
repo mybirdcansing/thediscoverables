@@ -97,28 +97,31 @@
             }
         },
         methods: {
-            savePlaylist: async function(e) {
+            savePlaylist: function(e) {
                 this.showSavingAlert = true;
                 this.playlist.songs = this.playlistSongs.map((song, index) => {
                     return song.id;
                 });
-                try {
-                    const payload = { data: this.playlist, handler: 'playlist' };
-                    if (this.create) {
-                        await this.createItem(payload);
-                    } else {
-                        await this.updateItem(payload);
-                    }
+                const sucess = (result) => {
                     this.errors = [];
                     setTimeout(() => {
                         this.showSavingAlert = false;
                         if (this.create) {
-                            this.goToPlaylistsPage();
+                             this.goToPlaylistsPage();
                         }
                     }, 900);
-                } catch(data) {
+                };
+                const fail = (data) => {
                     this.showSavingAlert = false;
                     this.errors = Object.values(data.errorMessages).reverse();
+                };
+                const payload = { data: this.playlist, handler: 'playlist' };
+
+                if (this.create) {
+                    this.createItem(payload).then(sucess).catch(fail);
+                } else {
+
+                    this.updateItem(payload).then(sucess).catch(fail);
                 }
             },
             goToPlaylistsPage() {

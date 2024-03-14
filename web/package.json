@@ -25,7 +25,7 @@
     "@babel/preset-env": "^7.10.3",
     "@vue/test-utils": "^1.0.2",
     "atom-ide-ui": "^0.7.2",
-    "axios": "^0.19.2",
+    "axios": "^1.6.7",
     "axios-mock-adapter": "^1.18.1",
     "babel-eslint": "^10.1.0",
     "babel-loader": "^8.1.0",
